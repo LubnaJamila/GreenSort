@@ -1,0 +1,234 @@
+/* Base Styles */
+body {
+  font-family: "Poppins", sans-serif;
+  color: #333;
+}
+
+/* Button Styles */
+.btn {
+  border-radius: 30px;
+  font-weight: 600;
+}
+
+.btn-success, .btn-outline-success {
+  --bs-success: #7DBB1F;
+  --bs-success-rgb: 125, 187, 31;
+}
+
+.btn-outline-success {
+  border-color: #7DBB1F;
+  color: #7DBB1F;
+}
+
+.btn-green {
+  background-color: #7DBB1F;
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-radius: 30px;
+  border: none;
+}
+
+.btn-green:hover {
+  background-color: #6aa01a;
+  color: white;
+}
+
+/* Header & Navigation */
+header {
+  min-height: 100vh;
+  position: relative;
+  padding-bottom: 2rem;
+}
+
+#bg-image {
+  background-color: #C9F53C;
+  clip-path: ellipse(75% 100% at 85% 0%);
+}
+
+@media (max-width: 768px) {
+  #bg-image {
+    clip-path: ellipse(150% 70% at 85% 0%);
+  }
+}
+
+nav {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+nav ul li a {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+nav ul li a:hover {
+  color: #7DBB1F !important;
+}
+
+/* About Us Section */
+.question-mark {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.green-bg {
+  background-color: #C9F53C;
+}
+
+.text-justify {
+  text-align: justify;
+}
+
+/* Services Section */
+.services-wrapper {
+  background-color: #F4F9D9;
+  border: 1px solid #0d6efd;
+  border-radius: 8px;
+  padding: 3rem 0;
+  margin: 4rem 0;
+}
+
+.service-card {
+  border-radius: 16px;
+  padding: 1.5rem;
+  height: 100%;
+  transition: all 0.3s ease;
+}
+
+.lime-card {
+  background-color: #C9F53C;
+}
+
+.white-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E0E0E0;
+}
+
+.service-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.service-title {
+  font-weight: 700;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.service-description {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 1.5rem;
+}
+
+/* Education Section */
+.education-image-container {
+  margin-top: 1.5rem;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+/* Contact Section */
+.contact-section {
+  background-color: #B9E22E;
+  padding: 4rem 0;
+  margin-top: 4rem;
+}
+
+.contact-card {
+  background-color: #7DBB1F;
+  color: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  height: 100%;
+}
+
+.contact-card i {
+  font-size: 1.5rem;
+}
+
+.contact-card h4 {
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.contact-card p {
+  font-size: 0.9rem;
+  margin-bottom: 0;
+}
+
+.contact-form {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.form-control {
+  border-radius: 8px;
+  padding: 0.7rem 1rem;
+  font-size: 0.9rem;
+}
+
+/* Footer */
+.footer {
+  background-color: #11142D;
+  color: white;
+  text-align: center;
+  padding: 1.5rem 0;
+  font-size: 0.9rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 767.98px) {
+  .border-start {
+    border-left: none !important;
+    padding-left: 0 !important;
+    margin-top: 1.5rem;
+  }
+  
+  .border-left-black {
+    border-left: none !important;
+    padding-left: 0 !important;
+    padding-top: 1rem;
+    border-top: 1px solid black;
+  }
+  
+  .services-wrapper {
+    padding: 2rem 1rem;
+  }
+  
+  .contact-card {
+    margin-bottom: 1rem;
+  }
+}
+
+/* Helper Classes */
+.rounded-4 {
+  border-radius: 1rem;
+}
+
+.fw-semibold {
+  font-weight: 600;
+}
+
+.border-left-black {
+  border-left: 1px solid black;
+  padding-left: 1.5rem;
+}
+
+/* Font Size Classes */
+.fs-7 {
+  font-size: 0.875rem;
+}
+
+.fs-8 {
+  font-size: 0.75rem;
+}

@@ -1,0 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
+  body {
+    font-family: "Poppins", sans-serif;
+    background-color: #fff;
+    /* min-height: 100vh; */
+    /* display: flex; */
+    /* align-items: center; */
+    /* justify-content: center; */
+    /* padding: 1.5rem; */
+  }
+  .divider {
+    position: relative;
+    width: 6rem;
+    margin: 2rem auto 3rem auto;
+  }
+  .divider::before,
+  .divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    border-top: 1.5px solid #6c757d;
+    transform: translateY(-50%);
+  }
+  .divider::before {
+    left: 0;
+    width: 100%;
+  }
+  .divider::after {
+    left: 0;
+    width: 100%;
+  }
+  .divider-dot-left,
+  .divider-dot-right {
+    position: absolute;
+    top: 50%;
+    width: 0.75rem;
+    height: 0.75rem;
+    background-color: #6c757d;
+    border-radius: 50%;
+    transform: translateY(-50%);
+  }
+  .divider-dot-left {
+    left: 0;
+    transform: translate(-50%, -50%);
+  }
+  .divider-dot-right {
+    right: 0;
+    transform: translate(50%, -50%);
+  }
+  .btn-lime {
+    background-color: #b9e62d;
+    color: black;
+    font-weight: 800;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px rgb(0 0 0 / 0.1);
+    transition: background-color 0.3s ease;
+  }
+  .btn-lime:hover,
+  .btn-lime:focus {
+    background-color: #a4d11f;
+    color: black;
+  }
+  .form-control::placeholder {
+    font-family: 'Roboto Mono', monospace;
+  }
+  .form-control {
+    border-radius: 0.5rem;
+    font-family: 'Roboto Mono', monospace;
+  }
+  .login-link {
+    color: #b9e62d;
+    text-decoration: none;
+    transition: text-decoration 0.3s ease;
+  }
+  .login-link:hover {
+    text-decoration: underline;
+  }
