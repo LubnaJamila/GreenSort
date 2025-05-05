@@ -17,7 +17,7 @@ module.exports = merge(common, {
     port: 8080,
     hot: true,
     historyApiFallback: {
-      index: 'index.html'
+      index: path.resolve(__dirname, "../dist/index.html")
     },
     devMiddleware: {
       publicPath: '/',

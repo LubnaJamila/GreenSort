@@ -5,10 +5,12 @@ import RegisterView from '../views/registerView.js';
 export default class RegisterPresenter {
   constructor() {
     this.view = new RegisterView();
-    this.registerForm = null;
+    this.handleRegisterSubmit = this.handleRegisterSubmit.bind(this);
+    this.handleNavigate = this.handleNavigate.bind(this);
   }
 
   init() {
+    console.log('Initializing RegisterPresenter');
     // Render the view
     this.view.render();
     
@@ -16,47 +18,45 @@ export default class RegisterPresenter {
     this.setupFormListener();
     
     // Listen for navigation events
-    // this.setupNavigationListener();
+    this.setupNavigationListener();
   }
 
-  // DIPISAHKAN: untuk menghindari masalah DOMContentLoaded
   setupFormListener() {
     // Get register form element
-    this.registerForm = document.getElementById('registerForm');
+    const registerForm = document.getElementById('registerForm');
     
-    if (this.registerForm) {
+    if (registerForm) {
       // Pastikan event listener hanya ditambahkan sekali
-      this.registerForm.removeEventListener('submit', this.handleRegisterSubmit.bind(this));
-      this.registerForm.addEventListener('submit', this.handleRegisterSubmit.bind(this));
+      registerForm.removeEventListener('submit', this.handleRegisterSubmit);
+      registerForm.addEventListener('submit', this.handleRegisterSubmit);
+      console.log('Register form event listener added');
     } else {
       console.error('Register form not found in the DOM');
     }
   }
   
-  // DIPISAHKAN: untuk kejelasan kode
   setupNavigationListener() {
     // Remove any existing event listeners to prevent duplication
     document.removeEventListener('navigate', this.handleNavigate);
     
     // Add new event listener
-    this.handleNavigate = (event) => {
-      if (event.detail.page === 'login') {
-        // Navigate to login page melalui custom event
-        const navEvent = new CustomEvent('navigate', { detail: { page: 'login' } });
-        document.dispatchEvent(navEvent);
-      }
-    };
-    
     document.addEventListener('navigate', this.handleNavigate);
+  }
+  
+  handleNavigate(event) {
+    console.log('Navigation event received:', event.detail);
+    // We don't handle the navigation here, just let it propagate to main.js
   }
 
   // Handle form submit for registration
   async handleRegisterSubmit(event) {
     event.preventDefault();
+    console.log('Register form submitted');
     
     try {
       // Get data from form using view method
       const userData = this.view.getRegisterFormData();
+      console.log('Form data:', userData);
       
       // Validate data
       if (!this.validateUserData(userData)) {
@@ -122,5 +122,19 @@ export default class RegisterPresenter {
     }
     
     return true;
+  }
+  
+  // Untuk membersihkan event listener dan view saat berpindah halaman
+  destroy() {
+    console.log('Destroying RegisterPresenter');
+    document.removeEventListener('navigate', this.handleNavigate);
+    
+    const registerForm = document.getElementById('registerForm');
+    if (registerForm) {
+      registerForm.removeEventListener('submit', this.handleRegisterSubmit);
+    }
+    
+    // Bersihkan view
+    this.view.destroy();
   }
 }

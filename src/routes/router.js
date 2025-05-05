@@ -1,63 +1,113 @@
 // src/routes/router.js
+
 export default class Router {
   constructor() {
-    this.routes = {};
-  }
-
-  // Add a route
-  addRoute(path, handler) {
-    this.routes[path] = handler;
-  }
-
-  // Navigate to a specific page
-  navigateTo(path) {
-    window.location.href = path;
-  }
-
-  // Navigate to a page with parameters
-  navigateWithParams(path, params) {
-    const url = new URL(path, window.location.origin);
+    // Define routes with hash
+    this.routes = {
+      'index': '#/',
+      'register': '#/register',
+      'login': '#/login', 
+      'dashboard': '#/dashboard'
+    };
     
-    // Add parameters to URL
-    if (params && typeof params === 'object') {
-      Object.keys(params).forEach(key => {
-        url.searchParams.append(key, params[key]);
-      });
-    }
-    
-    window.location.href = url.toString();
-  }
+    // Handle initial route
+    this.initialRoute = this.getCurrentRoute();
 
-  // Method to initialize router and handle URL changes
-  init() {
-    // Handle initial load
-    this.handleRouteChange();
-    
-    // Listen for popstate events (when the user navigates back/forward)
-    window.addEventListener('popstate', () => {
-      this.handleRouteChange();
+    // Setup hash change listener
+    window.addEventListener('hashchange', () => {
+      this.checkAuthAndRedirect();
+      this.dispatchRouteChange();
     });
+    
+    // Check initial route auth
+    this.checkAuthAndRedirect();
   }
 
-  // Method to handle route changes
-  handleRouteChange() {
-    const path = window.location.pathname;
-    const handler = this.routes[path] || this.routes['*']; // Default handler if route not found
+  // Get current route name
+  getCurrentRoute() {
+    const hash = window.location.hash || '#/';
     
-    if (handler && typeof handler === 'function') {
-      handler();
+    // Find matching route (more efficient with find)
+    const routeName = Object.entries(this.routes).find(
+      ([name, route]) => hash === route
+    )?.[0];
+    
+    return routeName || 'index';
+  }
+
+  // Get current full path (hash)
+  getCurrentPath() {
+    return window.location.hash || '#/';
+  }
+
+  // Navigate to route
+  navigateTo(page, options = {}) {
+    // Determine target hash
+    let targetHash;
+    
+    if (page.startsWith('#')) {
+      targetHash = page;
+    } else if (page.includes('/')) {
+      targetHash = `#${page}`;
+    } else {
+      targetHash = this.routes[page] || '#/';
     }
+
+    // Skip if already on the same page
+    if (targetHash === this.getCurrentPath() && !options.force) {
+      return;
+    }
+
+    // Update hash
+    if (options.replace) {
+      window.location.replace(targetHash);
+    } else {
+      window.location.hash = targetHash;
+    }
+
+    // Dispatch event
+    this.dispatchRouteChange();
+  }
+
+  // Dispatch route change event
+  dispatchRouteChange() {
+    const pageChangedEvent = new CustomEvent('routeChanged', {
+      detail: {
+        page: this.getCurrentRoute(),
+        path: this.getCurrentPath()
+      }
+    });
+    document.dispatchEvent(pageChangedEvent);
+  }
+
+  // Subscribe to route changes
+  onRouteChange(callback) {
+    const handler = (e) => callback(e.detail);
+    document.addEventListener('routeChanged', handler);
+    
+    // Return unsubscribe function
+    return () => document.removeEventListener('routeChanged', handler);
   }
   
-  // Get query parameters from URL
-  getQueryParams() {
-    const params = {};
-    const searchParams = new URLSearchParams(window.location.search);
+  // Check authentication status and redirect if needed
+  checkAuthAndRedirect() {
+    const currentRoute = this.getCurrentRoute();
+    const isLoggedIn = localStorage.getItem('currentUser');
     
-    for (const [key, value] of searchParams.entries()) {
-      params[key] = value;
+    // Jika mencoba mengakses dashboard tanpa login, redirect ke login
+    if (currentRoute === 'dashboard' && !isLoggedIn) {
+      console.log('Access to dashboard denied - not logged in');
+      this.navigateTo('login', { replace: true });
+      return false;
     }
     
-    return params;
+    // Jika sudah login dan mencoba mengakses register/login, redirect ke dashboard
+    if ((currentRoute === 'register' || currentRoute === 'login') && isLoggedIn) {
+      console.log('Already logged in - redirecting to dashboard');
+      this.navigateTo('dashboard', { replace: true });
+      return false;
+    }
+    
+    return true;
   }
 }

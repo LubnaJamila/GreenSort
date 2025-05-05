@@ -5,10 +5,13 @@ import LoginView from '../views/loginView.js';
 export default class LoginPresenter {
   constructor() {
     this.view = new LoginView();
-    this.loginForm = null;
+    // Binding fungsi untuk event handler
+    this.handleLoginSubmit = this.handleLoginSubmit.bind(this);
+    this.handleNavigate = this.handleNavigate.bind(this);
   }
 
   init() {
+    console.log('Initializing LoginPresenter');
     // Render the view
     this.view.render();
     
@@ -19,44 +22,42 @@ export default class LoginPresenter {
     this.setupNavigationListener();
   }
 
-  // DIPISAHKAN: untuk menghindari masalah DOMContentLoaded
   setupFormListener() {
     // Get login form element
-    this.loginForm = document.getElementById('loginForm');
+    const loginForm = document.getElementById('loginForm');
     
-    if (this.loginForm) {
+    if (loginForm) {
       // Pastikan event listener hanya ditambahkan sekali
-      this.loginForm.removeEventListener('submit', this.handleLoginSubmit.bind(this));
-      this.loginForm.addEventListener('submit', this.handleLoginSubmit.bind(this));
+      loginForm.removeEventListener('submit', this.handleLoginSubmit);
+      loginForm.addEventListener('submit', this.handleLoginSubmit);
+      console.log('Login form event listener added');
     } else {
       console.error('Login form not found in the DOM');
     }
   }
   
-  // DIPISAHKAN: untuk kejelasan kode
   setupNavigationListener() {
     // Remove any existing event listeners to prevent duplication
     document.removeEventListener('navigate', this.handleNavigate);
     
     // Add new event listener
-    this.handleNavigate = (event) => {
-      if (event.detail.page === 'register') {
-        // Navigate to register page melalui custom event
-        const navEvent = new CustomEvent('navigate', { detail: { page: 'register' } });
-        document.dispatchEvent(navEvent);
-      }
-    };
-    
     document.addEventListener('navigate', this.handleNavigate);
+  }
+  
+  handleNavigate(event) {
+    console.log('Navigation event received:', event.detail);
+    // We don't handle the navigation here, just let it propagate to main.js
   }
 
   // Handle form submit for login
   async handleLoginSubmit(event) {
     event.preventDefault();
+    console.log('Login form submitted');
     
     try {
       // Get data from form using view method
       const credentials = this.view.getLoginFormData();
+      console.log('Form data:', credentials);
       
       // Validate data
       if (!this.validateCredentials(credentials)) {
@@ -70,7 +71,7 @@ export default class LoginPresenter {
         // Show success message
         this.view.showLoginSuccess();
         
-        // Redirect to main page after successful login
+        // Redirect to dashboard after successful login
         setTimeout(() => {
           // Menggunakan event navigate yang konsisten
           const event = new CustomEvent('navigate', { detail: { page: 'dashboard' } });
@@ -100,5 +101,19 @@ export default class LoginPresenter {
     }
     
     return true;
+  }
+  
+  // Untuk membersihkan event listener dan view saat berpindah halaman
+  destroy() {
+    console.log('Destroying LoginPresenter');
+    document.removeEventListener('navigate', this.handleNavigate);
+    
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+      loginForm.removeEventListener('submit', this.handleLoginSubmit);
+    }
+    
+    // Bersihkan view
+    this.view.destroy();
   }
 }

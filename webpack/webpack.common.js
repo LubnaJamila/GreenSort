@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
@@ -10,6 +11,12 @@ module.exports = {
     clean: true,
   },
   plugins: [
+    new webpack.ProvidePlugin({
+      $: 'jquery',
+      jQuery: 'jquery',
+      'window.jQuery': 'jquery',
+      Popper: ['@popperjs/core', 'default']
+    }),
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, '../src/pages/index.html'),
       filename: 'index.html',
@@ -24,6 +31,11 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, '../src/pages/register.html'),
       filename: 'register.html',
+      chunks: ['main']
+    }),
+    new HtmlWebpackPlugin({
+      template: path.resolve(__dirname, '../src/pages/dashboard.html'),
+      filename: 'dashboard.html',
       chunks: ['main']
     }),
   ],
