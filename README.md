@@ -6,3 +6,4 @@ Nazira Front-End
 1 landing page
 2 Login
 3 Register 
+4 Dashboard
