@@ -1,53 +1,20 @@
 // src/views/dashboardView.js
-import '../assets/styles/dashboard.css';
-import userPlaceholder from '../assets/images/unsplash_HaNi1rsZ6Nc.png';
+import "../assets/styles/dashboard.css";
+import userPlaceholder from "../assets/images/unsplash_HaNi1rsZ6Nc.png";
+import SidebarView from "./sidebarView";
 
 export default class DashboardView {
-    constructor() {
-        this.app = document.getElementById('app');
-        this.eventListeners = [];
-    }
+  constructor() {
+    this.app = document.getElementById("content");
+    this.sidebar = new SidebarView();
+    this.eventListeners = [];
+  }
 
-    render() {
-        this.app.innerHTML = `
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="logo my-3 mx-3">
-                <span class="logo-text">GREENSORT</span>
-            </div>
-            
-            <div class="nav flex-column mt-4">
-                <a href="#" class="nav-link active">
-                    <i class="bi bi-grid"></i>
-                    <span class="nav-text">Dashboard</span>
-                </a>
-                
-                <div class="mt-3">
-                    <p class="ms-3 text-secondary mb-2">Master</p>
-                    <a href="#" class="nav-link">
-                        <i class="bi bi-database"></i>
-                        <span class="nav-text">Data Master</span>
-                    </a>
-                    <a href="#" class="nav-link">
-                        <i class="bi bi-people"></i>
-                        <span class="nav-text">Pengguna</span>
-                    </a>
-                    <a href="#" class="nav-link">
-                        <i class="bi bi-trash"></i>
-                        <span class="nav-text">Jenis Sampah</span>
-                    </a>
-                </div>
-            </div>
-            
-            <div class="mt-auto mb-4 px-3">
-                <button id="logout-btn" class="btn btn-outline-danger w-100">
-                    <i class="bi bi-box-arrow-left me-2"></i>Logout
-                </button>
-            </div>
-        </div>
-        
-        <!-- Main Content -->
-        <div class="main-content">
+  render() {
+    this.sidebar.render(); // render sidebar di elemen #sidebar
+    this.app.innerHTML = `
+      <!-- main content tanpa sidebar -->
+      <div class="main-content">
             <header>
               <!-- User Profile -->
               <div class="user-profile">
@@ -181,164 +148,138 @@ export default class DashboardView {
                 </div>
             </div>
         </div>
-        
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
         `;
-        
-        // Setup event listeners after rendering
-        this.setupEventListeners();
-    }
 
-    setupEventListeners() {
-        // Membersihkan event listener lama
-        this.removeEventListeners();
-        
-        // Add logout button event listener
-        const logoutBtn = document.getElementById('logout-btn');
-        if (logoutBtn) {
-            const logoutHandler = (e) => {
-                e.preventDefault();
-                console.log('Logging out');
-                // Trigger custom event for logout
-                const event = new CustomEvent('user-logout');
-                document.dispatchEvent(event);
-            };
-            
-            logoutBtn.addEventListener('click', logoutHandler);
-            this.eventListeners.push({ element: logoutBtn, type: 'click', handler: logoutHandler });
-        }
+    // Setup event listeners after rendering
+    this.setupEventListeners();
+  }
+
+  setupEventListeners() {
+    this.removeEventListeners();
+
+    // Jika ingin, bisa tambahkan event listener lain di sini
+  }
+
+  displayUserInfo(user) {
+    const userNameElement = document.getElementById("user-name");
+    if (userNameElement && user) {
+      userNameElement.textContent = user.name || user.username;
     }
-    
-    // Method untuk menampilkan informasi user
-    displayUserInfo(user) {
-        const userNameElement = document.getElementById('user-name');
-        if (userNameElement && user) {
-            userNameElement.textContent = user.name || user.username;
-        }
-    }
-    
-    // Method untuk menampilkan data dashboard
-    renderDashboardData(user) {
-        // Simulasi data untuk dashboard
-        const applicationsData = [
-            {
-                id: 1,
-                name: "Sherry Rowe",
-                status: "Menunggu Validasi",
-                jenisSampah: "Glass",
-                kuantitas: 6,
-                total: "Rp. 300,000",
-                imageUrl: "../assets/images/image 44.png"
-            },
-            {
-                id: 2,
-                name: "John Doe",
-                status: "Diterima",
-                jenisSampah: "Plastic",
-                kuantitas: 10,
-                total: "Rp. 450,000",
-                imageUrl: "/api/placeholder/100/70"
-            },
-            {
-                id: 3,
-                name: "Jane Smith",
-                status: "Dikirim",
-                jenisSampah: "Paper",
-                kuantitas: 8,
-                total: "Rp. 200,000",
-                imageUrl: "/api/placeholder/100/70"
-            },
-            {
-                id: 4,
-                name: "Robert Johnson",
-                status: "Selesai",
-                jenisSampah: "Metal",
-                kuantitas: 12,
-                total: "Rp. 600,000",
-                imageUrl: "/api/placeholder/100/70"
-            }
-        ];
-        
-        this.renderApplicationsTable(applicationsData);
-    }
-    
-    // Render table rows
-    renderApplicationsTable(applicationsData) {
-        const tableBody = document.getElementById('applications-table-body');
-        if (!tableBody) return;
-        
-        let tableHTML = '';
-        
-        applicationsData.forEach(app => {
-            let statusClass = 'bg-light';
-            let statusIcon = 'bi-hourglass-split';
-            
-            // Determine status styling
-            switch (app.status) {
-                case 'Diterima':
-                    statusClass = 'bg-info bg-opacity-10';
-                    statusIcon = 'bi-clipboard-check';
-                    break;
-                case 'Ditolak':
-                    statusClass = 'bg-danger bg-opacity-10';
-                    statusIcon = 'bi-x-circle';
-                    break;
-                case 'Dikirim':
-                    statusClass = 'bg-warning bg-opacity-10';
-                    statusIcon = 'bi-truck';
-                    break;
-                case 'Selesai':
-                    statusClass = 'bg-success bg-opacity-10';
-                    statusIcon = 'bi-check-circle';
-                    break;
-            }
-            
-            tableHTML += `
-            <tr>
-                <td>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="${app.id}">
-                    </div>
-                </td>
-                <td>${app.name}</td>
-                <td>
-                    <span class="status-badge ${statusClass}">
-                        <i class="bi ${statusIcon} me-1"></i>
-                        ${app.status}
-                    </span>
-                </td>
-                <td>${app.jenisSampah}</td>
-                <td>${app.kuantitas}</td>
-                <td>${app.total}</td>
-                <td>
-                    <img src="${app.imageUrl}" alt="Waste Image" class="waste-img">
-                </td>
-                <td>
-                    <button class="action-btn btn btn-success"><i class="bi bi-check"></i></button>
-                    <button class="action-btn btn btn-danger"><i class="bi bi-x"></i></button>
-                    <button class="action-btn btn btn-primary"><i class="bi bi-chat"></i></button>
-                </td>
-            </tr>
-            `;
-        });
-        
-        tableBody.innerHTML = tableHTML;
-    }
-    
-    // Membersihkan event listener saat view dihancurkan
-    removeEventListeners() {
-        this.eventListeners.forEach(({ element, type, handler }) => {
-            if (element) {
-                element.removeEventListener(type, handler);
-            }
-        });
-        this.eventListeners = [];
-    }
-    
-    // Method untuk digunakan oleh presenter saat destroy
-    destroy() {
-        console.log('Destroying DashboardView');
-        this.removeEventListeners();
-    }
+  }
+
+  renderDashboardData(user) {
+    const applicationsData = [
+      {
+        id: 1,
+        name: "Sherry Rowe",
+        status: "Menunggu Validasi",
+        jenisSampah: "Glass",
+        kuantitas: 6,
+        total: "Rp. 300,000",
+        imageUrl: "../assets/images/image 44.png",
+      },
+      {
+        id: 2,
+        name: "John Doe",
+        status: "Diterima",
+        jenisSampah: "Plastic",
+        kuantitas: 10,
+        total: "Rp. 450,000",
+        imageUrl: "/api/placeholder/100/70",
+      },
+      {
+        id: 3,
+        name: "Jane Smith",
+        status: "Dikirim",
+        jenisSampah: "Paper",
+        kuantitas: 8,
+        total: "Rp. 200,000",
+        imageUrl: "/api/placeholder/100/70",
+      },
+      {
+        id: 4,
+        name: "Robert Johnson",
+        status: "Selesai",
+        jenisSampah: "Metal",
+        kuantitas: 12,
+        total: "Rp. 600,000",
+        imageUrl: "/api/placeholder/100/70",
+      },
+    ];
+
+    this.renderApplicationsTable(applicationsData);
+  }
+
+  renderApplicationsTable(applicationsData) {
+    const tableBody = document.getElementById("applications-table-body");
+    if (!tableBody) return;
+
+    let tableHTML = "";
+
+    applicationsData.forEach((app) => {
+      let statusClass = "bg-light";
+      let statusIcon = "bi-hourglass-split";
+
+      switch (app.status) {
+        case "Diterima":
+          statusClass = "bg-info bg-opacity-10";
+          statusIcon = "bi-clipboard-check";
+          break;
+        case "Ditolak":
+          statusClass = "bg-danger bg-opacity-10";
+          statusIcon = "bi-x-circle";
+          break;
+        case "Dikirim":
+          statusClass = "bg-warning bg-opacity-10";
+          statusIcon = "bi-truck";
+          break;
+        case "Selesai":
+          statusClass = "bg-success bg-opacity-10";
+          statusIcon = "bi-check-circle";
+          break;
+      }
+
+      tableHTML += `
+      <tr>
+          <td>
+              <div class="form-check">
+                  <input class="form-check-input" type="checkbox" value="${app.id}">
+              </div>
+          </td>
+          <td>${app.name}</td>
+          <td>
+              <span class="status-badge ${statusClass}">
+                  <i class="bi ${statusIcon} me-1"></i>
+                  ${app.status}
+              </span>
+          </td>
+          <td>${app.jenisSampah}</td>
+          <td>${app.kuantitas}</td>
+          <td>${app.total}</td>
+          <td>
+              <img src="${app.imageUrl}" alt="Gambar Sampah" width="100" height="70" style="object-fit: cover;">
+          </td>
+          <td>
+              <button class="btn btn-sm btn-outline-primary">Detail</button>
+          </td>
+      </tr>
+    `;
+    });
+
+    tableBody.innerHTML = tableHTML;
+  }
+
+  removeEventListeners() {
+    this.eventListeners.forEach(({ element, type, handler }) => {
+      if (element) {
+        element.removeEventListener(type, handler);
+      }
+    });
+    this.eventListeners = [];
+  }
+
+  destroy() {
+    console.log("Destroying DashboardView");
+    this.removeEventListeners();
+  }
 }

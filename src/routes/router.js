@@ -1,10 +1,10 @@
 export default class Router {
   constructor() {
     this.routes = {
-      index: '#/',
-      register: '#/register',
-      login: '#/login',
-      dashboard: '#/dashboard'
+      index: "#/",
+      register: "#/register",
+      login: "#/login",
+      dashboard: "#/dashboard",
     };
 
     // Inisialisasi
@@ -14,24 +14,26 @@ export default class Router {
   }
 
   setupHashChangeListener() {
-    window.addEventListener('hashchange', () => {
+    window.addEventListener("hashchange", () => {
       this.checkAuthAndRedirect();
       this.dispatchRouteChange();
     });
   }
 
   getCurrentRoute() {
-    const hash = window.location.hash || '#/';
-    const route = Object.entries(this.routes).find(([_, path]) => path === hash);
-    return route ? route[0] : 'index';
+    const hash = window.location.hash || "#/";
+    const route = Object.entries(this.routes).find(
+      ([_, path]) => path === hash
+    );
+    return route ? route[0] : "index";
   }
 
   getCurrentPath() {
-    return window.location.hash || '#/';
+    return window.location.hash || "#/";
   }
 
   navigateTo(page, options = {}) {
-    let targetHash = page.startsWith('#') ? page : (this.routes[page] || '#/');
+    let targetHash = page.startsWith("#") ? page : this.routes[page] || "#/";
 
     if (targetHash === this.getCurrentPath() && !options.force) return;
 
@@ -45,35 +47,38 @@ export default class Router {
   }
 
   dispatchRouteChange() {
-    const event = new CustomEvent('routeChanged', {
+    const event = new CustomEvent("routeChanged", {
       detail: {
         page: this.getCurrentRoute(),
-        path: this.getCurrentPath()
-      }
+        path: this.getCurrentPath(),
+      },
     });
     document.dispatchEvent(event);
   }
 
   onRouteChange(callback) {
     const handler = (e) => callback(e.detail);
-    document.addEventListener('routeChanged', handler);
+    document.addEventListener("routeChanged", handler);
 
-    return () => document.removeEventListener('routeChanged', handler);
+    return () => document.removeEventListener("routeChanged", handler);
   }
 
   checkAuthAndRedirect() {
     const currentRoute = this.getCurrentRoute();
-    const isLoggedIn = !!localStorage.getItem('currentUser');
+    const isLoggedIn = !!localStorage.getItem("currentUser");
 
-    if (isLoggedIn && (currentRoute === 'login' || currentRoute === 'register')) {
+    if (
+      isLoggedIn &&
+      (currentRoute === "login" || currentRoute === "register")
+    ) {
       // Sudah login tapi mau ke login/register → redirect ke dashboard
-      this.navigateTo('dashboard', { replace: true });
+      this.navigateTo("dashboard", { replace: true });
       return false;
     }
 
-    if (!isLoggedIn && currentRoute === 'dashboard') {
+    if (!isLoggedIn && currentRoute === "dashboard") {
       // Belum login tapi mau ke dashboard → redirect ke login
-      this.navigateTo('login', { replace: true });
+      this.navigateTo("login", { replace: true });
       return false;
     }
 
