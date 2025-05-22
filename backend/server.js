@@ -26,7 +26,7 @@ db.connect((err) => {
 app.use(cors());
 app.use(express.json());
 
-// === HANDLE REGISTER ===
+
 app.post("/register", async (req, res) => {
   try {
     console.log("Request body:", req.body);
@@ -64,13 +64,14 @@ app.post("/register", async (req, res) => {
 
     const hashed = await bcrypt.hash(password, 10);
 
-    const sql =
-      "INSERT INTO user (nama_lengkap, email, no_hp, username, password) VALUES (?, ?, ?, ?, ?)";
+    const sql = 
+    "INSERT INTO users (nama_lengkap, email, no_hp, username, password, role) VALUES (?, ?, ?, ?, ?, ?)";
+
 
     db.query(
       sql,
-      [name, email, phone, username, hashed, "user"],
-      (err, result) => {
+      [name, email, phone, username, hashed, 'pengguna'],
+      (err) => {
         if (err) {
           console.error("Database error:", err);
 
@@ -97,11 +98,10 @@ app.post("/register", async (req, res) => {
   }
 });
 
-// === HANDLE LOGIN ===
 app.post("/login", (req, res) => {
   const { emailOrUsername, password } = req.body;
 
-  const sql = "SELECT * FROM user WHERE email = ? OR username = ?";
+  const sql = "SELECT * FROM users WHERE email = ? OR username = ?";
   db.query(sql, [emailOrUsername, emailOrUsername], async (err, results) => {
     if (err) return res.status(500).json({ success: false });
 

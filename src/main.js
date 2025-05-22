@@ -18,6 +18,10 @@ import LoginPresenter from "./presenters/loginPresenter.js";
 import DashboardPresenter from "./presenters/dashboardPresenter.js";
 import SidebarPresenter from "./presenters/sidebarPresenter.js";
 import Router from "./routes/router.js";
+import DashboardUserPresenter from "./presenters/dashboardUserPresenter.js";
+
+//models
+import { getCurrentUser } from "./models/authModel.js";
 
 class App {
   constructor() {
@@ -71,6 +75,17 @@ class App {
       this.currentPresenter.destroy();
       this.currentPresenter = null;
     }
+    const user = getCurrentUser();
+
+    if (user?.role === 'admin' && page === 'dashboardUser') {
+      this.router.navigateTo('dashboard');
+      return;
+    }
+
+    if (user?.role === 'pengguna' && page === 'dashboard') {
+      this.router.navigateTo('dashboardUser');
+      return;
+    }
 
     // Destroy sidebar if exists
     if (this.sidebarPresenter) {
@@ -93,6 +108,9 @@ class App {
         this.currentPresenter = new DashboardPresenter();
         this.sidebarPresenter = new SidebarPresenter();
         break;
+      case 'dashboardUser':
+      this.currentPresenter = new DashboardUserPresenter();
+      break;
       default:
         this.currentPresenter = new IndexPresenter();
     }

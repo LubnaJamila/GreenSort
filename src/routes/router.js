@@ -5,6 +5,7 @@ export default class Router {
       register: "#/register",
       login: "#/login",
       dashboard: "#/dashboard",
+      dashboardUser: '#/dashboardUser'
     };
 
     // Inisialisasi

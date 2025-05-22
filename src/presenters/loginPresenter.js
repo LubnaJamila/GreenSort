@@ -68,17 +68,12 @@ export default class LoginPresenter {
       const result = await loginUser(credentials);
       
       if (result.success) {
-        // Show success message
-        this.view.showLoginSuccess();
-        
-        // Redirect to dashboard after successful login
-        setTimeout(() => {
-          // Menggunakan event navigate yang konsisten
-          const event = new CustomEvent('navigate', { detail: { page: 'dashboard' } });
-          document.dispatchEvent(event);
-        }, 1500);
-      } else {
-        // Show error message
+      const user = result.user;
+      const targetPage = user.role === 'admin' ? 'dashboard' : 'dashboardUser';
+      const event = new CustomEvent('navigate', { detail: { page: targetPage } });
+      document.dispatchEvent(event);
+    }
+    else {
         this.view.showLoginError(result.message);
       }
     } catch (error) {
