@@ -1,0 +1,118 @@
+// src/models/dashboardModel.js
+export default class DashboardModel {
+  constructor() {}
+
+  getApplications() {
+    // Simulasi data (bisa diganti dengan fetch API ke backend)
+    return [
+      {
+        id: 1,
+        name: "Sherry Rowe",
+        status: "Menunggu Validasi",
+        jenisSampah: "Glass",
+        kuantitas: 6,
+        total: "Rp. 300,000",
+        imageUrl: "../assets/images/image 44.png",
+      },
+      {
+        id: 2,
+        name: "John Doe",
+        status: "Diterima",
+        jenisSampah: "Plastic",
+        kuantitas: 10,
+        total: "Rp. 450,000",
+        imageUrl: "/api/placeholder/100/70",
+      },
+      {
+        id: 3,
+        name: "Jane Smith",
+        status: "Dikirim",
+        jenisSampah: "Paper",
+        kuantitas: 8,
+        total: "Rp. 200,000",
+        imageUrl: "/api/placeholder/100/70",
+      },
+      {
+        id: 4,
+        name: "Robert Johnson",
+        status: "Selesai",
+        jenisSampah: "Metal",
+        kuantitas: 12,
+        total: "Rp. 600,000",
+        imageUrl: "/api/placeholder/100/70",
+      },
+      {
+        id: 1,
+        name: "Sherry Rowe",
+        status: "Menunggu Validasi",
+        jenisSampah: "Glass",
+        kuantitas: 6,
+        total: "Rp. 300,000",
+        imageUrl: "../assets/images/image 44.png",
+      },
+      {
+        id: 2,
+        name: "John Doe",
+        status: "Diterima",
+        jenisSampah: "Plastic",
+        kuantitas: 10,
+        total: "Rp. 450,000",
+        imageUrl: "/api/placeholder/100/70",
+      },
+      {
+        id: 3,
+        name: "Jane Smith",
+        status: "Dikirim",
+        jenisSampah: "Paper",
+        kuantitas: 8,
+        total: "Rp. 200,000",
+        imageUrl: "/api/placeholder/100/70",
+      },
+      {
+        id: 4,
+        name: "Robert Johnson",
+        status: "Selesai",
+        jenisSampah: "Metal",
+        kuantitas: 12,
+        total: "Rp. 600,000",
+        imageUrl: "/api/placeholder/100/70",
+      },
+      {
+        id: 1,
+        name: "Sherry Rowe",
+        status: "Menunggu Validasi",
+        jenisSampah: "Glass",
+        kuantitas: 6,
+        total: "Rp. 300,000",
+        imageUrl: "../assets/images/image 44.png",
+      },
+      {
+        id: 2,
+        name: "John Doe",
+        status: "Diterima",
+        jenisSampah: "Plastic",
+        kuantitas: 10,
+        total: "Rp. 450,000",
+        imageUrl: "/api/placeholder/100/70",
+      },
+      {
+        id: 3,
+        name: "Jane Smith",
+        status: "Dikirim",
+        jenisSampah: "Paper",
+        kuantitas: 8,
+        total: "Rp. 200,000",
+        imageUrl: "/api/placeholder/100/70",
+      },
+      {
+        id: 4,
+        name: "Robert Johnson",
+        status: "Selesai",
+        jenisSampah: "Metal",
+        kuantitas: 12,
+        total: "Rp. 600,000",
+        imageUrl: "/api/placeholder/100/70",
+      },
+    ];
+  }
+}

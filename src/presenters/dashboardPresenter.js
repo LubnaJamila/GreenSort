@@ -1,11 +1,14 @@
+// src/presenters/dashboardPresenter.js
 import DashboardView from "../views/dashboardView.js";
 import SidebarView from "../views/sidebarView.js";
+import DashboardModel from "../models/dashboard-model.js";
 import { getCurrentUser, logoutUser } from "../models/authModel.js";
 
 export default class DashboardPresenter {
   constructor() {
     this.dashboardView = new DashboardView();
     this.sidebarView = new SidebarView();
+    this.dashboardModel = new DashboardModel();
     this.currentUser = null;
 
     this.handleLogout = this.handleLogout.bind(this);
@@ -26,9 +29,14 @@ export default class DashboardPresenter {
     this.sidebarView.render();
     this.dashboardView.render();
 
-    // Tampilkan info user di dashboard (contoh)
+    // Tampilkan info user di dashboard
     this.dashboardView.displayUserInfo(this.currentUser);
-    this.dashboardView.renderDashboardData(this.currentUser);
+
+    // Ambil data aplikasi dari model
+    const applications = this.dashboardModel.getApplications();
+
+    // Render data ke tabel
+    this.dashboardView.renderDashboardData(applications);
 
     this.setupEventListeners();
   }

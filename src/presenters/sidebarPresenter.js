@@ -1,30 +1,27 @@
-// src/presenters/sidebarPresenter.js
-import SidebarView from "../views/sidebarView.js"; // pastikan path dan nama file sudah benar
+import SidebarView from "../views/sidebarView.js";
 import { getCurrentUser } from "../models/authModel.js";
 
 export default class SidebarPresenter {
-  constructor() {
+  constructor(role) {
     this.view = new SidebarView();
-    this.currentUser = null;
+    this.role = role; // Simpan role user
   }
 
   init() {
-    console.log("Initializing SidebarPresenter");
+    console.log("Initializing SidebarPresenter with role:", this.role);
 
-    this.currentUser = getCurrentUser();
-
-    if (!this.currentUser) {
-      console.log("User not logged in, redirecting to login");
+    // Bisa juga cek user di sini jika perlu
+    if (!this.role) {
+      console.log("Role tidak ditemukan, redirecting to login");
       const event = new CustomEvent("navigate", { detail: { page: "login" } });
       document.dispatchEvent(event);
       return;
     }
 
-    this.view.render();
+    this.view.render(this.role);
 
-    // Kalau mau handle event logout
     document.addEventListener("user-logout", () => {
-      localStorage.removeItem("currentUser"); // contoh hapus session login
+      localStorage.removeItem("currentUser");
       const event = new CustomEvent("navigate", { detail: { page: "login" } });
       document.dispatchEvent(event);
     });

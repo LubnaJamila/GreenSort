@@ -11,7 +11,7 @@ const db = mysql.createConnection({
   host: "localhost",
   user: "root",
   password: "",
-  database: "greensort",
+  database: "greensort_db",
 });
 
 // Cek koneksi database

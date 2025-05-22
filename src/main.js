@@ -105,12 +105,18 @@ class App {
         this.currentPresenter = new LoginPresenter();
         break;
       case "dashboard":
-        this.currentPresenter = new DashboardPresenter();
-        this.sidebarPresenter = new SidebarPresenter();
+      case "dashboardUser":
+        // Buat presenter sesuai page
+        if (page === "dashboard") {
+          this.currentPresenter = new DashboardPresenter();
+        } else {
+          this.currentPresenter = new DashboardUserPresenter();
+        }
+        // Sidebar selalu dibuat jika ada user
+        if (user) {
+          this.sidebarPresenter = new SidebarPresenter(user.role);
+        }
         break;
-      case 'dashboardUser':
-      this.currentPresenter = new DashboardUserPresenter();
-      break;
       default:
         this.currentPresenter = new IndexPresenter();
     }
