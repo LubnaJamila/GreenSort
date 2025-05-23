@@ -19,6 +19,8 @@ import DashboardPresenter from "./presenters/dashboardPresenter.js";
 import SidebarPresenter from "./presenters/sidebarPresenter.js";
 import Router from "./routes/router.js";
 import DashboardUserPresenter from "./presenters/dashboardUserPresenter.js";
+import DataRekeningPresenter from "./presenters/rekeningPresenter.js";
+import TambahRekeningPresenter from "./presenters/tambahRekeningPresenter.js";
 
 //models
 import { getCurrentUser } from "./models/authModel.js";
@@ -113,6 +115,18 @@ class App {
           this.currentPresenter = new DashboardUserPresenter();
         }
         // Sidebar selalu dibuat jika ada user
+        if (user) {
+          this.sidebarPresenter = new SidebarPresenter(user.role);
+        }
+        break;
+      case "dataRekening": // TAMBAHKAN INI
+         this.currentPresenter = new DataRekeningPresenter();
+        if (user) {
+          this.sidebarPresenter = new SidebarPresenter(user.role);
+        }
+        break;
+      case "tambahRekening": // TAMBAHKAN INI
+         this.currentPresenter = new TambahRekeningPresenter();
         if (user) {
           this.sidebarPresenter = new SidebarPresenter(user.role);
         }

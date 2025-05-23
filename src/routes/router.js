@@ -1,3 +1,4 @@
+
 export default class Router {
   constructor() {
     this.routes = {
@@ -5,7 +6,9 @@ export default class Router {
       register: "#/register",
       login: "#/login",
       dashboard: "#/dashboard",
-      dashboardUser: '#/dashboardUser'
+      dashboardUser: '#/dashboardUser',
+      dataRekening: "#/rekening",
+      tambahRekening: "#/rekening/tambah"
     };
 
     // Inisialisasi
