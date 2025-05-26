@@ -2,6 +2,7 @@ const express = require("express");
 const mysql = require("mysql2");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
+const banks = require('./data/bankList');
 
 const app = express();
 const port = 3000;
@@ -26,7 +27,29 @@ db.connect((err) => {
 app.use(cors());
 app.use(express.json());
 
+app.get('/api/banks', (req, res) => {
+  res.json(banks);
+});
+app.post('/api/rekening', (req, res) => {
+  const { no_rek, nama_bank, nama_pemilik } = req.body;
 
+  if (!no_rek || !nama_bank || !nama_pemilik) {
+    return res.status(400).json({ success: false, message: 'Data tidak lengkap' });
+  }
+
+  const sql = `
+    INSERT INTO rekening (no_rek, nama_bank, nama_pemilik)
+    VALUES (?, ?, ?)
+  `;
+
+  db.query(sql, [no_rek, nama_bank, nama_pemilik], (err, result) => {
+    if (err) {
+      console.error('DB Error:', err);
+      return res.status(500).json({ success: false, message: 'Gagal menyimpan' });
+    }
+    res.json({ success: true, message: 'Rekening disimpan' });
+  });
+});
 app.post("/register", async (req, res) => {
   try {
     console.log("Request body:", req.body);
