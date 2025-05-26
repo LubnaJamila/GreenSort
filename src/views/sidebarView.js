@@ -51,7 +51,7 @@ export default class SidebarView {
       return `
         <div class="nav-section">
           <div class="nav-section-title">Master</div>
-          <a href="#" class="nav-link" data-route="master-data">
+          <a href="#/master-alamat" class="nav-link" data-route="masterAlamat">
             <i class="bi bi-database"></i>
             <span class="nav-text">Data Master</span>
           </a>

@@ -1,6 +1,6 @@
 // src/views/registerView.js
-import '../assets/styles/register.css';
-import register from '../assets/images/Mobile login-amico 1.png';
+import '../../assets/styles/register.css';
+import register from '../../assets/images/Mobile login-amico 1.png';
 
 export default class RegisterView {
     constructor() {

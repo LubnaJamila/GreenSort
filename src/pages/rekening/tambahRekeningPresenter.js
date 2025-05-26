@@ -1,6 +1,6 @@
 // src/presenters/tambahRekeningPresenter.js
-import TambahRekeningView from "../views/tambahRekeningView"; 
-import { getCurrentUser } from "../models/authModel";
+import TambahRekeningView from "../rekening/tambahRekeningView"; 
+import { getCurrentUser } from "../../models/authModel";
 
 
 export default class TambahRekeningPresenter {
@@ -42,4 +42,11 @@ export default class TambahRekeningPresenter {
     });
     document.dispatchEvent(event);
   }
+  destroy() {
+        console.log("Destroying TambahRekeningPresenter");
+        if (this.view && this.view.destroy) {
+            this.view.destroy();
+        }
+        document.removeEventListener("user-logout", this.handleLogout);
+    }
 }

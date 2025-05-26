@@ -12,16 +12,25 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
 // Presenters
-import IndexPresenter from "./presenters/indexPresenter.js";
-import RegisterPresenter from "./presenters/registerPresenter.js";
-import LoginPresenter from "./presenters/loginPresenter.js";
-import DashboardPresenter from "./presenters/dashboardPresenter.js";
 import SidebarPresenter from "./presenters/sidebarPresenter.js";
 import Router from "./routes/router.js";
-import DashboardUserPresenter from "./presenters/dashboardUserPresenter.js";
-import DataRekeningPresenter from "./presenters/rekeningPresenter.js";
-import TambahRekeningPresenter from "./presenters/tambahRekeningPresenter.js";
-
+import IndexPresenter from "./pages/index/indexPresenter.js";
+import RegisterPresenter from "./pages/register/registerPresenter.js";
+import LoginPresenter from "./pages/login/loginPresenter.js";
+import DashboardPresenter from "./pages/dashboard-admin/dashboardPresenter.js";
+import DashboardUserPresenter from "./pages/dashboard-user/dashboardUserPresenter.js";
+import DataRekeningPresenter from "./pages/rekening/rekeningPresenter.js";
+import TambahRekeningPresenter from "./pages/rekening/tambahRekeningPresenter.js";
+import MasterAlamatPresenter from "./pages/alamat/masterAlamatPresenter.js";
+import TambahAlamatPresenter from "./pages/alamat/tambahAlamatPresenter.js";
+import PengajuanPresenter from "./pages/dashboard-admin/pengajuanPresenter.js";
+import PengirimanPresenter from "./pages/dashboard-admin/pengirimanPresenter.js";
+import SelesaiPresenter from "./pages/dashboard-admin/selesaiPresenter.js";
+import DiterimaPresenter from "./pages/dashboard-user/diterimaPresenter.js";
+import DitolakPresenter from "./pages/dashboard-user/ditolakPresenter.js";
+import PenawaranPresenter from "./pages/dashboard-admin/penawaranPresenter.js";
+import PenjemputanPresenter from "./pages/dashboard-user/penjemputanPresenter.js";
+import SelesaiUserPresenter from "./pages/dashboard-user/selesaiUserPresenter.js";
 //models
 import { getCurrentUser } from "./models/authModel.js";
 
@@ -79,13 +88,13 @@ class App {
     }
     const user = getCurrentUser();
 
-    if (user?.role === 'admin' && page === 'dashboardUser') {
-      this.router.navigateTo('dashboard');
+    if (user?.role === "admin" && page === "dashboardUser") {
+      this.router.navigateTo("dashboard");
       return;
     }
 
-    if (user?.role === 'pengguna' && page === 'dashboard') {
-      this.router.navigateTo('dashboardUser');
+    if (user?.role === "pengguna" && page === "dashboard") {
+      this.router.navigateTo("dashboardUser");
       return;
     }
 
@@ -120,13 +129,73 @@ class App {
         }
         break;
       case "dataRekening": // TAMBAHKAN INI
-         this.currentPresenter = new DataRekeningPresenter();
+        this.currentPresenter = new DataRekeningPresenter();
         if (user) {
           this.sidebarPresenter = new SidebarPresenter(user.role);
         }
         break;
       case "tambahRekening": // TAMBAHKAN INI
-         this.currentPresenter = new TambahRekeningPresenter();
+        this.currentPresenter = new TambahRekeningPresenter();
+        if (user) {
+          this.sidebarPresenter = new SidebarPresenter(user.role);
+        }
+        break;
+      case "diterima":
+        this.currentPresenter = new DiterimaPresenter();
+        if (user) {
+          this.sidebarPresenter = new SidebarPresenter(user.role);
+        }
+        break;
+      case "ditolak":
+        this.currentPresenter = new DitolakPresenter();
+        if (user) {
+          this.sidebarPresenter = new SidebarPresenter(user.role);
+        }
+        break;
+      case "penjemputan":
+        this.currentPresenter = new PenjemputanPresenter();
+        if (user) {
+          this.sidebarPresenter = new SidebarPresenter(user.role);
+        }
+        break;
+      case "selesaiUser":
+        this.currentPresenter = new SelesaiUserPresenter();
+        if (user) {
+          this.sidebarPresenter = new SidebarPresenter(user.role);
+        }
+        break;
+      case "masterAlamat":
+        this.currentPresenter = new MasterAlamatPresenter();
+        if (user) {
+          this.sidebarPresenter = new SidebarPresenter(user.role);
+        }
+        break;
+      case "tambahAlamat":
+        this.currentPresenter = new TambahAlamatPresenter();
+        if (user) {
+          this.sidebarPresenter = new SidebarPresenter(user.role);
+        }
+        break;
+      case "pengajuan":
+        this.currentPresenter = new PengajuanPresenter();
+        if (user) {
+          this.sidebarPresenter = new SidebarPresenter(user.role);
+        }
+        break;
+      case "penawaran":
+        this.currentPresenter = new PenawaranPresenter();
+        if (user) {
+          this.sidebarPresenter = new SidebarPresenter(user.role);
+        }
+        break;
+      case "pengiriman":
+        this.currentPresenter = new PengirimanPresenter();
+        if (user) {
+          this.sidebarPresenter = new SidebarPresenter(user.role);
+        }
+        break;
+      case "selesai":
+        this.currentPresenter = new SelesaiPresenter();
         if (user) {
           this.sidebarPresenter = new SidebarPresenter(user.role);
         }

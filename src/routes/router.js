@@ -1,4 +1,4 @@
-
+//src/routes/router.js
 export default class Router {
   constructor() {
     this.routes = {
@@ -7,6 +7,16 @@ export default class Router {
       login: "#/login",
       dashboard: "#/dashboard",
       dashboardUser: '#/dashboardUser',
+      masterAlamat: "#/master-alamat",
+      tambahAlamat: "#/master-alamat/tambah",
+      pengajuan: "#/pengajuan",
+      penawaran: "#/penawaran",
+      pengiriman: "#/pengiriman",
+      selesai: "#/selesai",
+      diterima: "#/diterima",
+      ditolak: "#/ditolak",
+      penjemputan: "#/penjemputan",
+      selesaiUser: "#/selesaiUser",
       dataRekening: "#/rekening",
       tambahRekening: "#/rekening/tambah"
     };

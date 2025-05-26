@@ -1,6 +1,6 @@
 // src/presenters/registerPresenter.js
-import { registerUser } from '../models/authModel.js';
-import RegisterView from '../views/registerView.js';
+import { registerUser } from '../../models/authModel.js';
+import RegisterView from './registerView.js';
 
 export default class RegisterPresenter {
   constructor() {

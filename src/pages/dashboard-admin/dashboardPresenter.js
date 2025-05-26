@@ -1,8 +1,8 @@
 // src/presenters/dashboardPresenter.js
-import DashboardView from "../views/dashboardView.js";
-import SidebarView from "../views/sidebarView.js";
-import DashboardModel from "../models/dashboard-model.js";
-import { getCurrentUser, logoutUser } from "../models/authModel.js";
+import DashboardView from "../dashboard-admin/dashboardView.js";
+import SidebarView from "../../views/sidebarView.js";
+import DashboardModel from "../../models/dashboard-model.js";
+import { getCurrentUser, logoutUser } from "../../models/authModel.js";
 
 export default class DashboardPresenter {
   constructor() {

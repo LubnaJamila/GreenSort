@@ -1,6 +1,7 @@
 // src/presenters/indexPresenter.js
-import IndexView from '../views/indexView.js';
-import Router from '../routes/router.js';
+import IndexView from './indexView.js';
+import Router from '../../routes/router.js';
+
 
 export default class IndexPresenter {
   constructor() {

@@ -1,6 +1,6 @@
 // src/views/loginView.js
-import '../assets/styles/login.css';
-import login from '../assets/images/Login-amico 1.png';
+import '../../assets/styles/login.css';
+import login from '../../assets/images/Login-amico 1.png';
 
 export default class LoginView {
     constructor() {
@@ -9,6 +9,7 @@ export default class LoginView {
     }
     
     render() {
+        // 渲染登录页面
         this.app.innerHTML = `
             <div class="login-container">
                 <div class="illustration">

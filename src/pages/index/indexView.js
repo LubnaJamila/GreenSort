@@ -1,12 +1,10 @@
-import '../assets/styles/main.css';
-// Import CSS Bootstrap
 import 'bootstrap/dist/css/bootstrap.min.css';
-// Import JS Bootstrap
 import 'bootstrap';
-import frame10 from '../assets/images/Frame 10.png';
-import frame11 from '../assets/images/Frame 11.png';
-import background from '../assets/images/Ellipse 28.png';
-import service from '../assets/images/4909450 1.png';
+import '../../assets/styles/main.css';
+import frame10 from '../../assets/images/Frame 10.png';
+import frame11 from '../../assets/images/Frame 11.png';
+import background from '../../assets/images/Ellipse 28.png';
+import service from '../../assets/images/4909450 1.png';
 
 export default class IndexView {
     constructor() {

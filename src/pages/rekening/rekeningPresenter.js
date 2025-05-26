@@ -1,6 +1,6 @@
 // src/presenters/rekeningPresenter.js
-import DataRekeningView from "../views/rekeningView.js";
-import { getCurrentUser } from "../models/authModel.js";
+import DataRekeningView from "../rekening/rekeningView.js";
+import { getCurrentUser } from "../../models/authModel.js";
 
 export default class DataRekeningPresenter {
   constructor() {

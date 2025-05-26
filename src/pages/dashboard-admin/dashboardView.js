@@ -1,7 +1,8 @@
-// src/views/dashboardUserView.js
-import "../assets/styles/dashboard.css";
-import userPlaceholder from "../assets/images/unsplash_HaNi1rsZ6Nc.png";
-import SidebarView from "./sidebarView";
+// src/pages/dashboard-admin/dashboardView.js
+import "../../assets/styles/sidebar.css";
+import "../../assets/styles/dashboard.css";
+import userPlaceholder from "../../assets/images/unsplash_HaNi1rsZ6Nc.png";
+import SidebarView from "../../views/sidebarView";
 
 export default class DashboardView {
   constructor() {
@@ -26,7 +27,9 @@ export default class DashboardView {
       </button>
       <div class="sidebar-overlay"></div>
       
-      <div class="main-content ${this.isMobile ? 'full-width' : ''} ${this.sidebarCollapsed ? 'collapsed' : ''}">
+      <div class="main-content ${this.isMobile ? "full-width" : ""} ${
+      this.sidebarCollapsed ? "collapsed" : ""
+    }">
         <header>
           <div class="header-content">
             <div class="dashboard-header">
@@ -39,11 +42,19 @@ export default class DashboardView {
               <span id="user-name">Loading...</span>
             </div>
           </div>
+
+          <div class="stats-grid">
+            ${this.renderStatCard("80", "Semua", "bi-hourglass-split", "yellow-bg", "#/dashboard")}
+            ${this.renderStatCard("16", "Pengajuan", "bi-clipboard-check", "blue-bg", "#/pengajuan")}
+            ${this.renderStatCard("8", "Penawaran", "bi-x-circle", "red-bg", "#/penawaran")}
+            ${this.renderStatCard("24", "Pengiriman", "bi-truck", "orange-bg", "#/pengiriman")}
+            ${this.renderStatCard("42", "Selesai", "bi-check-circle", "green-bg", "#/selesai")}
+          </div>
         </header>
 
         <div class="data-section">
           <div class="data-header">
-            <h3>Data Pengajuan</h3>
+            <h3>Semua Data</h3>
             <div class="table-actions">
               <button id="refresh-btn" class="btn btn-sm btn-outline-secondary">
                 <i class="bi bi-arrow-clockwise"></i> Refresh
@@ -56,13 +67,11 @@ export default class DashboardView {
               <thead>
                 <tr>
                   <th><input type="checkbox" id="select-all"></th>
-                  <th>Name</th>
-                  <th>Status</th>
                   <th>Jenis Sampah</th>
-                  <th>Kuantitas</th>
-                  <th>Total</th>
-                  <th>Gambar Sampah</th>
-                  <th>Action</th>
+                  <th>Tanggal Pembelian</th>
+                  <th>Berat</th>
+                  <th>Harga</th>
+                  <th>Total Harga</th>
                 </tr>
               </thead>
               <tbody id="applications-table-body">
@@ -75,115 +84,144 @@ export default class DashboardView {
     `;
   }
 
+  renderStatCard(number, label, icon, colorClass, link) {
+    return `
+      <div class="stat-card">
+        <div class="stat-content">
+          <div class="stat-number">${number}</div>
+          <div class="stat-label">${label}</div>
+        </div>
+        <div class="stat-icon ${colorClass}">
+          <i class="bi ${icon}"></i>
+        </div>
+        <a href="${link}" class="stat-more" aria-label="View more ${label} items">
+          <i class="bi bi-arrow-down"></i>
+        </a>
+      </div>
+    `;
+  }
+
   setupEventListeners() {
     this.removeEventListeners();
 
     // Mobile menu toggle
-    const mobileMenuBtn = document.getElementById('mobile-menu-toggle');
+    const mobileMenuBtn = document.getElementById("mobile-menu-toggle");
     if (mobileMenuBtn) {
       const handler = () => this.toggleSidebar();
-      mobileMenuBtn.addEventListener('click', handler);
-      this.eventListeners.push({ element: mobileMenuBtn, type: 'click', handler });
+      mobileMenuBtn.addEventListener("click", handler);
+      this.eventListeners.push({
+        element: mobileMenuBtn,
+        type: "click",
+        handler,
+      });
     }
 
     // Sidebar overlay click
-    const overlay = document.querySelector('.sidebar-overlay');
+    const overlay = document.querySelector(".sidebar-overlay");
     if (overlay) {
       const handler = () => this.toggleSidebar(false);
-      overlay.addEventListener('click', handler);
-      this.eventListeners.push({ element: overlay, type: 'click', handler });
+      overlay.addEventListener("click", handler);
+      this.eventListeners.push({ element: overlay, type: "click", handler });
     }
 
     // Window resize
     const resizeHandler = () => this.handleResize();
-    window.addEventListener('resize', resizeHandler);
-    this.eventListeners.push({ element: window, type: 'resize', handler: resizeHandler });
+    window.addEventListener("resize", resizeHandler);
+    this.eventListeners.push({
+      element: window,
+      type: "resize",
+      handler: resizeHandler,
+    });
 
     // Refresh button
-    const refreshBtn = document.getElementById('refresh-btn');
+    const refreshBtn = document.getElementById("refresh-btn");
     if (refreshBtn) {
       const handler = () => this.handleRefresh();
-      refreshBtn.addEventListener('click', handler);
-      this.eventListeners.push({ element: refreshBtn, type: 'click', handler });
+      refreshBtn.addEventListener("click", handler);
+      this.eventListeners.push({ element: refreshBtn, type: "click", handler });
     }
 
     // Select all checkbox
-    const selectAll = document.getElementById('select-all');
+    const selectAll = document.getElementById("select-all");
     if (selectAll) {
       const handler = (e) => this.toggleSelectAll(e.target.checked);
-      selectAll.addEventListener('change', handler);
-      this.eventListeners.push({ element: selectAll, type: 'change', handler });
+      selectAll.addEventListener("change", handler);
+      this.eventListeners.push({ element: selectAll, type: "change", handler });
     }
   }
 
   toggleSidebar(show = null) {
-    const sidebar = document.querySelector('.sidebar');
-    const overlay = document.querySelector('.sidebar-overlay');
-    const mainContent = document.querySelector('.main-content');
-    
+    const sidebar = document.querySelector(".sidebar");
+    const overlay = document.querySelector(".sidebar-overlay");
+    const mainContent = document.querySelector(".main-content");
+
     if (show === null) {
-      show = !sidebar.classList.contains('mobile-open');
+      show = !sidebar.classList.contains("mobile-open");
     }
 
     if (show) {
-      sidebar.classList.add('mobile-open');
-      overlay.classList.add('active');
-      document.body.style.overflow = 'hidden';
+      sidebar.classList.add("mobile-open");
+      overlay.classList.add("active");
+      document.body.style.overflow = "hidden";
     } else {
-      sidebar.classList.remove('mobile-open');
-      overlay.classList.remove('active');
-      document.body.style.overflow = '';
+      sidebar.classList.remove("mobile-open");
+      overlay.classList.remove("active");
+      document.body.style.overflow = "";
     }
   }
 
   handleResize() {
     const wasMobile = this.isMobile;
     this.isMobile = window.matchMedia("(max-width: 768px)").matches;
-    
+
     if (wasMobile !== this.isMobile) {
       this.checkMobileView();
     }
   }
 
   checkMobileView() {
-    const mainContent = document.querySelector('.main-content');
+    const mainContent = document.querySelector(".main-content");
     if (!mainContent) return;
 
     if (this.isMobile) {
-      mainContent.classList.add('full-width');
-      mainContent.classList.remove('collapsed');
+      mainContent.classList.add("full-width");
+      mainContent.classList.remove("collapsed");
     } else {
-      mainContent.classList.remove('full-width');
+      mainContent.classList.remove("full-width");
       if (this.sidebarCollapsed) {
-        mainContent.classList.add('collapsed');
+        mainContent.classList.add("collapsed");
       }
     }
   }
 
   toggleSelectAll(checked) {
-    const checkboxes = document.querySelectorAll('#applications-table-body input[type="checkbox"]');
-    checkboxes.forEach(checkbox => {
+    const checkboxes = document.querySelectorAll(
+      '#applications-table-body input[type="checkbox"]'
+    );
+    checkboxes.forEach((checkbox) => {
       checkbox.checked = checked;
     });
   }
 
   handleRefresh() {
-    const event = new CustomEvent('dashboard-refresh');
+    const event = new CustomEvent("dashboard-refresh");
     document.dispatchEvent(event);
   }
 
   displayUserInfo(user) {
-    const userNameElement = document.getElementById('user-name');
+    const userNameElement = document.getElementById("user-name");
     if (userNameElement && user) {
       userNameElement.textContent = user.name || user.username;
     }
   }
 
   renderApplicationsTable(applicationsData) {
-    const tableBody = document.getElementById('applications-table-body');
+    const tableBody = document.getElementById("applications-table-body");
     if (!tableBody) return;
 
-    const tableHTML = applicationsData.map(app => this.renderApplicationRow(app)).join('');
+    const tableHTML = applicationsData
+      .map((app) => this.renderApplicationRow(app))
+      .join("");
     tableBody.innerHTML = tableHTML;
 
     this.initDataTable();
@@ -191,45 +229,38 @@ export default class DashboardView {
 
   renderApplicationRow(app) {
     const { statusClass, statusIcon } = this.getStatusStyles(app.status);
-    
+
     return `
       <tr>
         <td><input type="checkbox" class="row-checkbox" value="${app.id}"></td>
-        <td>${app.name}</td>
-        <td><span class="status-badge ${statusClass}"><i class="bi ${statusIcon} me-1"></i>${app.status}</span></td>
         <td>${app.jenisSampah}</td>
+        <td>${app.tanggalPembelian}</td>
         <td>${app.kuantitas}</td>
+        <td>${app.harga}</td>
         <td>${app.total}</td>
-        <td><img src="${app.imageUrl}" alt="Sampah ${app.name}" class="waste-img"></td>
-        <td>
-          <button class="btn btn-sm btn-outline-primary detail-btn" data-id="${app.id}">
-            <span class="d-none d-md-inline">Detail</span>
-            <i class="bi bi-eye d-md-none"></i>
-          </button>
-        </td>
       </tr>
     `;
   }
 
   getStatusStyles(status) {
     const statusMap = {
-      'Diterima': { class: 'bg-info bg-opacity-10', icon: 'bi-clipboard-check' },
-      'Ditolak': { class: 'bg-danger bg-opacity-10', icon: 'bi-x-circle' },
-      'Dikirim': { class: 'bg-warning bg-opacity-10', icon: 'bi-truck' },
-      'Selesai': { class: 'bg-success bg-opacity-10', icon: 'bi-check-circle' },
-      'default': { class: 'bg-light', icon: 'bi-hourglass-split' }
+      Diterima: { class: "bg-info bg-opacity-10", icon: "bi-clipboard-check" },
+      Ditolak: { class: "bg-danger bg-opacity-10", icon: "bi-x-circle" },
+      Dikirim: { class: "bg-warning bg-opacity-10", icon: "bi-truck" },
+      Selesai: { class: "bg-success bg-opacity-10", icon: "bi-check-circle" },
+      default: { class: "bg-light", icon: "bi-hourglass-split" },
     };
 
     return statusMap[status] || statusMap.default;
   }
 
   initDataTable() {
-    if ($.fn.DataTable.isDataTable('#datatable')) {
-      $('#datatable').DataTable().destroy();
+    if ($.fn.DataTable.isDataTable("#datatable")) {
+      $("#datatable").DataTable().destroy();
     }
-    
+
     $(document).ready(() => {
-      $('#datatable').DataTable({
+      $("#datatable").DataTable({
         responsive: true,
         language: {
           search: "Cari:",
@@ -239,9 +270,9 @@ export default class DashboardView {
             first: "<<",
             last: ">>",
             next: ">",
-            previous: "<"
-          }
-        }
+            previous: "<",
+          },
+        },
       });
     });
   }
@@ -259,8 +290,8 @@ export default class DashboardView {
 
   destroy() {
     this.removeEventListeners();
-    if ($.fn.DataTable.isDataTable('#datatable')) {
-      $('#datatable').DataTable().destroy();
+    if ($.fn.DataTable.isDataTable("#datatable")) {
+      $("#datatable").DataTable().destroy();
     }
   }
 }

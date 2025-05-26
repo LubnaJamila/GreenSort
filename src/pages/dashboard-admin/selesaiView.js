@@ -1,9 +1,10 @@
-// src/views/dashboardView.js
-import "../assets/styles/dashboard.css";
-import userPlaceholder from "../assets/images/unsplash_HaNi1rsZ6Nc.png";
-import SidebarView from "./sidebarView";
+// src/pages/dashboard-admin/selesaiView.js
+import "../../assets/styles/sidebar.css";
+import "../../assets/styles/dashboard.css";
+import userPlaceholder from "../../assets/images/unsplash_HaNi1rsZ6Nc.png";
+import SidebarView from "../../views/sidebarView";
 
-export default class DashboardView {
+export default class SelesaiView {
   constructor() {
     this.app = document.getElementById("content");
     this.sidebar = new SidebarView();
@@ -43,32 +44,17 @@ export default class DashboardView {
           </div>
 
           <div class="stats-grid">
-            ${this.renderStatCard(
-              "80",
-              "Menunggu Validasi",
-              "bi-hourglass-split",
-              "yellow-bg"
-            )}
-            ${this.renderStatCard(
-              "16",
-              "Diterima",
-              "bi-clipboard-check",
-              "blue-bg"
-            )}
-            ${this.renderStatCard("8", "Ditolak", "bi-x-circle", "red-bg")}
-            ${this.renderStatCard("24", "Dikirim", "bi-truck", "orange-bg")}
-            ${this.renderStatCard(
-              "42",
-              "Selesai",
-              "bi-check-circle",
-              "green-bg"
-            )}
+            ${this.renderStatCard("80", "Semua", "bi-hourglass-split", "yellow-bg", "#/dashboard")}
+            ${this.renderStatCard("16", "Pengajuan", "bi-clipboard-check", "blue-bg", "#/pengajuan")}
+            ${this.renderStatCard("8", "Penawaran", "bi-x-circle", "red-bg", "#/penawaran")}
+            ${this.renderStatCard("24", "Pengiriman", "bi-truck", "orange-bg", "#/pengiriman")}
+            ${this.renderStatCard("42", "Selesai", "bi-check-circle", "green-bg", "#/selesai")}
           </div>
         </header>
 
         <div class="data-section">
           <div class="data-header">
-            <h3>Data Pengajuan</h3>
+            <h3>Semua Data</h3>
             <div class="table-actions">
               <button id="refresh-btn" class="btn btn-sm btn-outline-secondary">
                 <i class="bi bi-arrow-clockwise"></i> Refresh
@@ -81,11 +67,11 @@ export default class DashboardView {
               <thead>
                 <tr>
                   <th><input type="checkbox" id="select-all"></th>
-                  <th>Name</th>
-                  <th>Status</th>
+                  <th>Nama</th>
                   <th>Jenis Sampah</th>
-                  <th>Kuantitas</th>
-                  <th>Total</th>
+                  <th>Berat</th>
+                  <th>Harga</th>
+                  <th>Total Harga</th>
                   <th>Gambar Sampah</th>
                   <th>Action</th>
                 </tr>
@@ -100,7 +86,7 @@ export default class DashboardView {
     `;
   }
 
-  renderStatCard(number, label, icon, colorClass) {
+  renderStatCard(number, label, icon, colorClass, link) {
     return `
       <div class="stat-card">
         <div class="stat-content">
@@ -110,7 +96,7 @@ export default class DashboardView {
         <div class="stat-icon ${colorClass}">
           <i class="bi ${icon}"></i>
         </div>
-        <a href="#" class="stat-more" aria-label="View more ${label} items">
+        <a href="${link}" class="stat-more" aria-label="View more ${label} items">
           <i class="bi bi-arrow-down"></i>
         </a>
       </div>
@@ -220,7 +206,7 @@ export default class DashboardView {
   }
 
   handleRefresh() {
-    const event = new CustomEvent("dashboard-refresh");
+    const event = new CustomEvent("selesai-refresh");
     document.dispatchEvent(event);
   }
 
@@ -243,27 +229,20 @@ export default class DashboardView {
     this.initDataTable();
   }
 
-  renderApplicationRow(app) {
-    const { statusClass, statusIcon } = this.getStatusStyles(app.status);
+  // renderApplicationRow(app) {
+  //   const { statusClass, statusIcon } = this.getStatusStyles(app.status);
 
-    return `
-      <tr>
-        <td><input type="checkbox" class="row-checkbox" value="${app.id}"></td>
-        <td>${app.name}</td>
-        <td><span class="status-badge ${statusClass}"><i class="bi ${statusIcon} me-1"></i>${app.status}</span></td>
-        <td>${app.jenisSampah}</td>
-        <td>${app.kuantitas}</td>
-        <td>${app.total}</td>
-        <td><img src="${app.imageUrl}" alt="Sampah ${app.name}" class="waste-img"></td>
-        <td>
-          <button class="btn btn-sm btn-outline-primary detail-btn" data-id="${app.id}">
-            <span class="d-none d-md-inline">Detail</span>
-            <i class="bi bi-eye d-md-none"></i>
-          </button>
-        </td>
-      </tr>
-    `;
-  }
+  //   return `
+  //     <tr>
+  //       <td><input type="checkbox" class="row-checkbox" value="${app.id}"></td>
+  //       <td>${app.name}</td>
+  //       <td>${app.tanggalPembelian}</td>
+  //       <td>${app.kuantitas}</td>
+  //       <td>${app.harga}</td>
+  //       <td>${app.total}</td>
+  //     </tr>
+  //   `;
+  // }
 
   getStatusStyles(status) {
     const statusMap = {
@@ -300,7 +279,7 @@ export default class DashboardView {
     });
   }
 
-  renderDashboardData(applicationsData) {
+  renderSelesaiData(applicationsData) {
     this.renderApplicationsTable(applicationsData);
   }
 

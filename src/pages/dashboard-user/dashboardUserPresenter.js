@@ -1,5 +1,6 @@
-import DashboardUserView from '../views/dashboardUserView.js';
-import { getCurrentUser } from '../models/authModel.js';
+//src/pages/dashboard-user/dashboardUserPresenter.js
+import DashboardUserView from "./dashboardUserView.js";
+import { getCurrentUser } from "../../models/authModel.js";
 export default class DashboardUserPresenter {
   constructor() {
     this.view = new DashboardUserView();

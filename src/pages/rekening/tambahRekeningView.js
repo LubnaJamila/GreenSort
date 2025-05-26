@@ -1,7 +1,7 @@
-// src/views/tambahRekeningView.js
-import "../assets/styles/dashboard.css";
-import userPlaceholder from "../assets/images/unsplash_HaNi1rsZ6Nc.png";
-import SidebarView from "./sidebarView";
+// src/pages/rekening/tambahRekeningView.js
+import "../../assets/styles/rekening.css";
+import userPlaceholder from "../../assets/images/unsplash_HaNi1rsZ6Nc.png";
+import SidebarView from "../../views/sidebarView";
 
 export default class TambahRekeningView {
     constructor() {
@@ -41,7 +41,7 @@ export default class TambahRekeningView {
                 </div>
             </header>
 
-            <div class="data-section">
+            <div class="rekening-section">
                 <div class="form-section">
                     <form id="form-tambah-rekening" class="form">
                         <div class="form-group">
