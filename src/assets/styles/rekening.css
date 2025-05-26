@@ -124,6 +124,8 @@ body {
   margin-top: -550px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   min-height: calc(100vh - 180px);
+  position: relative;
+  z-index: 10;
 }
 
 .alamat-section {
@@ -133,6 +135,8 @@ body {
   margin-top: -550px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   min-height: calc(100vh - 180px);
+  position: relative;
+  z-index: 10;
 }
 
 .content-header {
