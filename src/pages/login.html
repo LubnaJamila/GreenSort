@@ -1,287 +1,319 @@
-<html lang="en">
+<!DOCTYPE html>
+<html lang="id">
 <head>
-  <meta charset="utf-8" />
-  <meta content="width=device-width, initial-scale=1" name="viewport" />
-  <title>Greensort Klasifikasi Sampah</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background-color: #fafafa;
-      min-height: 100vh;
-    }
-    .sidebar {
-      width: 16rem;
-      min-height: 100vh;
-      border-right: 1px solid #e5e7eb;
-      background: white;
-      padding: 3rem 2rem;
-    }
-    .sidebar h1 {
-      font-weight: 600;
-      font-size: 1.125rem;
-      letter-spacing: 0.2em;
-      margin-bottom: 5rem;
-    }
-    .sidebar a {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.75rem 1rem;
-      border-radius: 0.375rem;
-      font-size: 0.875rem;
-      color: black;
-      text-decoration: none;
-      margin-bottom: 1rem;
-    }
-    .sidebar a.active {
-      background-color: #f7ff5f;
-    }
-    .sidebar a.inactive {
-      background-color: #f3f3f3;
-    }
-    .header {
-      background: linear-gradient(to right, #f0f07a, #b7e72f);
-      border-top-right-radius: 3rem;
-      border-bottom-right-radius: 3rem;
-      padding: 3rem 4rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-    .header h2 {
-      font-weight: 400;
-      font-size: 2rem;
-      margin-bottom: 0.25rem;
-    }
-    .header p {
-      color: #6b7280;
-      font-size: 0.875rem;
-      max-width: 24rem;
-      margin: 0;
-    }
-    .user-btn {
-      background: white;
-      border-radius: 9999px;
-      padding: 0.5rem 1rem;
-      box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      border: none;
-    }
-    .user-btn img {
-      border-radius: 9999px;
-      width: 40px;
-      height: 40px;
-      object-fit: cover;
-    }
-    .user-info p {
-      margin: 0;
-      font-size: 0.75rem;
-      line-height: 1;
-    }
-    .user-info p:first-child {
-      font-weight: 400;
-      color: black;
-    }
-    .user-info p:last-child {
-      color: #9ca3af;
-      font-size: 0.5625rem;
-    }
-    .upload-box {
-      border: 2px dashed black;
-      border-radius: 0.5rem;
-      padding: 3rem 0;
-      text-align: center;
-      cursor: pointer;
-      max-width: 64rem;
-      margin: 0 auto;
-    }
-    .upload-box i {
-      font-size: 2rem;
-      margin-bottom: 0.75rem;
-    }
-    .upload-box p {
-      color: #6b7280;
-      font-size: 0.875rem;
-      margin: 0;
-    }
-    .btn-classify {
-      background: linear-gradient(to bottom, #f7ff5f, #7dbb0a);
-      font-weight: 700;
-      box-shadow: 0 4px 6px rgb(0 0 0 / 0.15);
-      border: none;
-      color: black;
-      padding: 0.5rem 1.25rem;
-      border-radius: 0.375rem;
-      transition: box-shadow 0.2s ease;
-    }
-    .btn-classify:hover {
-      box-shadow: 0 6px 8px rgb(0 0 0 / 0.25);
-    }
-    .result-card {
-      max-width: 64rem;
-      margin: 2rem auto 0;
-      background: white;
-      border-radius: 1rem;
-      padding: 2rem 3rem;
-      box-shadow: 0 4px 6px rgb(0 0 0 / 0.1);
-    }
-    .result-title {
-      font-weight: 400;
-      font-size: 1rem;
-      margin-bottom: 1.5rem;
-    }
-    .result-content {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 3rem;
-      align-items: center;
-    }
-    .result-content img {
-      border-radius: 0.5rem;
-      width: 200px;
-      height: 200px;
-      object-fit: cover;
-    }
-    .result-text {
-      flex: 1;
-      font-size: 0.875rem;
-      line-height: 1.5;
-    }
-    .result-text p {
-      margin-bottom: 1rem;
-    }
-    .result-text p span {
-      display: block;
-    }
-    .result-text p span:first-child {
-      font-weight: 400;
-    }
-    .result-text p span:nth-child(2) {
-      text-align: center;
-      margin-left: 1rem;
-    }
-    .result-text p span:last-child {
-      padding-left: 1rem;
-    }
-    .result-buttons {
-      display: flex;
-      gap: 1.5rem;
-      justify-content: flex-end;
-      margin-top: 1.5rem;
-      flex-wrap: wrap;
-    }
-    .result-buttons .btn {
-      background: linear-gradient(to bottom, #f7ff5f, #7dbb0a);
-      font-weight: 700;
-      box-shadow: 0 4px 6px rgb(0 0 0 / 0.15);
-      border: none;
-      color: black;
-      padding: 0.5rem 1.5rem;
-      border-radius: 0.375rem;
-      transition: box-shadow 0.2s ease;
-    }
-    .result-buttons .btn:hover {
-      box-shadow: 0 6px 8px rgb(0 0 0 / 0.25);
-    }
-    @media (max-width: 768px) {
-      .header {
-        border-radius: 0;
-        padding: 2rem 1.5rem;
-      }
-      .sidebar {
-        width: 100%;
-        min-height: auto;
-        border-right: none;
-        border-bottom: 1px solid #e5e7eb;
-        padding: 1.5rem 1rem;
-        display: flex;
-        justify-content: center;
-        gap: 2rem;
-        margin-bottom: 1rem;
-      }
-      .sidebar h1 {
-        display: none;
-      }
-      .sidebar a {
-        margin-bottom: 0;
-        padding: 0.5rem 0.75rem;
-        font-size: 0.75rem;
-      }
-      .result-content {
-        flex-direction: column;
-        align-items: center;
-      }
-      .result-text p span:nth-child(2) {
-        margin-left: 0;
-      }
-      .result-text p span:last-child {
-        padding-left: 0;
-      }
-      .result-buttons {
-        justify-content: center;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenSort - Pengaturan Akun</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-green: #c8e6c9;
+            --dark-green: #81c784;
+            --light-green: #e8f5e8;
+            --yellow-accent: #cddc39;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .sidebar {
+            background-color: white;
+            min-height: 100vh;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            padding: 0;
+        }
+        
+        .sidebar .logo {
+            padding: 1.5rem;
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #333;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .sidebar .nav-link {
+            padding: 1rem 1.5rem;
+            color: #666;
+            border: none;
+            border-radius: 0;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .sidebar .nav-link:hover {
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        
+        .sidebar .nav-link.active {
+            background-color: var(--yellow-accent);
+            color: #333;
+        }
+        
+        .header-section {
+            background: linear-gradient(135deg, var(--yellow-accent) 0%, #b2c639 100%);
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .header-content h1 {
+            color: #333;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header-content p {
+            color: #666;
+            margin-bottom: 1.5rem;
+        }
+        
+        .profile-tabs .btn {
+            border-radius: 25px;
+            padding: 0.5rem 1.5rem;
+            margin-right: 0.5rem;
+            border: 2px solid #ddd;
+            background-color: white;
+            color: #666;
+        }
+        
+        .profile-tabs .btn.active {
+            background-color: var(--dark-green);
+            border-color: var(--dark-green);
+            color: white;
+        }
+        
+        .user-avatar {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .user-avatar img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .profile-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .profile-info h3 {
+            color: #333;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .profile-info .text-muted {
+            margin-bottom: 1.5rem;
+        }
+        
+        .edit-photo-btn {
+            background-color: var(--yellow-accent);
+            border: none;
+            border-radius: 25px;
+            padding: 0.5rem 1.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .edit-photo-btn:hover {
+            background-color: var(--dark-green);
+            color: white;
+        }
+        
+        .profile-details h4 {
+            color: #333;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+        }
+        
+        .detail-item {
+            margin-bottom: 1.5rem;
+        }
+        
+        .detail-item label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        
+        .detail-item .value {
+            color: #666;
+            font-size: 0.95rem;
+        }
+        
+        .user-profile-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-left: auto;
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+        }
+        
+        .user-profile-header img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .user-profile-header span {
+            color: #333;
+            font-weight: 500;
+        }
+    </style>
 </head>
 <body>
-  <div class="d-flex">
-    <aside class="sidebar d-flex flex-column">
-      <h1>GREENSORT</h1>
-      <a href="#" class="inactive"><i class="far fa-clock fa-xs"></i> Dashboard</a>
-      <a href="#" class="active">Klasifikasi Sampah</a>
-      <a href="#" class="inactive">Rekening</a>
-      <a href="#" class="inactive">Pengaturan</a>
-    </aside>
-    <main class="flex-grow-1 d-flex flex-column">
-      <header class="header">
-        <div>
-          <h2>Klasifikasi Sampah</h2>
-          <p>Ringkasan status pengajuan Anda secara real-time.</p>
-        </div>
-        <button class="user-btn" type="button" aria-label="User profile">
-          <img src="https://storage.googleapis.com/a1aa/image/c3ba5a18-113d-4535-071e-88ff9b9e5f4e.jpg" alt="Profile picture of Sevri Vendrian" />
-          <div class="user-info text-start">
-            <p>Sevri Vendrian</p>
-            <p>User</p>
-          </div>
-        </button>
-      </header>
-      <section class="py-5 px-4">
-        <div class="bg-white rounded-4 shadow-sm p-5 mx-auto" style="max-width: 64rem;">
-          <div class="upload-box mb-3">
-            <i class="fas fa-upload"></i>
-            <p>Upload Gambar Sampah</p>
-          </div>
-          <div class="d-flex justify-content-end">
-            <button class="btn btn-classify" type="button">Klasifikasi</button>
-          </div>
-        </div>
-      </section>
-      <section class="px-4 pb-5">
-        <div class="result-card">
-          <h3 class="result-title">Hasil Klasifikasi</h3>
-          <div class="result-content">
-            <img src="https://storage.googleapis.com/a1aa/image/a2a54e58-3e7f-459c-73d6-6f1316c603d7.jpg" alt="White plastic bag with red text on a gray background" />
-            <div class="result-text">
-              <p><span>Jenis sampah</span><span>Organik</span></p>
-              <p><span>Rekomendasi Pengolahan sampah</span><span>blablabla</span></p>
-              <div class="result-buttons">
-                <button class="btn btn-classify" type="button">Sampah di daur ulang</button>
-                <button class="btn btn-classify" type="button">Sampah Dijual</button>
-              </div>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 sidebar">
+                <div class="logo">
+                    GREENSORT
+                </div>
+                <nav class="nav flex-column">
+                    <a class="nav-link" href="#">
+                        <i class="fas fa-tachometer-alt"></i>
+                        Dashboard
+                    </a>
+                    <a class="nav-link" href="#">
+                        <i class="fas fa-layer-group"></i>
+                        Klasifikasi Sampah
+                    </a>
+                    <a class="nav-link" href="#">
+                        <i class="fas fa-chart-line"></i>
+                        Rekening
+                    </a>
+                    <a class="nav-link active" href="#">
+                        <i class="fas fa-cog"></i>
+                        Pengaturan
+                    </a>
+                </nav>
             </div>
-          </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10">
+                <!-- Header Section -->
+                <div class="header-section">
+                    <div class="container-fluid">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div class="header-content">
+                                    <h1>Pengaturan Akun</h1>
+                                    <p class="mb-0">Atur Profile Kamu</p>
+                                    <div class="profile-tabs mt-3">
+                                        <button class="btn active">Detail Profil</button>
+                                        <button class="btn">Edit Profil</button>
+                                        <button class="btn">Ubah Password</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="user-profile-header">
+                                    <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face" alt="Profile">
+                                    <span>Sevri Vendrian</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Profile Content -->
+                <div class="container-fluid">
+                    <div class="row">
+                        <!-- Profile Card -->
+                        <div class="col-md-4">
+                            <div class="profile-card text-center">
+                                <div class="user-avatar mb-3">
+                                    <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face" alt="Sevri Vendrian">
+                                </div>
+                                <div class="profile-info">
+                                    <h3>Sevri Vendrian</h3>
+                                    <p class="text-muted">User</p>
+                                    <button class="btn edit-photo-btn">
+                                        <i class="fas fa-camera me-2"></i>
+                                        Edit Foto
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Profile Details -->
+                        <div class="col-md-8">
+                            <div class="profile-card">
+                                <div class="profile-details">
+                                    <h4>My Profile</h4>
+                                    
+                                    <div class="detail-item">
+                                        <label>Nama Lengkap</label>
+                                        <div class="value">Amelia</div>
+                                    </div>
+                                    
+                                    <div class="detail-item">
+                                        <label>Username</label>
+                                        <div class="value">Kepeng Jordan</div>
+                                    </div>
+                                    
+                                    <div class="detail-item">
+                                        <label>Email</label>
+                                        <div class="value">Kepsu@gmail.com</div>
+                                    </div>
+                                    
+                                    <div class="detail-item">
+                                        <label>No. Telepon</label>
+                                        <div class="value">081703023782</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </section>
-    </main>
-  </div>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Tab switching functionality
+        document.querySelectorAll('.profile-tabs .btn').forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                document.querySelectorAll('.profile-tabs .btn').forEach(btn => btn.classList.remove('active'));
+                // Add active class to clicked button
+                this.classList.add('active');
+            });
+        });
+        
+        // Edit photo button functionality
+        document.querySelector('.edit-photo-btn').addEventListener('click', function() {
+            alert('Fitur edit foto akan segera tersedia!');
+        });
+        
+        // Sidebar navigation
+        document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                // Remove active class from all links
+                document.querySelectorAll('.sidebar .nav-link').forEach(l => l.classList.remove('active'));
+                // Add active class to clicked link
+                this.classList.add('active');
+            });
+        });
+    </script>
 </body>
 </html>

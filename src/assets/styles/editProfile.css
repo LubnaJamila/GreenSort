@@ -1,0 +1,59 @@
+@import 'content.css';
+.user-avatar {
+    position: relative;
+    display: inline-block;
+}
+
+.image-overlay {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+}
+
+.upload-btn {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.form-label {
+    margin-bottom: 0.5rem;
+}
+
+.invalid-feedback {
+    display: block;
+}
+
+.is-invalid {
+    border-color: #dc3545;
+}
+
+.classify-btn.active {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.classify-btn.active i {
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .d-flex.gap-2 {
+        flex-direction: column;
+    }
+    
+    .d-flex.gap-2 button {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}

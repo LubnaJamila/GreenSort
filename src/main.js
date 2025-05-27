@@ -31,14 +31,19 @@ import DitolakPresenter from "./pages/dashboard-user/ditolakPresenter.js";
 import PenawaranPresenter from "./pages/dashboard-admin/penawaranPresenter.js";
 import PenjemputanPresenter from "./pages/dashboard-user/penjemputanPresenter.js";
 import SelesaiUserPresenter from "./pages/dashboard-user/selesaiUserPresenter.js";
+import KlasifikasiSampahPresenter from "./pages/klasifikasi-sampah/klasifikasiSampahPresenter.js";
+import EditProfilePresenter from "./pages/pengaturan/editProfilePresenter.js";
+import UbahPasswordPresenter from "./pages/pengaturan/ubahPasswordPresenter.js";
 //models
 import { getCurrentUser } from "./models/authModel.js";
+import DetailProfilePresenter from "./pages/pengaturan/detailProfilePresenter.js";
 
 class App {
   constructor() {
     this.router = new Router();
     this.currentPresenter = null;
     this.sidebarPresenter = null;
+    this.currentPage = null;
 
     document.addEventListener("navigate", this.handleNavigateEvent.bind(this));
     this.setupRouteHandlers();
@@ -63,6 +68,7 @@ class App {
   }
 
   loadPage(page) {
+    this.currentPage = page;
     // Ambil halaman sebelumnya
     const previousPage = sessionStorage.getItem("previousPage");
 
@@ -124,6 +130,30 @@ class App {
           this.currentPresenter = new DashboardUserPresenter();
         }
         // Sidebar selalu dibuat jika ada user
+        if (user) {
+          this.sidebarPresenter = new SidebarPresenter(user.role);
+        }
+        break;
+      case "klasifikasiSampah": // TAMBAHKAN INI
+        this.currentPresenter = new KlasifikasiSampahPresenter();
+        if (user) {
+          this.sidebarPresenter = new SidebarPresenter(user.role);
+        }
+        break;
+      case "detailProfile": // TAMBAHKAN INI
+        this.currentPresenter = new DetailProfilePresenter();
+        if (user) {
+          this.sidebarPresenter = new SidebarPresenter(user.role);
+        }
+        break;
+      case "editProfile": // TAMBAHKAN INI
+        this.currentPresenter = new EditProfilePresenter();
+        if (user) {
+          this.sidebarPresenter = new SidebarPresenter(user.role);
+        }
+        break;
+      case "ubahPassword": // TAMBAHKAN INI
+        this.currentPresenter = new UbahPasswordPresenter();
         if (user) {
           this.sidebarPresenter = new SidebarPresenter(user.role);
         }
@@ -211,7 +241,21 @@ class App {
 
     if (this.sidebarPresenter) {
       this.sidebarPresenter.init();
+      // Update active state after initialization
+      setTimeout(() => {
+        this.sidebarPresenter.setActiveRoute(page);
+      }, 100);
     }
+
+    // Dispatch route change event for other components
+    document.dispatchEvent(new CustomEvent('route-changed', { 
+      detail: { route: page } 
+    }));
+  }
+
+  // Method to get current page
+  getCurrentPage() {
+    return this.currentPage;
   }
 }
 

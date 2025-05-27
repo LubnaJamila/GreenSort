@@ -7,6 +7,9 @@ export default class Router {
       login: "#/login",
       dashboard: "#/dashboard",
       dashboardUser: '#/dashboardUser',
+      detailProfile: "#/detail-profile",
+      editProfile: "#/edit-profile",
+      ubahPassword: "#/ubah-password",
       masterAlamat: "#/master-alamat",
       tambahAlamat: "#/master-alamat/tambah",
       pengajuan: "#/pengajuan",
@@ -17,6 +20,7 @@ export default class Router {
       ditolak: "#/ditolak",
       penjemputan: "#/penjemputan",
       selesaiUser: "#/selesaiUser",
+      klasifikasiSampah: "#/klasifikasi-sampah",
       dataRekening: "#/rekening",
       tambahRekening: "#/rekening/tambah"
     };

@@ -1,10 +1,10 @@
 //src/pages/klasifikasi-sampah/klasifikasiSampahPresenter.js
-import KlasifikasiSampahView from "./klasifikasiSampahView.js";
+import EditProfileView from "./editProfileView.js";
 import { getCurrentUser } from "../../models/authModel.js";
 
-export default class KlasifikasiSampahPresenter {
+export default class EditProfilePresenter {
     constructor() {
-        this.view = new KlasifikasiSampahView();
+        this.view = new EditProfileView();
     }
     
     init() {

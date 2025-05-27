@@ -4,6 +4,7 @@ export default class SidebarView {
     this.app = document.getElementById('sidebar');
     this.eventListeners = [];
     this.isMobile = window.matchMedia('(max-width: 768px)').matches;
+    this.currentRoute = 'dashboard'; // Default active route
   }
 
   render(role = 'pengguna') {
@@ -33,12 +34,14 @@ export default class SidebarView {
     `;
 
     this.setupEventListeners();
+    // Set active state after rendering
+    this.updateActiveState();
   }
 
   renderMainMenu() {
     return `
       <div class="nav-section">
-        <a href="#" class="nav-link active" data-route="dashboard">
+        <a href="#" class="nav-link" data-route="dashboard">
           <i class="bi bi-grid"></i>
           <span class="nav-text">Dashboard</span>
         </a>
@@ -61,16 +64,16 @@ export default class SidebarView {
       return `
         <div class="nav-section">
           <div class="nav-section-title">Menu Pengguna</div>
-          <a href="#" class="nav-link" data-route="profile">
-            <i class="bi bi-person"></i>
+          <a href="#/klasifikasi-sampah" class="nav-link" data-route="klasifikasiSampah">
+            <i class="bi bi-recycle"></i>
             <span class="nav-text">Klasifikasi Sampah</span>
           </a>
           <a href="#/rekening" class="nav-link" data-route="dataRekening">
-            <i class="bi bi-cart"></i>
+            <i class="bi bi-wallet2"></i>
             <span class="nav-text">Rekening</span>
           </a>
-          <a href="#" class="nav-link" data-route="pengaturan">
-            <i class="bi bi-cart"></i>
+          <a href="#/detail-profile" class="nav-link" data-route="detailProfile">
+            <i class="bi bi-person-gear"></i>
             <span class="nav-text">Pengaturan</span>
           </a>
         </div>
@@ -108,6 +111,11 @@ export default class SidebarView {
       link.addEventListener('click', handler);
       this.eventListeners.push({ element: link, type: 'click', handler });
     });
+
+    // Listen for route changes from other parts of the app
+    const routeChangeHandler = (e) => this.handleRouteChange(e);
+    document.addEventListener('route-changed', routeChangeHandler);
+    this.eventListeners.push({ element: document, type: 'route-changed', handler: routeChangeHandler });
   }
 
   toggleSidebar() {
@@ -132,24 +140,110 @@ export default class SidebarView {
   handleNavLinkClick(e, link) {
     e.preventDefault();
     
-    // Update active state
-    document.querySelectorAll('.nav-link').forEach(navLink => {
-      navLink.classList.remove('active');
-    });
-    link.classList.add('active');
-    
-    // Dispatch navigation event
     const route = link.dataset.route;
     if (route) {
-      document.dispatchEvent(new CustomEvent('navigate', { detail: { page : route } }));
+      console.log("Nav link clicked:", route);
+      
+      // Update current route immediately for immediate visual feedback
+      this.currentRoute = route;
+      this.updateActiveState();
+      
+      // Dispatch navigation event
+      document.dispatchEvent(new CustomEvent('navigate', { detail: { page: route } }));
     }
     
     // Close sidebar on mobile
     if (this.isMobile) {
-      document.querySelector('.sidebar').classList.remove('mobile-open');
-      document.querySelector('.sidebar-overlay').classList.remove('active');
+      const sidebar = document.querySelector('.sidebar');
+      const overlay = document.querySelector('.sidebar-overlay');
+      
+      if (sidebar) sidebar.classList.remove('mobile-open');
+      if (overlay) overlay.classList.remove('active');
       document.body.style.overflow = '';
     }
+  }
+
+  // Method to handle route changes from external sources
+  handleRouteChange(e) {
+    if (e.detail && e.detail.route) {
+      console.log("Route change received in sidebar view:", e.detail.route);
+      this.currentRoute = e.detail.route;
+      this.updateActiveState();
+    }
+  }
+
+  // Method to update active state based on current route
+  updateActiveState() {
+    console.log("Updating active state for route:", this.currentRoute);
+    
+    // Remove active class from all navigation links
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(navLink => {
+      navLink.classList.remove('active');
+    });
+    
+    // Add active class to current route
+    const activeLink = document.querySelector(`[data-route="${this.currentRoute}"]`);
+    if (activeLink) {
+      activeLink.classList.add('active');
+      console.log("Active state set for:", this.currentRoute);
+    } else {
+      console.log("No nav link found for route:", this.currentRoute);
+    }
+
+    // Handle special cases for dashboard routes
+    if (this.currentRoute === 'dashboardUser' || this.currentRoute === 'dashboard') {
+      const dashboardLink = document.querySelector('[data-route="dashboard"]');
+      if (dashboardLink) {
+        dashboardLink.classList.add('active');
+        console.log("Dashboard active state set");
+      }
+    }
+
+    // Handle special cases for rekening routes
+    if (this.currentRoute === 'tambahRekening') {
+      const rekeningLink = document.querySelector('[data-route="dataRekening"]');
+      if (rekeningLink) {
+        rekeningLink.classList.add('active');
+        console.log("Rekening active state set for tambahRekening");
+      }
+    }
+
+    // Handle special cases for profile routes
+    if (this.currentRoute === 'editProfile' || this.currentRoute === 'ubahPassword') {
+      const profileLink = document.querySelector('[data-route="detailProfile"]');
+      if (profileLink) {
+        profileLink.classList.add('active');
+        console.log("Profile active state set for sub-route");
+      }
+    }
+
+    // Handle special cases for alamat routes
+    if (this.currentRoute === 'tambahAlamat') {
+      const alamatLink = document.querySelector('[data-route="masterAlamat"]');
+      if (alamatLink) {
+        alamatLink.classList.add('active');
+        console.log("Master Alamat active state set for tambahAlamat");
+      }
+    }
+  }
+
+  // Method to set active route and update UI
+  setActiveRoute(route) {
+    console.log("Setting active route to:", route);
+    this.currentRoute = route;
+    this.updateActiveState();
+  }
+
+  // Method to initialize with specific route
+  initWithRoute(route) {
+    console.log("Initializing with route:", route);
+    this.currentRoute = route;
+  }
+
+  // Method to get current active route
+  getActiveRoute() {
+    return this.currentRoute;
   }
 
   removeEventListeners() {

@@ -1,0 +1,558 @@
+@import 'content.css';
+/* Upload Box Styles */
+
+/* Add these styles to your sampah.css file */
+
+.classification-results {
+    margin-bottom: 1.5rem;
+}
+
+.prediction-section, .alternative-section {
+    margin-bottom: 1.5rem;
+}
+
+.prediction-section h4, .alternative-section h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.75rem;
+}
+
+.top-prediction {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.prediction-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+}
+
+.alternative-item {
+    border-bottom: 1px solid #e9ecef;
+    padding: 0.75rem 0;
+}
+
+.alternative-item:last-child {
+    border-bottom: none;
+}
+
+.prediction-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+
+.color-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    display: inline-block;
+}
+
+.confidence-score {
+    font-size: 0.9rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.top-prediction .confidence-score {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.alternative-predictions {
+    background-color: #ffffff;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+}
+
+.sampah-section {
+  background: white;
+  border-radius: 15px;
+  padding: 20px 15px; /* Reduced padding for mobile */
+  margin-top: -550px; /* Changed from -520px to normal flow */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  min-height: auto; /* Changed from calc(100vh - 180px) */
+position: relative;
+  z-index: 10;
+}
+.upload-box {
+  border: 2px dashed #333333;
+  border-radius: 0.5rem;
+  padding: 3rem 0;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: #ffffff;
+}
+
+.upload-box:hover {
+  background-color: #f8f9fa;
+  border-color: var(--primary-color);
+}
+
+.upload-box.dragover {
+  background-color: #e8f5e8;
+  border-color: var(--primary-color);
+  transform: scale(1.02);
+}
+
+.upload-box i {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+  color: #6c757d;
+  transition: color 0.3s ease;
+}
+
+.upload-box:hover i {
+  color: var(--primary-color);
+}
+
+.upload-box p {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin: 0;
+  font-weight: 500;
+}
+
+.upload-box.has-image {
+  padding: 1rem;
+  border: 2px solid var(--primary-color);
+  background-color: #f8fff8;
+}
+
+.upload-box.has-image img {
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: 0.5rem;
+  object-fit: contain;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Classification Button */
+.btn-classify {
+  background: linear-gradient(135deg, #F1F864 0%, #BCEB3C 50%, #9BE64C 100%);
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(155, 230, 76, 0.3);
+  border: none;
+  color: #333333;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-classify::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.btn-classify:hover:not(:disabled) {
+  box-shadow: 0 6px 20px rgba(155, 230, 76, 0.4);
+  transform: translateY(-2px);
+}
+
+.btn-classify:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+.btn-classify:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(155, 230, 76, 0.3);
+}
+
+.btn-classify:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #e9ecef;
+  color: #6c757d;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Result Card */
+.result-card {
+  max-width: 64rem;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 1rem;
+  padding: 2rem 3rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  border: 1px solid #f0f0f0;
+  position: relative;
+  overflow: hidden;
+}
+
+.result-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #F1F864, #BCEB3C, #9BE64C);
+}
+
+.result-title {
+  font-weight: 600;
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  color: #333333;
+  text-align: center;
+  position: relative;
+  padding-bottom: 1rem;
+}
+
+.result-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background: linear-gradient(90deg, #F1F864, #9BE64C);
+  border-radius: 2px;
+}
+
+.result-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3rem;
+  align-items: flex-start;
+}
+
+.result-content img {
+  border-radius: 1rem;
+  width: 280px;
+  height: 280px;
+  object-fit: cover;
+  border: 3px solid #f0f0f0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.result-content img:hover {
+  transform: scale(1.05);
+}
+
+.result-text {
+  flex: 1;
+  min-width: 320px;
+}
+
+.result-text p {
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.result-text p span:first-child {
+  font-weight: 600;
+  color: #495057;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.result-text p span:last-child {
+  font-size: 1.1rem;
+  color: #212529;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-radius: 0.75rem;
+  border-left: 5px solid var(--primary-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  line-height: 1.6;
+  transition: transform 0.2s ease;
+}
+
+.result-text p span:last-child:hover {
+  transform: translateX(5px);
+}
+
+/* Result Buttons */
+.result-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.result-buttons .btn {
+  flex: 1;
+  min-width: 180px;
+  max-width: 250px;
+  background: linear-gradient(135deg, #F1F864 0%, #BCEB3C 50%, #9BE64C 100%);
+  color: #333333;
+  font-weight: 600;
+  padding: 1rem 1.5rem;
+  border-radius: 0.75rem;
+  border: none;
+  box-shadow: 0 4px 12px rgba(155, 230, 76, 0.3);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.85rem;
+}
+
+.result-buttons .btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.result-buttons .btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(155, 230, 76, 0.4);
+}
+
+.result-buttons .btn:hover::before {
+  left: 100%;
+}
+
+.result-buttons .btn:active {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(155, 230, 76, 0.3);
+}
+
+/* Loading Animation */
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Success Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.result-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Upload Section Container */
+.upload-section {
+  background: #ffffff;
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  padding: 2.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid #f0f0f0;
+}
+
+.upload-section-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.upload-section-header h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333333;
+  margin-bottom: 0.5rem;
+}
+
+.upload-section-header p {
+  color: #6c757d;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* File Input Hidden */
+input[type="file"] {
+  display: none;
+}
+
+/* Pulse Animation for Upload Box */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(155, 230, 76, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(155, 230, 76, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(155, 230, 76, 0);
+  }
+}
+
+.upload-box.has-image {
+  animation: pulse 2s infinite;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+  .upload-section {
+    padding: 1.5rem;
+    border-radius: 1rem;
+  }
+  
+  .upload-box {
+    padding: 2rem 1rem;
+  }
+  
+  .upload-box i {
+    font-size: 1.5rem;
+  }
+  
+  .upload-box p {
+    font-size: 0.8rem;
+  }
+  
+  .result-card {
+    padding: 1.5rem;
+    border-radius: 1rem;
+  }
+  
+  .result-content {
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: center;
+  }
+  
+  .result-content img {
+    width: 220px;
+    height: 220px;
+  }
+  
+  .result-text {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .result-text p span:last-child {
+    font-size: 1rem;
+    padding: 0.875rem 1rem;
+  }
+  
+  .result-buttons {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .result-buttons .btn {
+    width: 100%;
+    min-width: auto;
+    max-width: none;
+  }
+  
+  .btn-classify {
+    width: 100%;
+    padding: 1rem;
+    font-size: 0.85rem;
+  }
+  
+  .result-title {
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .upload-section {
+    padding: 1rem;
+    margin: 0 -15px 2rem -15px;
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
+    border-top: 1px solid #f0f0f0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .result-card {
+    margin: 0 -15px;
+    border-radius: 0;
+    padding: 1rem;
+    box-shadow: none;
+    border: none;
+    border-top: 1px solid #f0f0f0;
+  }
+  
+  .result-content img {
+    width: 180px;
+    height: 180px;
+  }
+  
+  .upload-box {
+    border-radius: 0.375rem;
+  }
+  
+  .upload-section-header h3 {
+    font-size: 1.25rem;
+  }
+}
+
+/* Dark mode support (optional) */
+@media (prefers-color-scheme: dark) {
+  .upload-section,
+  .result-card {
+    background: #1a1a1a;
+    border-color: #333;
+  }
+  
+  .upload-box {
+    border-color: #555;
+    background-color: #222;
+  }
+  
+  .upload-box p,
+  .upload-box i {
+    color: #ccc;
+  }
+  
+  .result-title,
+  .result-text p span:first-child,
+  .result-text p span:last-child {
+    color: #fff;
+  }
+  
+  .result-text p span:last-child {
+    background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+  }
+}

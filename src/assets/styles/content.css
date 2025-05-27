@@ -1,4 +1,4 @@
-/* src/assets/styles/components/main-content-simple.css */
+/* src/assets/styles/components/content.css */
 @import 'sidebar.css';
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
@@ -58,7 +58,7 @@ body {
 
 .dashboard-header {
   flex: 1;
-  min-width: 0; /* Changed from 300px to allow better shrinking */
+  min-width: 0;
 }
 
 .dashboard-header h2 {
