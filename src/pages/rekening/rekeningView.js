@@ -67,7 +67,7 @@ export default class DataRekeningView {
 
         this.initDataTable();
         this.setupEventListeners();
-        this.renderRekeningData();
+        // this.renderRekeningData();
     }
 
     setupEventListeners() {
@@ -100,11 +100,8 @@ export default class DataRekeningView {
     }
 
     bindAddRekening(handler) {
-        // 获取添加银行卡按钮
         const tambahBtn = document.querySelector('[data-route="tambahRekeningBtn"]');
-        // 如果按钮存在
         if (tambahBtn) {
-        // 定义点击事件处理函数
         const clickHandler = (e) => {
             e.preventDefault();
             handler();
@@ -170,41 +167,47 @@ export default class DataRekeningView {
         }
     }
 
-    renderRekeningData() {
-        const rekeningData = [
-        { id: 1, namaPemilik: "John Doe", noRekening: "1234567890", bank: "BCA" },
-        { id: 2, namaPemilik: "Jane Smith", noRekening: "0987654321", bank: "Mandiri" },
-        { id: 3, namaPemilik: "Robert Johnson", noRekening: "1122334455", bank: "BRI" },
-        { id: 4, namaPemilik: "Sarah Wilson", noRekening: "5566778899", bank: "BNI" }
-        ];
-        this.renderRekeningTable(rekeningData);
-    }
-
     renderRekeningTable(rekeningData) {
         const tableBody = document.getElementById("rekening-table-body");
         if (!tableBody) return;
         const tableHTML = rekeningData.map(rekening => this.renderRekeningRow(rekening)).join('');
         tableBody.innerHTML = tableHTML;
+        this.setupActionButtons();
     }
 
     renderRekeningRow(rekening) {
         return `
         <tr>
-            <td>${rekening.namaPemilik}</td>
-            <td>${rekening.noRekening}</td>
-            <td>${rekening.bank}</td>
+            <td>${rekening.nama_pemilik}</td>
+            <td>${rekening.no_rek}</td>
+            <td>${rekening.nama_bank}</td>
             <td>
             <div class="btn-group" role="group">
                 <button class="btn btn-sm btn-outline-primary edit-btn" data-id="${rekening.id}">
                 <i class="bi bi-pencil"></i> Edit
                 </button>
-                <button class="btn btn-sm btn-outline-danger delete-btn" data-id="${rekening.id}">
+                <button class="btn btn-sm btn-outline-danger delete-btn" data-id="${rekening.id_rekening}">
                 <i class="bi bi-trash"></i> Hapus
                 </button>
             </div>
             </td>
         </tr>
         `;
+    }
+    setupActionButtons() {
+    document.querySelectorAll(".delete-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+        const id = btn.dataset.id;
+
+        const konfirmasi = confirm("Yakin ingin menghapus rekening ini?");
+        if (!konfirmasi) return;
+
+        // Kirim event ke presenter
+        const event = new CustomEvent("delete-rekening", {
+        detail: { id_rekening: id, targetRow: btn.closest("tr") }});
+        document.dispatchEvent(event);
+        });
+    });
     }
 
     initDataTable() {

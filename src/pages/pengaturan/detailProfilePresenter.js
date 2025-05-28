@@ -1,16 +1,22 @@
 //src/pages/klasifikasi-sampah/klasifikasiSampahPresenter.js
 import DetailProfileView from "./detailProfileView.js";
-import { getCurrentUser } from "../../models/authModel.js";
+import { getCurrentUser,getUserDetailById } from "../../models/authModel.js";
 
 export default class DetailProfilePresenter {
     constructor() {
         this.view = new DetailProfileView();
     }
     
-    init() {
+    async init() {
         this.view.render();
-        const user = getCurrentUser();
-        this.view.displayUserInfo(user);
+
+        const currentUser = getCurrentUser();
+        if (currentUser && currentUser.id_user) {
+        const result = await getUserDetailById(currentUser.id_user);
+        if (result && result.success) {
+            this.view.updateProfileData(result.user);
+        }
+        }
     }
     
     destroy() {

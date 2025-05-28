@@ -1,6 +1,6 @@
 // src/presenters/tambahRekeningPresenter.js
 import TambahRekeningView from "../rekening/tambahRekeningView"; 
-import { getCurrentUser } from "../../models/authModel";
+import { getCurrentUser,createRekening } from "../../models/authModel";
 
 
 export default class TambahRekeningPresenter {
@@ -30,11 +30,31 @@ export default class TambahRekeningPresenter {
     }
 
 
-    handleFormSubmit(data) {
-        console.log("Data rekening disubmit:", data);
-        alert("Rekening berhasil ditambahkan!");
-        this.handleBack(); // Gunakan method yang sudah ada
+    async handleFormSubmit(data) {
+    console.log("Data rekening disubmit:", data);
+
+    if (!data.noRekening || !data.bank || !data.namaPemilik) {
+        alert("Semua field wajib diisi.");
+        return;
     }
+
+    const rekeningData = {
+        no_rek: data.noRekening,
+        nama_bank: data.bank,
+        nama_pemilik: data.namaPemilik,
+        id_user: this.currentUser.id_user,
+    };
+
+    const result = await createRekening(rekeningData);
+
+    if (result.success) {
+        alert("Rekening berhasil disimpan!");
+        this.handleBack();
+    } else {
+        alert("Gagal: " + result.message);
+    }
+    }
+
 
     handleBack() {
     const event = new CustomEvent("navigate", { 

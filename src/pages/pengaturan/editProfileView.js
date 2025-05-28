@@ -78,7 +78,7 @@ export default class EditProfileView {
                                         </div>
                                         <div class="profile-info">
                                             <h4 class="card-title" id="preview-name">Nazira Ayu</h4>
-                                            <p class="text-muted mb-3">User</p>
+                                            <p class="text-muted mb-3" id="preview-role">User</p>
                                             <input type="file" id="image-input" accept="image/*" style="display: none;">
                                             <small class="text-muted d-block">
                                                 Ukuran maksimal: 2MB<br>
@@ -351,53 +351,56 @@ export default class EditProfileView {
     }
 
     handleFormSubmit(event) {
-        event.preventDefault();
-        
-        const form = event.target;
-        const formData = new FormData(form);
-        const inputs = form.querySelectorAll('input[required]');
-        
-        let isFormValid = true;
-        inputs.forEach(input => {
-            if (!this.validateField(input)) {
-                isFormValid = false;
-            }
-        });
+    event.preventDefault();
 
-        if (!isFormValid) {
-            return;
+    const form = event.target;
+    const formData = new FormData(form);
+    const inputs = form.querySelectorAll('input[required]');
+
+    let isFormValid = true;
+    inputs.forEach(input => {
+        if (!this.validateField(input)) {
+            isFormValid = false;
         }
+    });
 
-        // Show loading modal
-        const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
-        loadingModal.show();
-
-        // Simulate API call
-        setTimeout(() => {
-            this.saveProfile(formData);
-            loadingModal.hide();
-            
-            // Show success modal
-            const successModal = new bootstrap.Modal(document.getElementById('successModal'));
-            successModal.show();
-        }, 2000);
+    if (!isFormValid) {
+        return;
     }
 
-    saveProfile(formData) {
-        // Update local profile data
-        this.profileData = {
-            namaLengkap: formData.get('namaLengkap'),
-            username: formData.get('username'),
-            email: formData.get('email'),
-            noTelepon: formData.get('noTelepon')
-        };
+    // Show loading modal
+    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+    loadingModal.show();
 
-        console.log('Profile saved:', this.profileData);
-        // Here you would typically send the data to your API
+    // Simulate API call
+    setTimeout(() => {
+        this.saveProfile(formData); // simpan ke this.profileData
+
+        if (this.saveProfileHandler) {
+            this.saveProfileHandler(this.profileData); // baru kirim setelah tersimpan
+        }
+
+        loadingModal.hide();
+
+        // Show success modal
+        const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+        successModal.show();
+    }, 2000);
+}
+
+
+    saveProfile(formData) {
+    this.profileData = {
+        namaLengkap: formData.get('namaLengkap'),
+        username: formData.get('username'),
+        email: formData.get('email'),
+        noTelepon: formData.get('noTelepon'),
+    };
     }
 
     handleCancel() {
         if (confirm('Apakah Anda yakin ingin membatalkan perubahan?')) {
+            window.location.hash = "#/detail-profile";
             // Reset form to original values
             document.getElementById('nama-lengkap').value = this.profileData.namaLengkap;
             document.getElementById('username').value = this.profileData.username;
@@ -462,15 +465,29 @@ export default class EditProfileView {
     }
 
     displayUserInfo(user = null) {
-        const userNameElement = document.getElementById("user-name");
-        if (userNameElement) {
-            if (user) {
-                userNameElement.textContent = user.name || user.username;
-            } else {
-                userNameElement.textContent = this.profileData.namaLengkap;
-            }
-        }
+    const userNameElement = document.getElementById("user-name");
+    const previewName = document.getElementById("preview-name");
+    const previewRole = document.getElementById("preview-role");
+
+    if (userNameElement && user) {
+        userNameElement.textContent = user.nama_lengkap;
     }
+
+    if (previewName && user) {
+        previewName.textContent = user.nama_lengkap;
+    }
+
+    if (previewRole && user) {
+        previewRole.textContent = user.role;
+    }
+
+    if (user) {
+        document.getElementById("nama-lengkap").value = user.nama_lengkap;
+        document.getElementById("username").value = user.username;
+        document.getElementById("email").value = user.email;
+        document.getElementById("no-telepon").value = user.no_hp;
+    }
+}
 
     // Method untuk bind dengan router
     bindSaveProfile(handler) {

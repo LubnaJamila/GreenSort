@@ -9,6 +9,8 @@ import "datatables.net-responsive-bs5";
 import "datatables.net-bs5/css/dataTables.bootstrap5.min.css";
 import "datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css";
 import "bootstrap/dist/css/bootstrap.min.css";
+import * as bootstrap from 'bootstrap';
+window.bootstrap = bootstrap;
 import "bootstrap-icons/font/bootstrap-icons.css";
 
 // Presenters

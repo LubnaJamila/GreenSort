@@ -62,15 +62,11 @@ export default class DetailProfileView {
                             <div class="card h-100">
                                 <div class="card-body text-center">
                                     <div class="user-avatar mb-3">
-                                        <img src="${userPlaceholder}" alt="Sevri Vendrian" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover;">
+                                        <img src="${userPlaceholder}" alt="foto profile" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover;">
                                     </div>
                                     <div class="profile-info">
-                                        <h4 class="card-title">Sevri Vendrian</h4>
-                                        <p class="text-muted mb-3">User</p>
-                                        <button class="btn btn-outline-primary edit-photo-btn" id="edit-photo-btn">
-                                            <i class="bi bi-camera me-2"></i>
-                                            Edit Foto
-                                        </button>
+                                        <h4 class="card-title"></h4>
+                                        <p class="text-muted mb-3"></p>
                                     </div>
                                 </div>
                             </div>
@@ -92,33 +88,23 @@ export default class DetailProfileView {
                                                 <tr>
                                                     <td class="fw-bold" style="width: 30%;">Nama Lengkap</td>
                                                     <td>:</td>
-                                                    <td>Nazira Ayu</td>
+                                                    <td id="detail-nama"></td>
                                                 </tr>
                                                 <tr>
                                                     <td class="fw-bold">Username</td>
                                                     <td>:</td>
-                                                    <td>Jeje</td>
+                                                    <td id="detail-username"></td>
                                                 </tr>
                                                 <tr>
                                                     <td class="fw-bold">Email</td>
                                                     <td>:</td>
-                                                    <td>Jeje@gmail.com</td>
+                                                    <td id="detail-email"></td>
                                                 </tr>
                                                 <tr>
                                                     <td class="fw-bold">No. Telepon</td>
                                                     <td>:</td>
-                                                    <td>081703023782</td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="fw-bold">Status</td>
-                                                    <td>:</td>
-                                                    <td><span class="badge bg-success">Active</span></td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="fw-bold">Bergabung Sejak</td>
-                                                    <td>:</td>
-                                                    <td>15 Januari 2024</td>
-                                                </tr>
+                                                    <td id="detail-phone"></td>
+                                                </tr> 
                                             </tbody>
                                         </table>
                                     </div>
@@ -263,18 +249,20 @@ export default class DetailProfileView {
             }
         }
     }
+        updateProfileData(profileData) {
+        this.displayUserInfo(profileData);
 
-    // Method untuk update profile data
-    updateProfileData(profileData) {
-        if (profileData) {
-            // Update nama di header
-            this.displayUserInfo(profileData);
-            
-            // Update data di tabel bisa dilakukan di sini
-            // Misalnya dengan mengupdate innerHTML dari sel-sel tertentu
-        }
+        const nameElement = document.querySelector(".profile-info .card-title");
+        const roleElement = document.querySelector(".profile-info .text-muted");
+
+        if (nameElement) nameElement.textContent = profileData.nama_lengkap;
+        if (roleElement) roleElement.textContent = profileData.role;
+
+        document.getElementById("detail-nama").textContent = profileData.nama_lengkap;
+        document.getElementById("detail-username").textContent = profileData.username;
+        document.getElementById("detail-email").textContent = profileData.email;
+        document.getElementById("detail-phone").textContent = profileData.no_hp;
     }
-
     removeEventListeners() {
         this.eventListeners.forEach(({ element, type, handler }) => {
             if (element) {

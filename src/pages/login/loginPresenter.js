@@ -69,6 +69,7 @@ export default class LoginPresenter {
 
       if (result.success) {
         const user = result.user;
+         localStorage.setItem("user", JSON.stringify(user));
         const targetPage =
           user.role === "admin" ? "dashboard" : "dashboardUser";
         const event = new CustomEvent("navigate", {

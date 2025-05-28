@@ -46,6 +46,9 @@
 .classify-btn.active i {
     color: white;
 }
+.invalid-feedback {
+  display: none !important;
+}
 
 @media (max-width: 768px) {
     .d-flex.gap-2 {

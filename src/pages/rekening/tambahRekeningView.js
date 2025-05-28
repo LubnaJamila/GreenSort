@@ -2,6 +2,7 @@
 import "../../assets/styles/rekening.css";
 import userPlaceholder from "../../assets/images/unsplash_HaNi1rsZ6Nc.png";
 import SidebarView from "../../views/sidebarView";
+import { getBankList } from "../../models/authModel";
 
 export default class TambahRekeningView {
     constructor() {
@@ -15,6 +16,7 @@ export default class TambahRekeningView {
     render() {
         this.sidebarView.render();
         this.renderMainContent();
+        this.populateBankDropdown();
         this.setupEventListeners();
         this.checkMobileView();
     }
@@ -54,7 +56,9 @@ export default class TambahRekeningView {
                         </div>
                         <div class="form-group">
                             <label for="bank">Bank</label>
-                            <input type="text" id="bank" class="form-control" required>
+                            <select id="bank" class="form-control" required>
+                                <option value="">Memuat daftar bank...</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary">Simpan</button>
@@ -65,6 +69,23 @@ export default class TambahRekeningView {
             </div>
         </div>
         `;
+    }
+
+    async populateBankDropdown() {
+    const select = document.getElementById("bank");
+    try {
+        const banks = await getBankList();
+
+        select.innerHTML = `<option value="">-- Pilih Bank --</option>`;
+        banks.forEach(bank => {
+        const option = document.createElement("option");
+        option.value = bank.nama;
+        option.textContent = `${bank.nama} (${bank.kode})`;
+        select.appendChild(option);
+        });
+    } catch (err) {
+        select.innerHTML = `<option value="">Gagal memuat bank</option>`;
+    }
     }
 
     setupEventListeners() {
@@ -151,21 +172,30 @@ export default class TambahRekeningView {
     }
 
     bindFormSubmit(handler) {
-        const form = document.getElementById("form-tambah-rekening");
-        if (form) {
-            const formHandler = (e) => {
-                e.preventDefault();
-                const data = {
-                    namaPemilik: document.getElementById("nama-pemilik").value,
-                    noRekening: document.getElementById("no-rekening").value,
-                    bank: document.getElementById("bank").value,
-                };
-                handler(data);
+    const form = document.getElementById("form-tambah-rekening");
+
+    if (form) {
+        const formHandler = (e) => {
+            e.preventDefault();
+
+            const namaPemilik = document.getElementById("nama-pemilik")?.value.trim();
+            const noRekening = document.getElementById("no-rekening")?.value.trim();
+            const bank = document.getElementById("bank")?.value;
+            const data = {
+                namaPemilik,
+                noRekening,
+                bank,
             };
-            form.addEventListener("submit", formHandler);
-            this.eventListeners.push({ element: form, type: 'submit', handler: formHandler });
-        }
+
+            handler(data);
+        };
+
+        form.addEventListener("submit", formHandler);
+        this.eventListeners.push({ element: form, type: 'submit', handler: formHandler });
+    } else {
+        console.error("❌ Form tidak ditemukan!");
     }
+}
 
     bindBackButton(handler) {
         const btn = document.getElementById("btn-kembali");

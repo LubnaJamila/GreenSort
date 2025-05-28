@@ -1,6 +1,6 @@
 // src/presenters/rekeningPresenter.js
 import DataRekeningView from "../rekening/rekeningView.js";
-import { getCurrentUser } from "../../models/authModel.js";
+import { getCurrentUser,getRekeningByUserId,deleteRekeningById } from "../../models/authModel.js";
 
 export default class DataRekeningPresenter {
   constructor() {
@@ -9,6 +9,8 @@ export default class DataRekeningPresenter {
     
     this.handleLogout = this.handleLogout.bind(this);
     this.handleAddRekening = this.handleAddRekening.bind(this);
+    this.handleDeleteRekening = this.handleDeleteRekening.bind(this);
+
   }
 
   init() {
@@ -25,6 +27,8 @@ export default class DataRekeningPresenter {
     this.view.render();
     
     this.view.displayUserInfo(this.currentUser);
+    this.fetchRekeningUser(this.currentUser.id_user);
+
     
     this.setupEventListeners();
     this.view.bindAddRekening(this.handleAddRekening);
@@ -32,6 +36,8 @@ export default class DataRekeningPresenter {
 
   setupEventListeners() {
     document.addEventListener("user-logout", this.handleLogout);
+    document.addEventListener("delete-rekening", this.handleDeleteRekening);
+
   }
 
   handleLogout() {
@@ -59,4 +65,25 @@ export default class DataRekeningPresenter {
     });
     document.dispatchEvent(event);
   }
+  async fetchRekeningUser(userId) {
+  const result = await getRekeningByUserId(userId);
+
+  if (result.success) {
+    this.view.renderRekeningTable(result.data);
+  } else {
+    console.error("Gagal mendapatkan data rekening:", result.message);
+  }
+}
+async handleDeleteRekening(event) {
+  const { id_rekening, targetRow } = event.detail;
+
+  const result = await deleteRekeningById(id_rekening);
+  alert(result.message);
+
+  if (result.success && targetRow) {
+    targetRow.remove(); // langsung hapus baris dari tabel
+  }
+}
+
+
 }

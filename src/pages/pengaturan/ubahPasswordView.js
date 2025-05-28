@@ -274,6 +274,21 @@ export default class UbahPasswordView {
                     </div>
                 </div>
             </div>
+            <!-- Error Modal -->
+            <div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-body text-center p-4">
+                            <div class="text-danger mb-3">
+                                <i class="bi bi-x-circle-fill" style="font-size: 3rem;"></i>
+                            </div>
+                            <h5 class="mb-2" id="errorModalTitle">Gagal Mengubah Password</h5>
+                            <p class="mb-3" id="errorModalMessage">Password lama salah.</p>
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Tutup</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         `;
 
         this.setupEventListeners();
@@ -283,7 +298,6 @@ export default class UbahPasswordView {
     setupEventListeners() {
         this.removeEventListeners();
 
-        // Mobile menu toggle
         const mobileMenuBtn = document.getElementById('mobile-menu-toggle');
         if (mobileMenuBtn) {
             const handler = () => this.toggleSidebar();
@@ -291,7 +305,6 @@ export default class UbahPasswordView {
             this.eventListeners.push({ element: mobileMenuBtn, type: 'click', handler });
         }
 
-        // Sidebar overlay
         const overlay = document.querySelector('.sidebar-overlay');
         if (overlay) {
             const handler = () => this.toggleSidebar(false);
@@ -299,15 +312,12 @@ export default class UbahPasswordView {
             this.eventListeners.push({ element: overlay, type: 'click', handler });
         }
 
-        // Resize handler
         const resizeHandler = () => this.handleResize();
         window.addEventListener('resize', resizeHandler);
         this.eventListeners.push({ element: window, type: 'resize', handler: resizeHandler });
 
-        // Password visibility toggles
         this.setupPasswordToggles();
 
-        // Form submission
         const form = document.getElementById('change-password-form');
         if (form) {
             const submitHandler = (e) => this.handleFormSubmit(e);
@@ -315,7 +325,6 @@ export default class UbahPasswordView {
             this.eventListeners.push({ element: form, type: 'submit', handler: submitHandler });
         }
 
-        // Cancel button
         const cancelBtn = document.getElementById('cancel-btn');
         if (cancelBtn) {
             const cancelHandler = () => this.handleCancel();
@@ -323,7 +332,6 @@ export default class UbahPasswordView {
             this.eventListeners.push({ element: cancelBtn, type: 'click', handler: cancelHandler });
         }
 
-        // Password strength checker
         const newPasswordInput = document.getElementById('new-password');
         if (newPasswordInput) {
             const strengthHandler = (e) => this.checkPasswordStrength(e.target.value);
@@ -331,7 +339,6 @@ export default class UbahPasswordView {
             this.eventListeners.push({ element: newPasswordInput, type: 'input', handler: strengthHandler });
         }
 
-        // Confirm password validation
         const confirmPasswordInput = document.getElementById('confirm-password');
         if (confirmPasswordInput) {
             const confirmHandler = () => this.validatePasswordMatch();
@@ -339,7 +346,6 @@ export default class UbahPasswordView {
             this.eventListeners.push({ element: confirmPasswordInput, type: 'input', handler: confirmHandler });
         }
 
-        // Form validation
         this.setupFormValidation();
     }
 
@@ -440,7 +446,6 @@ export default class UbahPasswordView {
             special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
         };
 
-        // Update requirement indicators
         Object.keys(requirements).forEach(req => {
             const element = document.getElementById(`req-${req}`);
             if (element) {
@@ -452,7 +457,6 @@ export default class UbahPasswordView {
             }
         });
 
-        // Calculate strength score
         const score = Object.values(requirements).filter(Boolean).length;
         this.updatePasswordStrengthIndicator(score, password.length);
     }
@@ -511,7 +515,6 @@ export default class UbahPasswordView {
             }
         });
 
-        // Additional validation for password strength
         const newPassword = formData.get('newPassword');
         if (newPassword.length < 8) {
             isFormValid = false;
@@ -522,58 +525,57 @@ export default class UbahPasswordView {
             return;
         }
 
-        // Show loading modal
         const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
         loadingModal.show();
 
-        // Simulate API call
         setTimeout(() => {
-            this.changePassword(formData);
+        const newPassword = formData.get("newPassword");
+        const confirmPassword = formData.get("confirmPassword");
+
+        if (newPassword !== confirmPassword) {
+            // Tambahkan class is-invalid dan tampilkan feedback
+            const confirmField = document.getElementById('confirm-password');
+            confirmField.classList.add('is-invalid');
+
+            const feedback = confirmField.nextElementSibling;
+            if (feedback && feedback.classList.contains('invalid-feedback')) {
+                feedback.textContent = "Konfirmasi password tidak cocok.";
+            }
+
             loadingModal.hide();
-            
-            // Show success modal
-            const successModal = new bootstrap.Modal(document.getElementById('successModal'));
-            successModal.show();
-        }, 2000);
+            return;
+        }
+
+        this.changePassword(formData);
+        loadingModal.hide();
+    }, 2000);
     }
 
     changePassword(formData) {
-        const passwordData = {
-            currentPassword: formData.get('currentPassword'),
-            newPassword: formData.get('newPassword'),
-            confirmPassword: formData.get('confirmPassword')
-        };
+    const passwordData = {
+        currentPassword: formData.get("currentPassword"),
+        newPassword: formData.get("newPassword")
+    };
 
-        console.log('Password change request:', {
-            ...passwordData,
-            currentPassword: '***',
-            newPassword: '***',
-            confirmPassword: '***'
-        });
-        
-        // Here you would typically send the data to your API
-        // After successful change, you might want to redirect to login
+    if (this.changePasswordHandler) {
+        this.changePasswordHandler(passwordData);
+    }
     }
 
     handleCancel() {
         if (confirm('Apakah Anda yakin ingin membatalkan perubahan password?')) {
-            // Reset form
             const form = document.getElementById('change-password-form');
             form.reset();
             
-            // Clear validation
             form.classList.remove('was-validated');
             form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
             
-            // Reset password strength indicator
             this.updatePasswordStrengthIndicator(0, 0);
             
-            // Reset requirement indicators
             document.querySelectorAll('.requirement').forEach(req => {
                 req.classList.remove('met');
             });
 
-            // Reset password visibility
             document.querySelectorAll('input[type="text"]').forEach(input => {
                 if (input.id.includes('password')) {
                     input.type = 'password';
@@ -639,7 +641,6 @@ export default class UbahPasswordView {
         }
     }
 
-    // Method untuk bind dengan router
     bindChangePassword(handler) {
         this.changePasswordHandler = handler;
     }
