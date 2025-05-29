@@ -75,6 +75,29 @@ app.delete('/api/rekening/:id', (req, res) => {
     res.json({ success: true, message: "Rekening dihapus" });
   });
 });
+app.put('/api/rekening/:id_rekening', (req, res) => {
+  const { id_rekening } = req.params;
+  const { no_rek, nama_bank, nama_pemilik } = req.body;
+
+  if (!no_rek || !nama_bank || !nama_pemilik) {
+    return res.status(400).json({ success: false, message: 'Data tidak lengkap' });
+  }
+
+  const sql = `
+    UPDATE rekening
+    SET no_rek = ?, nama_bank = ?, nama_pemilik = ?
+    WHERE id_rekening = ?
+  `;
+
+  db.query(sql, [no_rek, nama_bank, nama_pemilik, id_rekening], (err, result) => {
+    if (err) {
+      console.error("DB Error:", err);
+      return res.status(500).json({ success: false, message: "Gagal mengupdate rekening" });
+    }
+
+    res.json({ success: true, message: "Rekening berhasil diperbarui" });
+  });
+});
 app.post("/register", async (req, res) => {
   try {
     console.log("Request body:", req.body);

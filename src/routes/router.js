@@ -22,7 +22,9 @@ export default class Router {
       selesaiUser: "#/selesaiUser",
       klasifikasiSampah: "#/klasifikasi-sampah",
       dataRekening: "#/rekening",
-      tambahRekening: "#/rekening/tambah"
+      tambahRekening: "#/rekening/tambah",
+      ubahRekening: "#/rekening/edit", // tambahkan ini
+
     };
 
     // Inisialisasi

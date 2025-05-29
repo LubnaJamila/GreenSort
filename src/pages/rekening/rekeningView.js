@@ -183,7 +183,7 @@ export default class DataRekeningView {
             <td>${rekening.nama_bank}</td>
             <td>
             <div class="btn-group" role="group">
-                <button class="btn btn-sm btn-outline-primary edit-btn" data-id="${rekening.id}">
+                <button class="btn btn-sm btn-outline-primary edit-btn" data-id="${rekening.id_rekening}">
                 <i class="bi bi-pencil"></i> Edit
                 </button>
                 <button class="btn btn-sm btn-outline-danger delete-btn" data-id="${rekening.id_rekening}">
@@ -198,18 +198,28 @@ export default class DataRekeningView {
     document.querySelectorAll(".delete-btn").forEach(btn => {
         btn.addEventListener("click", () => {
         const id = btn.dataset.id;
+        if (confirm("Yakin ingin menghapus rekening ini?")) {
+            const event = new CustomEvent("delete-rekening", {
+            detail: { id_rekening: id, targetRow: btn.closest("tr") }
+            });
+            document.dispatchEvent(event);
+        }
+        });
+    });
 
-        const konfirmasi = confirm("Yakin ingin menghapus rekening ini?");
-        if (!konfirmasi) return;
-
-        // Kirim event ke presenter
-        const event = new CustomEvent("delete-rekening", {
-        detail: { id_rekening: id, targetRow: btn.closest("tr") }});
+    document.querySelectorAll(".edit-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+        const id = btn.dataset.id;
+        const event = new CustomEvent("navigate", {
+        detail: {
+            page: "ubahRekening",
+            id_rekening: id
+        }
+        });
         document.dispatchEvent(event);
         });
     });
     }
-
     initDataTable() {
         if ($.fn.DataTable.isDataTable('#rekening-datatable')) {
         $('#rekening-datatable').DataTable().destroy();

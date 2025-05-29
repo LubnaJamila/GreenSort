@@ -36,6 +36,7 @@ import SelesaiUserPresenter from "./pages/dashboard-user/selesaiUserPresenter.js
 import KlasifikasiSampahPresenter from "./pages/klasifikasi-sampah/klasifikasiSampahPresenter.js";
 import EditProfilePresenter from "./pages/pengaturan/editProfilePresenter.js";
 import UbahPasswordPresenter from "./pages/pengaturan/ubahPasswordPresenter.js";
+import EditRekeningPresenter from "./pages/rekening/editRekeningPresenter.js";
 //models
 import { getCurrentUser } from "./models/authModel.js";
 import DetailProfilePresenter from "./pages/pengaturan/detailProfilePresenter.js";
@@ -63,11 +64,16 @@ class App {
   }
 
   handleNavigateEvent(event) {
-    if (event.detail && event.detail.page) {
-      console.log("Navigation event received:", event.detail);
-      this.router.navigateTo(event.detail.page);
-    }
+  if (event.detail?.id_rekening) {
+    sessionStorage.setItem("id_rekening", event.detail.id_rekening);
   }
+
+  if (event.detail && event.detail.page) {
+    console.log("Navigation event received:", event.detail);
+    this.router.navigateTo(event.detail.page);
+  }
+}
+
 
   loadPage(page) {
     this.currentPage = page;
@@ -171,6 +177,11 @@ class App {
         if (user) {
           this.sidebarPresenter = new SidebarPresenter(user.role);
         }
+        break;
+        case "ubahRekening":
+        const id_rekening = history.state?.id_rekening || sessionStorage.getItem("id_rekening");
+        this.currentPresenter = new EditRekeningPresenter(id_rekening);
+        if (user) this.sidebarPresenter = new SidebarPresenter(user.role);
         break;
       case "diterima":
         this.currentPresenter = new DiterimaPresenter();
