@@ -16,8 +16,8 @@ export default class TambahAlamatPresenter {
         // Bind form submission
         this.view.bindFormSubmit((formData) => {
             console.log("Form data submitted:", formData);
-            // Di sini Anda bisa menambahkan logika untuk menyimpan data alamat
-            // Misalnya dengan memanggil API atau model yang sesuai
+            // Sekarang formData sudah termasuk latitude dan longitude
+            // Anda bisa menggunakan data ini untuk menyimpan alamat lengkap dengan koordinat
             
             // Setelah berhasil, kembali ke halaman master alamat
             document.dispatchEvent(new CustomEvent('navigate', {

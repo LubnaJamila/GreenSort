@@ -12,6 +12,9 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import * as bootstrap from 'bootstrap';
 window.bootstrap = bootstrap;
 import "bootstrap-icons/font/bootstrap-icons.css";
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 // Presenters
 import SidebarPresenter from "./presenters/sidebarPresenter.js";

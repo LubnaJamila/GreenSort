@@ -1,6 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   entry: path.resolve(__dirname, '../src/main.js'),
@@ -38,6 +39,14 @@ module.exports = {
       filename: 'dashboard.html',
       chunks: ['main']
     }),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: 'node_modules/leaflet/dist/images',
+          to: 'images'
+        }
+      ]
+    })
   ],
   module: {
     rules: [
@@ -58,6 +67,18 @@ module.exports = {
         generator: {
           filename: 'assets/fonts/[hash][ext][query]'
         }
+      },
+      {
+        test: /\.(png|jpg|gif|svg)$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[path][name].[ext]',
+              outputPath: 'images/'
+            }
+          }
+        ]
       }
     ],
   },
