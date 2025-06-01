@@ -56,7 +56,7 @@ export default class SidebarView {
           <div class="nav-section-title">Master</div>
           <a href="#/master-alamat" class="nav-link" data-route="masterAlamat">
             <i class="bi bi-database"></i>
-            <span class="nav-text">Data Master</span>
+            <span class="nav-text">Master Alamat</span>
           </a>
         </div>
       `;
@@ -67,6 +67,10 @@ export default class SidebarView {
           <a href="#/klasifikasi-sampah" class="nav-link" data-route="klasifikasiSampah">
             <i class="bi bi-recycle"></i>
             <span class="nav-text">Klasifikasi Sampah</span>
+          </a>
+          <a href="#/master-alamat" class="nav-link" data-route="masterAlamat">
+            <i class="bi bi-database"></i>
+            <span class="nav-text">Alamat</span>
           </a>
           <a href="#/rekening" class="nav-link" data-route="dataRekening">
             <i class="bi bi-wallet2"></i>

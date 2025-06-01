@@ -351,8 +351,32 @@ export default class KlasifikasiSampahView {
       }
     } else if (action === "sell") {
       if (confirm("Apakah Anda yakin ingin menjual sampah ini?")) {
-        alert(`Sampah akan dijual sebanyak ${quantity} kg.`);
+        // Save classification data to localStorage before navigating
+        this.saveClassificationDataForSell(quantity);
+        window.location.href = "#/penjualan-sampah";
       }
+    }
+  }
+
+  // NEW METHOD: Save classification data for sell action
+  saveClassificationDataForSell(quantity) {
+    const classificationData = {
+      image: this.uploadedImage,
+      category: this.classificationResult.topPrediction.type,
+      confidence: this.classificationResult.topPrediction.confidence,
+      quantity: parseFloat(quantity),
+      timestamp: new Date().toISOString(),
+    };
+
+    try {
+      localStorage.setItem(
+        "penjualanSampahData",
+        JSON.stringify(classificationData)
+      );
+      console.log("Data penjualan sampah disimpan:", classificationData);
+    } catch (error) {
+      console.error("Gagal menyimpan data penjualan:", error);
+      alert("Terjadi kesalahan saat menyimpan data untuk penjualan");
     }
   }
 

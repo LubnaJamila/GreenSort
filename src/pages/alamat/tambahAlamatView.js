@@ -2,57 +2,54 @@
 import "../../assets/styles/rekening.css";
 import userPlaceholder from "../../assets/images/unsplash_HaNi1rsZ6Nc.png";
 import SidebarView from "../../views/sidebarView";
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerIconShadow from 'leaflet/dist/images/marker-shadow.png';
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerIconShadow from "leaflet/dist/images/marker-shadow.png";
 
 export default class TambahAlamatView {
-    constructor() {
-        this.app = document.getElementById("content");
-        this.sidebarView = new SidebarView();
-        this.isMobile = window.matchMedia("(max-width: 768px)").matches;
-        this.sidebarCollapsed = false;
-        this.eventListeners = [];
+  constructor() {
+    this.app = document.getElementById("content");
+    this.sidebarView = new SidebarView();
+    this.isMobile = window.matchMedia("(max-width: 768px)").matches;
+    this.sidebarCollapsed = false;
+    this.eventListeners = [];
 
-        // API endpoints
-        this.apiBaseUrl = "https://www.emsifa.com/api-wilayah-indonesia/api";
+    // Map related properties
+    this.map = null;
+    this.marker = null;
+    this.currentLocation = null;
 
-        // Cache untuk menyimpan data yang sudah dimuat
-        this.cache = {
-        provinces: null,
-        regencies: {},
-        districts: {},
-        villages: {},
-        };
+    // Event handlers (will be set by presenter)
+    this.onProvinsiChangeHandler = null;
+    this.onKabupatenChangeHandler = null;
+    this.onKecamatanChangeHandler = null;
+    this.onFormSubmitHandler = null;
+    this.onCancelHandler = null;
+  }
 
-        this.map = null;
-        this.marker = null;
-        this.currentLocation = null;
-    }
+  render() {
+    this.sidebarView.render();
+    this.renderMainContent();
+    this.setupEventListeners();
+    this.checkMobileView();
 
-    render() {
-        this.sidebarView.render();
-        this.renderMainContent();
-        this.setupEventListeners();
-        this.checkMobileView();
-        this.loadProvinces(); // Load provinces saat render
-         // Inisialisasi peta setelah konten dirender
-        setTimeout(() => {
-            this.initMap();
-        }, 100);
-    }
+    // Initialize map after content is rendered
+    setTimeout(() => {
+      this.initMap();
+    }, 100);
+  }
 
-    renderMainContent() {
-        this.app.innerHTML = `
+  renderMainContent() {
+    this.app.innerHTML = `
             <button id="mobile-menu-toggle" class="mobile-menu-btn">
                 <i class="bi bi-list"></i>
             </button>
             <div class="sidebar-overlay"></div>
             
             <div class="main-content ${this.isMobile ? "full-width" : ""} ${
-        this.sidebarCollapsed ? "collapsed" : ""
-        }">
+      this.sidebarCollapsed ? "collapsed" : ""
+    }">
                 <header>
                     <div class="header-content">
                         <div class="dashboard-header">
@@ -69,18 +66,18 @@ export default class TambahAlamatView {
 
                 <div class="alamat-section">
                     <div class="form-section">
-                        <form id="alamatForm" class="form">
+                        <form id="form-alamat" class="form">
                             <!-- Row 1: Provinsi dan Kabupaten -->
                             <div class="form-row-group">
                                 <div class="form-group">
                                     <label for="provinsi" class="form-label">Pilih Provinsi</label>
-                                    <select class="form-control" id="provinsi" required>
+                                    <select class="form-control" id="provinsi" name="provinsi" required>
                                         <option value="">Loading provinsi...</option>
                                     </select>
                                 </div>
                                 <div class="form-group">
                                     <label for="kabupaten" class="form-label">Pilih Kabupaten/Kota</label>
-                                    <select class="form-control" id="kabupaten" required disabled>
+                                    <select class="form-control" id="kabupaten" name="kabupaten" required disabled>
                                         <option value="">Pilih provinsi terlebih dahulu</option>
                                     </select>
                                 </div>
@@ -90,13 +87,13 @@ export default class TambahAlamatView {
                             <div class="form-row-group">
                                 <div class="form-group">
                                     <label for="kecamatan" class="form-label">Pilih Kecamatan</label>
-                                    <select class="form-control" id="kecamatan" required disabled>
+                                    <select class="form-control" id="kecamatan" name="kecamatan" required disabled>
                                         <option value="">Pilih kabupaten terlebih dahulu</option>
                                     </select>
                                 </div>
                                 <div class="form-group">
                                     <label for="desa" class="form-label">Pilih Desa/Kelurahan</label>
-                                    <select class="form-control" id="desa" required disabled>
+                                    <select class="form-control" id="desa" name="desa" required disabled>
                                         <option value="">Pilih kecamatan terlebih dahulu</option>
                                     </select>
                                 </div>
@@ -105,7 +102,8 @@ export default class TambahAlamatView {
                             <!-- Alamat Lengkap -->
                             <div class="form-group">
                                 <label for="alamatLengkap" class="form-label">Alamat Lengkap</label>
-                                <textarea class="form-control" id="alamatLengkap" rows="4" placeholder="Masukkan alamat lengkap Anda..." required></textarea>
+                                <textarea class="form-control" id="alamatLengkap" name="alamatLengkap" rows="4" 
+                                         placeholder="Masukkan alamat lengkap Anda..." required></textarea>
                             </div>
                             
                             <!-- Map Section -->
@@ -140,7 +138,7 @@ export default class TambahAlamatView {
                             
                             <!-- Submit Button -->
                             <div class="form-group">
-                                <button type="submit" class="btn btn-primary">
+                                <button type="submit" class="btn btn-primary" id="btn-simpan">
                                     <i class="fas fa-save me-2"></i>Simpan
                                 </button>
                                 <button type="button" id="btn-kembali" class="btn btn-secondary">Kembali</button>
@@ -149,562 +147,576 @@ export default class TambahAlamatView {
                     </div>
                 </div>
             </div>
-            `;
+        `;
+  }
+
+  setupEventListeners() {
+    this.removeEventListeners();
+
+    // Mobile menu toggle
+    const mobileMenuBtn = document.getElementById("mobile-menu-toggle");
+    if (mobileMenuBtn) {
+      const handler = () => this.toggleSidebar();
+      mobileMenuBtn.addEventListener("click", handler);
+      this.eventListeners.push({
+        element: mobileMenuBtn,
+        type: "click",
+        handler,
+      });
     }
 
-    setupEventListeners() {
-        this.removeEventListeners();
-
-        // Mobile menu toggle
-        const mobileMenuBtn = document.getElementById("mobile-menu-toggle");
-        if (mobileMenuBtn) {
-        const handler = () => this.toggleSidebar();
-        mobileMenuBtn.addEventListener("click", handler);
-        this.eventListeners.push({
-            element: mobileMenuBtn,
-            type: "click",
-            handler,
-        });
-        }
-
-        // Sidebar overlay click
-        const overlay = document.querySelector(".sidebar-overlay");
-        if (overlay) {
-        const handler = () => this.toggleSidebar(false);
-        overlay.addEventListener("click", handler);
-        this.eventListeners.push({ element: overlay, type: "click", handler });
-        }
-
-        // Window resize
-        const resizeHandler = () => this.handleResize();
-        window.addEventListener("resize", resizeHandler);
-        this.eventListeners.push({
-        element: window,
-        type: "resize",
-        handler: resizeHandler,
-        });
-
-        // Form validation untuk dropdown dependencies
-        this.setupFormValidation();
+    // Sidebar overlay click
+    const overlay = document.querySelector(".sidebar-overlay");
+    if (overlay) {
+      const handler = () => this.toggleSidebar(false);
+      overlay.addEventListener("click", handler);
+      this.eventListeners.push({ element: overlay, type: "click", handler });
     }
 
-    toggleSidebar(show = null) {
-        const sidebar = document.querySelector(".sidebar");
-        const overlay = document.querySelector(".sidebar-overlay");
-        const mainContent = document.querySelector(".main-content");
+    // Window resize
+    const resizeHandler = () => this.handleResize();
+    window.addEventListener("resize", resizeHandler);
+    this.eventListeners.push({
+      element: window,
+      type: "resize",
+      handler: resizeHandler,
+    });
 
-        if (show === null) {
-        show = !sidebar.classList.contains("mobile-open");
-        }
+    // Form event listeners
+    this.setupFormEventListeners();
+  }
 
-        if (show) {
-        sidebar.classList.add("mobile-open");
-        overlay.classList.add("active");
-        document.body.style.overflow = "hidden";
-        } else {
-        sidebar.classList.remove("mobile-open");
-        overlay.classList.remove("active");
-        document.body.style.overflow = "";
-        }
+  setupFormEventListeners() {
+    // Provinsi change
+    const provinsi = document.getElementById("provinsi");
+    if (provinsi && this.onProvinsiChangeHandler) {
+      provinsi.addEventListener("change", this.onProvinsiChangeHandler);
+      this.eventListeners.push({
+        element: provinsi,
+        type: "change",
+        handler: this.onProvinsiChangeHandler,
+      });
     }
 
-    setupFormValidation() {
-        const provinsi = document.getElementById("provinsi");
-        const kabupaten = document.getElementById("kabupaten");
-        const kecamatan = document.getElementById("kecamatan");
-        const desa = document.getElementById("desa");
-
-        if (provinsi) {
-        const handler = () => this.onProvinsiChange();
-        provinsi.addEventListener("change", handler);
-        this.eventListeners.push({ element: provinsi, type: "change", handler });
-        }
-
-        if (kabupaten) {
-        const handler = () => this.onKabupatenChange();
-        kabupaten.addEventListener("change", handler);
-        this.eventListeners.push({ element: kabupaten, type: "change", handler });
-        }
-
-        if (kecamatan) {
-        const handler = () => this.onKecamatanChange();
-        kecamatan.addEventListener("change", handler);
-        this.eventListeners.push({ element: kecamatan, type: "change", handler });
-        }
+    // Kabupaten change
+    const kabupaten = document.getElementById("kabupaten");
+    if (kabupaten && this.onKabupatenChangeHandler) {
+      kabupaten.addEventListener("change", this.onKabupatenChangeHandler);
+      this.eventListeners.push({
+        element: kabupaten,
+        type: "change",
+        handler: this.onKabupatenChangeHandler,
+      });
     }
 
-    // API Methods
-    async fetchData(url) {
-        try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return await response.json();
-        } catch (error) {
-        console.error("Error fetching data:", error);
-        throw error;
-        }
+    // Kecamatan change
+    const kecamatan = document.getElementById("kecamatan");
+    if (kecamatan && this.onKecamatanChangeHandler) {
+      kecamatan.addEventListener("change", this.onKecamatanChangeHandler);
+      this.eventListeners.push({
+        element: kecamatan,
+        type: "change",
+        handler: this.onKecamatanChangeHandler,
+      });
     }
 
-    async loadProvinces() {
-        const provinsiSelect = document.getElementById("provinsi");
+    // Form submit - Updated to match presenter expectations
+    const form = document.getElementById("form-alamat");
+    if (form && this.onFormSubmitHandler) {
+      const formHandler = (e) => {
+        e.preventDefault();
 
-        try {
-        // Cek cache terlebih dahulu
-        if (this.cache.provinces) {
-            this.populateProvinces(this.cache.provinces);
-            return;
+        // Validate form before submitting
+        const validation = this.validateForm();
+        if (!validation.isValid) {
+          this.showValidationErrors(validation.errors);
+          return;
         }
 
-        provinsiSelect.innerHTML =
-            '<option value="">Loading provinsi...</option>';
-
-        const provinces = await this.fetchData(
-            `${this.apiBaseUrl}/provinces.json`
-        );
-        this.cache.provinces = provinces;
-        this.populateProvinces(provinces);
-        } catch (error) {
-        console.error("Error loading provinces:", error);
-        provinsiSelect.innerHTML =
-            '<option value="">Error loading provinsi</option>';
-        }
+        // Call the presenter's form submit handler
+        this.onFormSubmitHandler(e);
+      };
+      form.addEventListener("submit", formHandler);
+      this.eventListeners.push({
+        element: form,
+        type: "submit",
+        handler: formHandler,
+      });
     }
 
-    populateProvinces(provinces) {
-        const provinsiSelect = document.getElementById("provinsi");
-        provinsiSelect.innerHTML = '<option value="">Pilih Provinsi</option>';
-
-        provinces.forEach((province) => {
-        const option = document.createElement("option");
-        option.value = province.id;
-        option.textContent = province.name;
-        provinsiSelect.appendChild(option);
-        });
+    // Cancel button
+    const cancelBtn = document.getElementById("btn-kembali");
+    if (cancelBtn && this.onCancelHandler) {
+      const clickHandler = (e) => {
+        e.preventDefault();
+        this.onCancelHandler();
+      };
+      cancelBtn.addEventListener("click", clickHandler);
+      this.eventListeners.push({
+        element: cancelBtn,
+        type: "click",
+        handler: clickHandler,
+      });
     }
+  }
 
-    async onProvinsiChange() {
-        const provinsiSelect = document.getElementById("provinsi");
-        const kabupatenSelect = document.getElementById("kabupaten");
-        const kecamatanSelect = document.getElementById("kecamatan");
-        const desaSelect = document.getElementById("desa");
+  // Set event handlers (called by presenter)
+  setEventHandlers(handlers) {
+    this.onProvinsiChangeHandler = handlers.onProvinsiChange;
+    this.onKabupatenChangeHandler = handlers.onKabupatenChange;
+    this.onKecamatanChangeHandler = handlers.onKecamatanChange;
+    this.onFormSubmitHandler = handlers.onFormSubmit;
+    this.onCancelHandler = handlers.onCancel;
 
-        const provinsiId = provinsiSelect.value;
+    // Re-setup form event listeners with new handlers
+    this.setupFormEventListeners();
+  }
 
-        // Reset dependent dropdowns
-        kecamatanSelect.innerHTML =
+  // UI Update Methods
+  populateProvinces(provinces) {
+    const provinsiSelect = document.getElementById("provinsi");
+    if (!provinsiSelect) return;
+
+    provinsiSelect.innerHTML = '<option value="">Pilih Provinsi</option>';
+    provinces.forEach((province) => {
+      const option = document.createElement("option");
+      option.value = province.id;
+      option.textContent = province.name;
+      provinsiSelect.appendChild(option);
+    });
+  }
+
+  populateKabupaten(regencies) {
+    const kabupatenSelect = document.getElementById("kabupaten");
+    if (!kabupatenSelect) return;
+
+    kabupatenSelect.innerHTML =
+      '<option value="">Pilih Kabupaten/Kota</option>';
+    kabupatenSelect.disabled = false;
+
+    regencies.forEach((regency) => {
+      const option = document.createElement("option");
+      option.value = regency.id;
+      option.textContent = regency.name;
+      kabupatenSelect.appendChild(option);
+    });
+  }
+
+  populateKecamatan(districts) {
+    const kecamatanSelect = document.getElementById("kecamatan");
+    if (!kecamatanSelect) return;
+
+    kecamatanSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
+    kecamatanSelect.disabled = false;
+
+    districts.forEach((district) => {
+      const option = document.createElement("option");
+      option.value = district.id;
+      option.textContent = district.name;
+      kecamatanSelect.appendChild(option);
+    });
+  }
+
+  populateDesa(villages) {
+    const desaSelect = document.getElementById("desa");
+    if (!desaSelect) return;
+
+    desaSelect.innerHTML = '<option value="">Pilih Desa/Kelurahan</option>';
+    desaSelect.disabled = false;
+
+    villages.forEach((village) => {
+      const option = document.createElement("option");
+      option.value = village.id;
+      option.textContent = village.name;
+      desaSelect.appendChild(option);
+    });
+  }
+
+  // Reset dependent dropdowns
+  resetKabupatenOptions() {
+    const kabupatenSelect = document.getElementById("kabupaten");
+    const kecamatanSelect = document.getElementById("kecamatan");
+    const desaSelect = document.getElementById("desa");
+
+    if (kabupatenSelect) {
+      kabupatenSelect.innerHTML =
+        '<option value="">Pilih provinsi terlebih dahulu</option>';
+      kabupatenSelect.disabled = true;
+    }
+    if (kecamatanSelect) {
+      kecamatanSelect.innerHTML =
         '<option value="">Pilih kabupaten terlebih dahulu</option>';
-        kecamatanSelect.disabled = true;
-        desaSelect.innerHTML =
+      kecamatanSelect.disabled = true;
+    }
+    if (desaSelect) {
+      desaSelect.innerHTML =
         '<option value="">Pilih kecamatan terlebih dahulu</option>';
-        desaSelect.disabled = true;
-
-        if (!provinsiId) {
-        kabupatenSelect.innerHTML =
-            '<option value="">Pilih provinsi terlebih dahulu</option>';
-        kabupatenSelect.disabled = true;
-        return;
-        }
-
-        try {
-        // Cek cache
-        if (this.cache.regencies[provinsiId]) {
-            this.populateKabupaten(this.cache.regencies[provinsiId]);
-            return;
-        }
-
-        kabupatenSelect.innerHTML =
-            '<option value="">Loading kabupaten...</option>';
-        kabupatenSelect.disabled = false;
-
-        const regencies = await this.fetchData(
-            `${this.apiBaseUrl}/regencies/${provinsiId}.json`
-        );
-        this.cache.regencies[provinsiId] = regencies;
-        this.populateKabupaten(regencies);
-        } catch (error) {
-        console.error("Error loading regencies:", error);
-        kabupatenSelect.innerHTML =
-            '<option value="">Error loading kabupaten</option>';
-        }
+      desaSelect.disabled = true;
     }
+  }
 
-    populateKabupaten(regencies) {
-        const kabupatenSelect = document.getElementById("kabupaten");
-        kabupatenSelect.innerHTML =
-        '<option value="">Pilih Kabupaten/Kota</option>';
-        kabupatenSelect.disabled = false;
+  resetKecamatanOptions() {
+    const kecamatanSelect = document.getElementById("kecamatan");
+    const desaSelect = document.getElementById("desa");
 
-        regencies.forEach((regency) => {
-        const option = document.createElement("option");
-        option.value = regency.id;
-        option.textContent = regency.name;
-        kabupatenSelect.appendChild(option);
-        });
+    if (kecamatanSelect) {
+      kecamatanSelect.innerHTML =
+        '<option value="">Pilih kabupaten terlebih dahulu</option>';
+      kecamatanSelect.disabled = true;
     }
-
-    async onKabupatenChange() {
-        const kabupatenSelect = document.getElementById("kabupaten");
-        const kecamatanSelect = document.getElementById("kecamatan");
-        const desaSelect = document.getElementById("desa");
-
-        const kabupatenId = kabupatenSelect.value;
-
-        // Reset dependent dropdown
-        desaSelect.innerHTML =
+    if (desaSelect) {
+      desaSelect.innerHTML =
         '<option value="">Pilih kecamatan terlebih dahulu</option>';
-        desaSelect.disabled = true;
+      desaSelect.disabled = true;
+    }
+  }
 
-        if (!kabupatenId) {
-        kecamatanSelect.innerHTML =
-            '<option value="">Pilih kabupaten terlebih dahulu</option>';
-        kecamatanSelect.disabled = true;
-        return;
-        }
+  resetDesaOptions() {
+    const desaSelect = document.getElementById("desa");
+    if (desaSelect) {
+      desaSelect.innerHTML =
+        '<option value="">Pilih kecamatan terlebih dahulu</option>';
+      desaSelect.disabled = true;
+    }
+  }
 
-        try {
-        // Cek cache
-        if (this.cache.districts[kabupatenId]) {
-            this.populateKecamatan(this.cache.districts[kabupatenId]);
-            return;
-        }
+  // Loading states
+  showLoading(selectId, message) {
+    const select = document.getElementById(selectId);
+    if (select) {
+      select.innerHTML = `<option value="">${message}</option>`;
+      select.disabled = false;
+    }
+  }
 
-        kecamatanSelect.innerHTML =
-            '<option value="">Loading kecamatan...</option>';
-        kecamatanSelect.disabled = false;
+  showError(selectId, message) {
+    const select = document.getElementById(selectId);
+    if (select) {
+      select.innerHTML = `<option value="">${message}</option>`;
+    }
+  }
 
-        const districts = await this.fetchData(
-            `${this.apiBaseUrl}/districts/${kabupatenId}.json`
-        );
-        this.cache.districts[kabupatenId] = districts;
-        this.populateKecamatan(districts);
-        } catch (error) {
-        console.error("Error loading districts:", error);
-        kecamatanSelect.innerHTML =
-            '<option value="">Error loading kecamatan</option>';
-        }
+  // Form validation and data
+  getFormData() {
+    return {
+      provinsi: document.getElementById("provinsi")?.value || "",
+      kabupaten: document.getElementById("kabupaten")?.value || "",
+      kecamatan: document.getElementById("kecamatan")?.value || "",
+      desa: document.getElementById("desa")?.value || "",
+      alamatLengkap: document.getElementById("alamatLengkap")?.value || "",
+      latitude: document.getElementById("latitude")?.value || "",
+      longitude: document.getElementById("longitude")?.value || "",
+      // Get selected text for display purposes
+      provinsiText: this.getSelectedText("provinsi"),
+      kabupatenText: this.getSelectedText("kabupaten"),
+      kecamatanText: this.getSelectedText("kecamatan"),
+      desaText: this.getSelectedText("desa"),
+    };
+  }
+
+  getSelectedText(selectId) {
+    const select = document.getElementById(selectId);
+    return select?.selectedOptions[0]?.text || "";
+  }
+
+  validateForm() {
+    const requiredFields = [
+      { id: "provinsi", label: "Provinsi" },
+      { id: "kabupaten", label: "Kabupaten/Kota" },
+      { id: "kecamatan", label: "Kecamatan" },
+      { id: "desa", label: "Desa/Kelurahan" },
+      { id: "alamatLengkap", label: "Alamat Lengkap" },
+      { id: "latitude", label: "Koordinat (klik pada peta)" },
+      { id: "longitude", label: "Koordinat (klik pada peta)" },
+    ];
+    const errors = [];
+
+    requiredFields.forEach(({ id, label }) => {
+      const field = document.getElementById(id);
+      if (!field?.value?.trim()) {
+        errors.push(`${label} harus diisi`);
+        field?.classList.add("is-invalid");
+      } else {
+        field?.classList.remove("is-invalid");
+      }
+    });
+
+    // Validate coordinates if provided
+    const lat = document.getElementById("latitude")?.value;
+    const lng = document.getElementById("longitude")?.value;
+
+    if (lat && (isNaN(lat) || lat < -90 || lat > 90)) {
+      errors.push("Koordinat latitude tidak valid");
     }
 
-    populateKecamatan(districts) {
-        const kecamatanSelect = document.getElementById("kecamatan");
-        kecamatanSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
-        kecamatanSelect.disabled = false;
-
-        districts.forEach((district) => {
-        const option = document.createElement("option");
-        option.value = district.id;
-        option.textContent = district.name;
-        kecamatanSelect.appendChild(option);
-        });
+    if (lng && (isNaN(lng) || lng < -180 || lng > 180)) {
+      errors.push("Koordinat longitude tidak valid");
     }
 
-    async onKecamatanChange() {
-        const kecamatanSelect = document.getElementById("kecamatan");
-        const desaSelect = document.getElementById("desa");
+    return {
+      isValid: errors.length === 0,
+      errors: errors,
+    };
+  }
 
-        const kecamatanId = kecamatanSelect.value;
+  showValidationErrors(errors) {
+    alert("Mohon lengkapi semua field yang required:\n" + errors.join("\n"));
+  }
 
-        if (!kecamatanId) {
-        desaSelect.innerHTML =
-            '<option value="">Pilih kecamatan terlebih dahulu</option>';
-        desaSelect.disabled = true;
-        return;
-        }
+  // Success/Error messaging
+  showSuccess(message) {
+    alert(message);
+  }
 
-        try {
-        // Cek cache
-        if (this.cache.villages[kecamatanId]) {
-            this.populateDesa(this.cache.villages[kecamatanId]);
-            return;
-        }
+  showErrorMessage(message) {
+    alert(`Error: ${message}`);
+  }
 
-        desaSelect.innerHTML = '<option value="">Loading desa...</option>';
-        desaSelect.disabled = false;
+  // Form state management
+  setFormLoading(loading) {
+    const submitBtn = document.getElementById("btn-simpan");
+    const form = document.getElementById("form-alamat");
 
-        const villages = await this.fetchData(
-            `${this.apiBaseUrl}/villages/${kecamatanId}.json`
-        );
-        this.cache.villages[kecamatanId] = villages;
-        this.populateDesa(villages);
-        } catch (error) {
-        console.error("Error loading villages:", error);
-        desaSelect.innerHTML = '<option value="">Error loading desa</option>';
-        }
+    if (loading) {
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML =
+          '<i class="fas fa-spinner fa-spin me-2"></i>Menyimpan...';
+      }
+      if (form) {
+        form.style.opacity = "0.7";
+      }
+    } else {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-save me-2"></i>Simpan';
+      }
+      if (form) {
+        form.style.opacity = "1";
+      }
     }
+  }
+  showSuccessMessage(message) {
+    this.showSuccess(message);
+  }
 
-    populateDesa(villages) {
-        const desaSelect = document.getElementById("desa");
-        desaSelect.innerHTML = '<option value="">Pilih Desa/Kelurahan</option>';
-        desaSelect.disabled = false;
+  showSubmitLoading(loading) {
+    this.setFormLoading(loading);
+  }
 
-        villages.forEach((village) => {
-        const option = document.createElement("option");
-        option.value = village.id;
-        option.textContent = village.name;
-        desaSelect.appendChild(option);
-        });
-    }
+  clearForm() {
+    const form = document.getElementById("form-alamat");
+    if (form) {
+      form.reset();
 
-    handleResize() {
-        const wasMobile = this.isMobile;
-        this.isMobile = window.matchMedia("(max-width: 768px)").matches;
+      // Reset dropdowns to initial state
+      this.resetKabupatenOptions();
 
-        if (wasMobile !== this.isMobile) {
-        this.checkMobileView();
-        }
-    }
+      // Clear coordinates
+      document.getElementById("latitude").value = "";
+      document.getElementById("longitude").value = "";
 
-    checkMobileView() {
-        const mainContent = document.querySelector(".main-content");
-        if (!mainContent) return;
-
-        if (this.isMobile) {
-        mainContent.classList.add("full-width");
-        mainContent.classList.remove("collapsed");
-        } else {
-        mainContent.classList.remove("full-width");
-        if (this.sidebarCollapsed) {
-            mainContent.classList.add("collapsed");
-        }
-        }
-    }
-
-    displayUserInfo(user) {
-        const userNameElement = document.getElementById("user-name");
-        if (userNameElement && user) {
-        userNameElement.textContent = user.name || user.username;
-        }
-    }
-
-    removeEventListeners() {
-        this.eventListeners.forEach(({ element, type, handler }) => {
-        element.removeEventListener(type, handler);
-        });
-        this.eventListeners = [];
-    }
-
-    validateForm() {
-        const requiredFields = [
-        "provinsi",
-        "kabupaten",
-        "kecamatan",
-        "desa",
-        "alamatLengkap",
-        "latitude",
-        "longitude",
-        ];
-        const errors = [];
-
-        requiredFields.forEach((fieldId) => {
-        const field = document.getElementById(fieldId);
-        if (!field.value.trim()) {
-            errors.push(`${field.labels[0]?.textContent || fieldId} harus diisi`);
-            field.classList.add("is-invalid");
-        } else {
-            field.classList.remove("is-invalid");
-        }
-        });
-
-        return {
-        isValid: errors.length === 0,
-        errors: errors,
-        };
-    }
-
-    getSelectedText(selectId) {
-        const select = document.getElementById(selectId);
-        return select.selectedOptions[0]?.text || "";
-    }
-
-    bindFormSubmit(handler) {
-        const form = document.getElementById("alamatForm");
-        if (form) {
-            const formHandler = (e) => {
-                e.preventDefault();
-
-                const validation = this.validateForm();
-                if (!validation.isValid) {
-                alert(
-                    "Mohon lengkapi semua field yang required:\n" +
-                    validation.errors.join("\n")
-                );
-                return;
-                }
-
-                const data = {
-                provinsi: document.getElementById("provinsi").value,
-                kabupaten: document.getElementById("kabupaten").value,
-                kecamatan: document.getElementById("kecamatan").value,
-                desa: document.getElementById("desa").value,
-                alamatLengkap: document.getElementById("alamatLengkap").value,
-                latitude: document.getElementById("latitude").value,
-                longitude: document.getElementById("longitude").value,
-                // Get selected text for display purposes
-                provinsiText: this.getSelectedText("provinsi"),
-                kabupatenText: this.getSelectedText("kabupaten"),
-                kecamatanText: this.getSelectedText("kecamatan"),
-                desaText: this.getSelectedText("desa"),
-                };
-
-                handler(data);
-            };
-            form.addEventListener("submit", formHandler);
-            this.eventListeners.push({
-                element: form,
-                type: "submit",
-                handler: formHandler,
-            });
-        }
-    }
-
-    bindBackButton(handler) {
-        const backBtn = document.getElementById("btn-kembali");
-        if (backBtn) {
-        const clickHandler = (e) => {
-            e.preventDefault();
-            handler();
-        };
-        backBtn.addEventListener("click", clickHandler);
-        this.eventListeners.push({
-            element: backBtn,
-            type: "click",
-            handler: clickHandler,
-        });
-        }
-    }
-
-    bindCancel(handler) {
-        console.log("bindCancel called");
-        // Buat temporary cancel button
-        const cancelBtn = document.createElement("button");
-        cancelBtn.textContent = "Kembali";
-        cancelBtn.className = "btn btn-secondary";
-        cancelBtn.onclick = handler;
-    }
-
-    destroy() {
-        this.removeEventListeners();
-    }
-
-    //map section
-    initMap() {
-        // Fix Leaflet marker icons
-        delete L.Icon.Default.prototype._getIconUrl;
-        L.Icon.Default.mergeOptions({
-            iconRetinaUrl: markerIcon,
-            iconUrl: markerIcon,
-            shadowUrl: markerIconShadow
-        });
-
-        // Inisialisasi peta dengan view default ke Indonesia
-        this.map = L.map('map').setView([-2.5489, 118.0149], 5); // Koordinat tengah Indonesia, zoom level 5
-        
-        // Tambahkan tile layer OpenStreetMap
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(this.map);
-
-        // Sembunyikan placeholder
-        document.getElementById('mapPlaceholder').style.display = 'none';
-
-        // Tambahkan event click untuk menempatkan marker
-        this.map.on('click', (e) => {
-            console.log('Map clicked at coordinates:', e.latlng);
-            this.placeMarker(e.latlng);
-        });
-
-        // Inisialisasi marker (null sampai user klik)
+      // Remove marker from map
+      if (this.marker) {
+        this.map.removeLayer(this.marker);
         this.marker = null;
-        
-        // Setup control buttons
-        this.setupMapControls();
+      }
+
+      // Remove validation classes
+      form.querySelectorAll(".is-invalid").forEach((el) => {
+        el.classList.remove("is-invalid");
+      });
+    }
+  }
+
+  // Map functionality
+  initMap() {
+    // Fix Leaflet marker icons
+    delete L.Icon.Default.prototype._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: markerIcon,
+      iconUrl: markerIcon,
+      shadowUrl: markerIconShadow,
+    });
+
+    // Initialize map with default view to Indonesia
+    this.map = L.map("map").setView([-2.5489, 118.0149], 5);
+
+    // Add OpenStreetMap tile layer
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(this.map);
+
+    // Hide placeholder
+    const placeholder = document.getElementById("mapPlaceholder");
+    if (placeholder) {
+      placeholder.style.display = "none";
     }
 
-    setupMapControls() {
-        // Zoom In
-        document.getElementById('zoomIn').addEventListener('click', () => {
-            this.map.zoomIn();
-        });
+    // Add click event to place marker
+    this.map.on("click", (e) => {
+      this.placeMarker(e.latlng);
+    });
 
-        // Zoom Out
-        document.getElementById('zoomOut').addEventListener('click', () => {
-            this.map.zoomOut();
-        });
+    // Initialize marker as null
+    this.marker = null;
 
-        // Locate Me
-        document.getElementById('locateMe').addEventListener('click', () => {
-            this.locateUser();
-        });
+    // Setup control buttons
+    this.setupMapControls();
+  }
+
+  setupMapControls() {
+    const zoomInBtn = document.getElementById("zoomIn");
+    const zoomOutBtn = document.getElementById("zoomOut");
+    const locateMeBtn = document.getElementById("locateMe");
+
+    if (zoomInBtn) {
+      const handler = () => this.map.zoomIn();
+      zoomInBtn.addEventListener("click", handler);
+      this.eventListeners.push({ element: zoomInBtn, type: "click", handler });
     }
 
-    placeMarker(latlng) {
-        // Hapus marker sebelumnya jika ada
-        if (this.marker) {
-            this.map.removeLayer(this.marker);
+    if (zoomOutBtn) {
+      const handler = () => this.map.zoomOut();
+      zoomOutBtn.addEventListener("click", handler);
+      this.eventListeners.push({ element: zoomOutBtn, type: "click", handler });
+    }
+
+    if (locateMeBtn) {
+      const handler = () => this.locateUser();
+      locateMeBtn.addEventListener("click", handler);
+      this.eventListeners.push({
+        element: locateMeBtn,
+        type: "click",
+        handler,
+      });
+    }
+  }
+
+  placeMarker(latlng) {
+    // Remove previous marker if exists
+    if (this.marker) {
+      this.map.removeLayer(this.marker);
+    }
+
+    // Add new marker
+    this.marker = L.marker(latlng, {
+      draggable: true,
+      autoPan: true,
+    }).addTo(this.map);
+
+    // Save coordinates to form
+    const latField = document.getElementById("latitude");
+    const lngField = document.getElementById("longitude");
+
+    if (latField) latField.value = latlng.lat;
+    if (lngField) lngField.value = latlng.lng;
+
+    // Event for dragged marker
+    this.marker.on("dragend", (e) => {
+      const newLatLng = e.target.getLatLng();
+      if (latField) latField.value = newLatLng.lat;
+      if (lngField) lngField.value = newLatLng.lng;
+    });
+
+    // Center map to marker
+    this.map.setView(latlng, this.map.getZoom());
+  }
+
+  locateUser() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const latlng = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+
+          this.placeMarker(latlng);
+          this.map.setView(latlng, 15);
+          this.currentLocation = latlng;
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+          alert(
+            "Tidak dapat mendapatkan lokasi Anda. Pastikan izin lokasi telah diberikan."
+          );
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0,
         }
+      );
+    } else {
+      alert("Browser Anda tidak mendukung geolocation.");
+    }
+  }
 
-        // Tambahkan marker baru
-        this.marker = L.marker(latlng, {
-            draggable: true,
-            autoPan: true
-        }).addTo(this.map);
+  // UI Helper methods
+  toggleSidebar(show = null) {
+    const sidebar = document.querySelector(".sidebar");
+    const overlay = document.querySelector(".sidebar-overlay");
 
-        // Simpan koordinat ke form
-        document.getElementById('latitude').value = latlng.lat;
-        document.getElementById('longitude').value = latlng.lng;
-        
-        console.log('Marker placed at:');
-        console.log('Latitude:', latlng.lat);
-        console.log('Longitude:', latlng.lng);
-
-        // Event untuk marker yang di-drag
-        this.marker.on('dragend', (e) => {
-            const newLatLng = e.target.getLatLng();
-            document.getElementById('latitude').value = newLatLng.lat;
-            document.getElementById('longitude').value = newLatLng.lng;
-            
-            console.log('Marker dragged to new position:');
-            console.log('New Latitude:', newLatLng.lat);
-            console.log('New Longitude:', newLatLng.lng);
-        });
-
-        // Centered map ke marker
-        this.map.setView(latlng, this.map.getZoom());
+    if (show === null) {
+      show = !sidebar?.classList.contains("mobile-open");
     }
 
-    async locateUser() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const latlng = {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude
-                    };
-                    
-                    console.log('User location found:');
-                    console.log('Latitude:', latlng.lat);
-                    console.log('Longitude:', latlng.lng);
-                    
-                    this.placeMarker(latlng);
-                    this.map.setView(latlng, 15); // Zoom lebih dekat saat lokasi ditemukan
-                    
-                    // Simpan lokasi saat ini
-                    this.currentLocation = latlng;
-                },
-                (error) => {
-                    console.error("Error getting location:", error);
-                    alert("Tidak dapat mendapatkan lokasi Anda. Pastikan izin lokasi telah diberikan.");
-                },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 5000,
-                    maximumAge: 0
-                }
-            );
-        } else {
-            console.log('Geolocation not supported by browser');
-            alert("Browser Anda tidak mendukung geolocation.");
-        }
+    if (show) {
+      sidebar?.classList.add("mobile-open");
+      overlay?.classList.add("active");
+      document.body.style.overflow = "hidden";
+    } else {
+      sidebar?.classList.remove("mobile-open");
+      overlay?.classList.remove("active");
+      document.body.style.overflow = "";
     }
+  }
+
+  handleResize() {
+    const wasMobile = this.isMobile;
+    this.isMobile = window.matchMedia("(max-width: 768px)").matches;
+
+    if (wasMobile !== this.isMobile) {
+      this.checkMobileView();
+    }
+  }
+
+  checkMobileView() {
+    const mainContent = document.querySelector(".main-content");
+    if (!mainContent) return;
+
+    if (this.isMobile) {
+      mainContent.classList.add("full-width");
+      mainContent.classList.remove("collapsed");
+    } else {
+      mainContent.classList.remove("full-width");
+      if (this.sidebarCollapsed) {
+        mainContent.classList.add("collapsed");
+      }
+    }
+  }
+
+  displayUserInfo(user) {
+    const userNameElement = document.getElementById("user-name");
+    if (userNameElement && user) {
+      userNameElement.textContent = user.name || user.username;
+    }
+  }
+
+  removeEventListeners() {
+    this.eventListeners.forEach(({ element, type, handler }) => {
+      element?.removeEventListener(type, handler);
+    });
+    this.eventListeners = [];
+  }
+
+  destroy() {
+    this.removeEventListeners();
+    if (this.map) {
+      this.map.remove();
+      this.map = null;
+    }
+  }
 }

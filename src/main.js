@@ -43,6 +43,7 @@ import EditRekeningPresenter from "./pages/rekening/editRekeningPresenter.js";
 //models
 import { getCurrentUser } from "./models/authModel.js";
 import DetailProfilePresenter from "./pages/pengaturan/detailProfilePresenter.js";
+import PenjualanSampahPresenter from "./pages/klasifikasi-sampah/penjualanSampahPresenter.js";
 
 class App {
   constructor() {
@@ -151,6 +152,12 @@ class App {
           this.sidebarPresenter = new SidebarPresenter(user.role);
         }
         break;
+      case "penjualanSampah": // TAMBAHKAN INI
+        this.currentPresenter = new PenjualanSampahPresenter();
+        if (user) {
+          this.sidebarPresenter = new SidebarPresenter(user.role);
+        }
+        break;
       case "detailProfile": // TAMBAHKAN INI
         this.currentPresenter = new DetailProfilePresenter();
         if (user) {
@@ -181,8 +188,9 @@ class App {
           this.sidebarPresenter = new SidebarPresenter(user.role);
         }
         break;
-        case "ubahRekening":
-        const id_rekening = history.state?.id_rekening || sessionStorage.getItem("id_rekening");
+      case "ubahRekening":
+        const id_rekening =
+          history.state?.id_rekening || sessionStorage.getItem("id_rekening");
         this.currentPresenter = new EditRekeningPresenter(id_rekening);
         if (user) this.sidebarPresenter = new SidebarPresenter(user.role);
         break;

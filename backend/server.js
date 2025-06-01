@@ -246,6 +246,213 @@ app.put("/api/user/password/:id_user", async (req, res) => {
   });
 });
 
+// Tambahkan endpoints ini ke server.js Anda
+
+// POST - Insert alamat baru
+app.post('/api/alamat', (req, res) => {
+  const { 
+    provinsi, 
+    kabupaten, 
+    kecamatan, 
+    desa, 
+    alamat_lengkap, 
+    latitude, 
+    longitude, 
+    id_user,
+  } = req.body;
+
+  // Validasi data wajib
+  if (!provinsi || !kabupaten || !kecamatan || !desa || !alamat_lengkap || !latitude || !longitude || !id_user) {
+    return res.status(400).json({ 
+      success: false, 
+      message: 'Semua field alamat wajib diisi' 
+    });
+  }
+
+  // Validasi koordinat
+  if (isNaN(latitude) || latitude < -90 || latitude > 90) {
+    return res.status(400).json({ 
+      success: false, 
+      message: 'Latitude tidak valid' 
+    });
+  }
+
+  if (isNaN(longitude) || longitude < -180 || longitude > 180) {
+    return res.status(400).json({ 
+      success: false, 
+      message: 'Longitude tidak valid' 
+    });
+  }
+
+  // Cek apakah user ada
+  const checkUserSql = "SELECT id_user FROM users WHERE id_user = ?";
+  db.query(checkUserSql, [id_user], (err, userResults) => {
+    if (err) {
+      console.error('Error checking user:', err);
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Gagal memverifikasi user' 
+      });
+    }
+
+    if (userResults.length === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'User tidak ditemukan' 
+      });
+    }
+
+    // Insert alamat
+    const insertSql = `
+      INSERT INTO alamat (
+        provinsi, kabupaten, kecamatan, desa, alamat_lengkap, 
+        latitude, longitude, id_user, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+    `;
+
+    const values = [
+      provinsi, 
+      kabupaten, 
+      kecamatan, 
+      desa, 
+      alamat_lengkap,
+      parseFloat(latitude), 
+      parseFloat(longitude), 
+      id_user
+    ];
+
+    db.query(insertSql, values, (err, result) => {
+      if (err) {
+        console.error('Error inserting alamat:', err);
+        return res.status(500).json({ 
+          success: false, 
+          message: 'Gagal menyimpan alamat' 
+        });
+      }
+
+      res.json({ 
+        success: true, 
+        message: 'Alamat berhasil disimpan',
+        id_alamat: result.insertId
+      });
+    });
+  });
+});
+
+// GET - Ambil semua alamat user
+app.get('/api/alamat/:id_user', (req, res) => {
+  const { id_user } = req.params;
+
+  const sql = `
+    SELECT 
+      id_alamat, 
+      provinsi, 
+      kabupaten, 
+      kecamatan, 
+      desa, 
+      alamat_lengkap, 
+      latitude, 
+      longitude,
+      created_at
+    FROM alamat 
+    WHERE id_user = ? 
+    ORDER BY created_at DESC
+  `;
+
+  db.query(sql, [id_user], (err, results) => {
+    if (err) {
+      console.error("Error fetching alamat:", err);
+      return res.status(500).json({ 
+        success: false, 
+        message: "Gagal mengambil data alamat" 
+      });
+    }
+
+    res.json({ 
+      success: true, 
+      data: results 
+    });
+  });
+});
+
+// DELETE - Hapus alamat berdasarkan id
+app.delete('/api/alamat/:id_alamat', (req, res) => {
+  const { id_alamat } = req.params;
+
+  // Validasi ID alamat
+  if (!id_alamat || isNaN(id_alamat)) {
+    return res.status(400).json({ 
+      success: false, 
+      message: 'ID alamat tidak valid' 
+    });
+  }
+
+  // Cek apakah alamat ada
+  const checkSql = "SELECT id_alamat, id_user FROM alamat WHERE id_alamat = ?";
+  db.query(checkSql, [id_alamat], (err, results) => {
+    if (err) {
+      console.error("Error checking alamat:", err);
+      return res.status(500).json({ 
+        success: false, 
+        message: "Gagal memverifikasi alamat" 
+      });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Alamat tidak ditemukan" 
+      });
+    }
+
+    // Hapus alamat
+    const deleteSql = "DELETE FROM alamat WHERE id_alamat = ?";
+    db.query(deleteSql, [id_alamat], (err, result) => {
+      if (err) {
+        console.error("Error deleting alamat:", err);
+        return res.status(500).json({ 
+          success: false, 
+          message: "Gagal menghapus alamat" 
+        });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "Alamat tidak ditemukan atau sudah dihapus" 
+        });
+      }
+
+      res.json({ 
+        success: true, 
+        message: "Alamat berhasil dihapus" 
+      });
+    });
+  });
+});
+
+// DELETE - Hapus alamat berdasarkan user (opsional - untuk menghapus semua alamat user)
+app.delete('/api/alamat/user/:id_user', (req, res) => {
+  const { id_user } = req.params;
+
+  const sql = "DELETE FROM alamat WHERE id_user = ?";
+  db.query(sql, [id_user], (err, result) => {
+    if (err) {
+      console.error("Error deleting user alamat:", err);
+      return res.status(500).json({ 
+        success: false, 
+        message: "Gagal menghapus alamat user" 
+      });
+    }
+
+    res.json({ 
+      success: true, 
+      message: `${result.affectedRows} alamat berhasil dihapus`,
+      deleted_count: result.affectedRows
+    });
+  });
+});
+
 app.listen(port, () => {
   console.log(`Server backend berjalan di http://localhost:${port}`);
 });

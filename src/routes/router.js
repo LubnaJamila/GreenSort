@@ -21,6 +21,7 @@ export default class Router {
       penjemputan: "#/penjemputan",
       selesaiUser: "#/selesaiUser",
       klasifikasiSampah: "#/klasifikasi-sampah",
+      penjualanSampah: "#/penjualan-sampah",
       dataRekening: "#/rekening",
       tambahRekening: "#/rekening/tambah",
       ubahRekening: "#/rekening/edit", // tambahkan ini
