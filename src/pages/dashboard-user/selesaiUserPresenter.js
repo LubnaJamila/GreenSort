@@ -1,4 +1,4 @@
-// src/pages/dashboard-admin/selesaiPresenter.js
+// src/pages/dashboard-admin/selesaiUserPresenter.js
 import SelesaiUserView from "../dashboard-user/selesaiUserView.js";
 import SidebarView from "../../views/sidebarView.js";
 // import DashboardModel from "../../models/dashboard-model.js"; // Uncomment ketika model sudah ada
@@ -6,12 +6,12 @@ import { getCurrentUser, logoutUser } from "../../models/authModel.js";
 
 export default class SelesaiUserPresenter {
   constructor() {
-    this.view = new SelesaiUserView(); // ✅ Perbaikan: gunakan 'view' bukan 'selesaiView'
+    this.view = new SelesaiUserView();
     this.sidebarView = new SidebarView();
-    // this.dashboardModel = new DashboardModel(); // ✅ Comment dulu sampai model ada
+    // this.dashboardModel = new DashboardModel(); // Comment dulu sampai model ada
     this.currentUser = null;
     this.handleLogout = this.handleLogout.bind(this);
-    this.handleRefresh = this.handleRefresh.bind(this); // ✅ Tambahkan binding untuk refresh
+    this.handleRefresh = this.handleRefresh.bind(this);
   }
 
   init() {
@@ -25,13 +25,13 @@ export default class SelesaiUserPresenter {
       return;
     }
 
-    // ✅ Perbaikan: Render view yang benar
+    // Render view yang benar
     this.view.render(); // Ini akan render sidebar dan main content sekaligus
     
     // Tampilkan info user di dashboard
     this.view.displayUserInfo(this.currentUser);
     
-    // ✅ Perbaikan: Gunakan data dummy sementara sampai model ready
+    // ✅ PERBAIKAN: Gunakan data dummy dengan struktur yang sesuai
     const applications = this.getDummySelesaiData();
     
     // Render data ke tabel
@@ -40,48 +40,66 @@ export default class SelesaiUserPresenter {
     this.setupEventListeners();
   }
 
-  // ✅ Tambahkan method untuk data dummy sementara
+  // ✅ PERBAIKAN: Update struktur data sesuai dengan kolom tabel
   getDummySelesaiData() {
     return [
       {
         id: 1,
         jenisSampah: "Plastik Botol",
         tanggalPembelian: "2024-01-15",
-        kuantitas: "5 kg",
-        harga: "Rp 2.000",
-        total: "Rp 10.000",
+        berat: "5 kg",
+        harga: "Rp 2.000/kg",
+        totalHarga: "Rp 10.000",
         status: "Selesai"
       },
       {
         id: 2,
         jenisSampah: "Kertas Bekas",
         tanggalPembelian: "2024-01-14",
-        kuantitas: "3 kg",
-        harga: "Rp 1.500",
-        total: "Rp 4.500",
+        berat: "3 kg",
+        harga: "Rp 1.500/kg",
+        totalHarga: "Rp 4.500",
         status: "Selesai"
       },
       {
         id: 3,
         jenisSampah: "Kaleng Aluminium",
         tanggalPembelian: "2024-01-13",
-        kuantitas: "2 kg",
-        harga: "Rp 5.000",
-        total: "Rp 10.000",
+        berat: "2 kg",
+        harga: "Rp 5.000/kg",
+        totalHarga: "Rp 10.000",
+        status: "Selesai"
+      },
+      {
+        id: 4,
+        jenisSampah: "Kardus Bekas",
+        tanggalPembelian: "2024-01-12",
+        berat: "8 kg",
+        harga: "Rp 800/kg",
+        totalHarga: "Rp 6.400",
+        status: "Selesai"
+      },
+      {
+        id: 5,
+        jenisSampah: "Botol Kaca",
+        tanggalPembelian: "2024-01-11",
+        berat: "4 kg",
+        harga: "Rp 1.200/kg",
+        totalHarga: "Rp 4.800",
         status: "Selesai"
       }
     ];
   }
 
   setupEventListeners() {
-    // ✅ Event listener untuk logout
+    // Event listener untuk logout
     document.addEventListener("user-logout", this.handleLogout);
     
-    // ✅ Event listener untuk refresh yang dipicu dari view
-    document.addEventListener("selesai-refresh", this.handleRefresh);
+    // ✅ PERBAIKAN: Event listener sesuai dengan yang ada di view
+    document.addEventListener("selesaiUser-refresh", this.handleRefresh);
   }
 
-  // ✅ Tambahkan method untuk handle refresh
+  // Method untuk handle refresh
   handleRefresh() {
     console.log("Refreshing selesai data");
     const applications = this.getDummySelesaiData();
@@ -101,9 +119,9 @@ export default class SelesaiUserPresenter {
   }
 
   destroy() {
-    console.log("Destroying SelesaiPresenter");
+    console.log("Destroying SelesaiUserPresenter");
     document.removeEventListener("user-logout", this.handleLogout);
-    document.removeEventListener("selesai-refresh", this.handleRefresh); // ✅ Remove refresh listener
+    document.removeEventListener("selesaiUser-refresh", this.handleRefresh);
     this.view.destroy();
   }
 }

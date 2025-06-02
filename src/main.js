@@ -40,10 +40,15 @@ import KlasifikasiSampahPresenter from "./pages/klasifikasi-sampah/klasifikasiSa
 import EditProfilePresenter from "./pages/pengaturan/editProfilePresenter.js";
 import UbahPasswordPresenter from "./pages/pengaturan/ubahPasswordPresenter.js";
 import EditRekeningPresenter from "./pages/rekening/editRekeningPresenter.js";
-//models
-import { getCurrentUser } from "./models/authModel.js";
 import DetailProfilePresenter from "./pages/pengaturan/detailProfilePresenter.js";
 import PenjualanSampahPresenter from "./pages/klasifikasi-sampah/penjualanSampahPresenter.js";
+import FormPenolakanPresenter from "./pages/dashboard-admin/formPenolakanPresenter.js";
+import FormPenawaranPresenter from "./pages/dashboard-admin/formPenawaranPresenter.js";
+import FormOngkirPresenter from "./pages/dashboard-user/formOngkirPresenter.js";
+import FormSelesaiPresenter from "./pages/dashboard-admin/formSelesaiPresenter.js";
+
+//models
+import { getCurrentUser } from "./models/authModel.js";
 
 class App {
   constructor() {
@@ -250,6 +255,30 @@ class App {
         break;
       case "selesai":
         this.currentPresenter = new SelesaiPresenter();
+        if (user) {
+          this.sidebarPresenter = new SidebarPresenter(user.role);
+        }
+        break;
+      case "formPenolakan":
+        this.currentPresenter = new FormPenolakanPresenter();
+        if (user) {
+          this.sidebarPresenter = new SidebarPresenter(user.role);
+        }
+        break;
+      case "formPenawaran":
+        this.currentPresenter = new FormPenawaranPresenter();
+        if (user) {
+          this.sidebarPresenter = new SidebarPresenter(user.role);
+        }
+        break;
+      case "formOngkir":
+        this.currentPresenter = new FormOngkirPresenter();
+        if (user) {
+          this.sidebarPresenter = new SidebarPresenter(user.role);
+        }
+        break;
+      case "formSelesai":
+        this.currentPresenter = new FormSelesaiPresenter();
         if (user) {
           this.sidebarPresenter = new SidebarPresenter(user.role);
         }

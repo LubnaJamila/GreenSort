@@ -1,4 +1,4 @@
-// src/pages/dashboard-admin/selesaiView.js
+// src/pages/dashboard-admin/selesaiUserView.js
 import "../../assets/styles/sidebar.css";
 import "../../assets/styles/dashboard.css";
 import userPlaceholder from "../../assets/images/unsplash_HaNi1rsZ6Nc.png";
@@ -55,11 +55,6 @@ export default class SelesaiUserView {
         <div class="data-section">
           <div class="data-header">
             <h3>Data Selesai</h3>
-            <div class="table-actions">
-              <button id="refresh-btn" class="btn btn-sm btn-outline-secondary">
-                <i class="bi bi-arrow-clockwise"></i> Refresh
-              </button>
-            </div>
           </div>
 
           <div class="table-responsive">
@@ -67,13 +62,11 @@ export default class SelesaiUserView {
               <thead>
                 <tr>
                   <th><input type="checkbox" id="select-all"></th>
-                  <th>Nama</th>
                   <th>Jenis Sampah</th>
+                  <th>Tanggal Pembelian</th>
                   <th>Berat</th>
                   <th>Harga</th>
                   <th>Total Harga</th>
-                  <th>Gambar Sampah</th>
-                  <th>Action</th>
                 </tr>
               </thead>
               <tbody id="applications-table-body">
@@ -229,20 +222,19 @@ export default class SelesaiUserView {
     this.initDataTable();
   }
 
-  // renderApplicationRow(app) {
-  //   const { statusClass, statusIcon } = this.getStatusStyles(app.status);
-
-  //   return `
-  //     <tr>
-  //       <td><input type="checkbox" class="row-checkbox" value="${app.id}"></td>
-  //       <td>${app.name}</td>
-  //       <td>${app.tanggalPembelian}</td>
-  //       <td>${app.kuantitas}</td>
-  //       <td>${app.harga}</td>
-  //       <td>${app.total}</td>
-  //     </tr>
-  //   `;
-  // }
+  // ✅ PERBAIKAN: Implementasi method renderApplicationRow yang hilang
+  renderApplicationRow(app) {
+    return `
+      <tr>
+        <td><input type="checkbox" class="row-checkbox" value="${app.id}"></td>
+        <td>${app.jenisSampah}</td>
+        <td>${app.tanggalPembelian}</td>
+        <td>${app.berat}</td>
+        <td>${app.harga}</td>
+        <td>${app.totalHarga}</td>
+      </tr>
+    `;
+  }
 
   getStatusStyles(status) {
     const statusMap = {
@@ -279,7 +271,8 @@ export default class SelesaiUserView {
     });
   }
 
-  renderSelesaiUserData(applicationsData) {
+  // ✅ PERBAIKAN: Ganti nama method sesuai dengan yang dipanggil di presenter
+  renderSelesaiData(applicationsData) {
     this.renderApplicationsTable(applicationsData);
   }
 

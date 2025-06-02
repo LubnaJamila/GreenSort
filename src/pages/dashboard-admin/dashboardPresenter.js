@@ -10,7 +10,7 @@ export default class DashboardPresenter {
     this.sidebarView = new SidebarView();
     this.dashboardModel = new DashboardModel();
     this.currentUser = null;
-
+ 
     this.handleLogout = this.handleLogout.bind(this);
   }
 
@@ -25,17 +25,13 @@ export default class DashboardPresenter {
       return;
     }
 
-    // Render sidebar dan dashboard
     this.sidebarView.render();
     this.dashboardView.render();
 
-    // Tampilkan info user di dashboard
     this.dashboardView.displayUserInfo(this.currentUser);
 
-    // Ambil data aplikasi dari model
     const applications = this.dashboardModel.getApplications();
 
-    // Render data ke tabel
     this.dashboardView.renderDashboardData(applications);
 
     this.setupEventListeners();
@@ -49,11 +45,9 @@ export default class DashboardPresenter {
     console.log("Logout initiated");
     logoutUser();
 
-    // Bersihkan tampilan dashboard dan sidebar
     this.dashboardView.destroy();
     this.sidebarView.destroy();
 
-    // Navigasi ke halaman login
     const event = new CustomEvent("navigate", { detail: { page: "login" } });
     document.dispatchEvent(event);
   }

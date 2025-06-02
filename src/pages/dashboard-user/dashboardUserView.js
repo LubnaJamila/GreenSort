@@ -1,4 +1,4 @@
-// src/pages/dashboard-user/dashboardView.js
+// src/pages/dashboard-user/dashboardUserView.js
 import "../../assets/styles/sidebar.css";
 import "../../assets/styles/dashboard.css";
 import userPlaceholder from "../../assets/images/unsplash_HaNi1rsZ6Nc.png";
@@ -55,11 +55,6 @@ export default class DashboardUserView {
         <div class="data-section">
           <div class="data-header">
             <h3>Data Pengajuan</h3>
-            <div class="table-actions">
-              <button id="refresh-btn" class="btn btn-sm btn-outline-secondary">
-                <i class="bi bi-arrow-clockwise"></i> Refresh
-              </button>
-            </div>
           </div>
 
           <div class="table-responsive">
@@ -72,6 +67,8 @@ export default class DashboardUserView {
                   <th>Berat</th>
                   <th>Harga</th>
                   <th>Total Harga</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
                 </tr>
               </thead>
               <tbody id="applications-table-body">
@@ -210,8 +207,14 @@ export default class DashboardUserView {
 
   displayUserInfo(user) {
     const userNameElement = document.getElementById("user-name");
+    const userAvatar = document.getElementById("user-avatar");
+    
     if (userNameElement && user) {
       userNameElement.textContent = user.name || user.username;
+    }
+    
+    if (userAvatar && user && user.avatar) {
+      userAvatar.src = user.avatar;
     }
   }
 
@@ -225,6 +228,7 @@ export default class DashboardUserView {
     tableBody.innerHTML = tableHTML;
 
     this.initDataTable();
+    this.setupTableEventListeners();
   }
 
   renderApplicationRow(app) {
@@ -235,37 +239,146 @@ export default class DashboardUserView {
         <td><input type="checkbox" class="row-checkbox" value="${app.id}"></td>
         <td>${app.jenisSampah}</td>
         <td>${app.tanggalPembelian}</td>
-        <td>${app.kuantitas}</td>
-        <td>${app.harga}</td>
-        <td>${app.total}</td>
+        <td>${app.kuantitas} kg</td>
+        <td>Rp ${this.formatCurrency(app.harga)}</td>
+        <td>Rp ${this.formatCurrency(app.total)}</td>
+        <td>
+          <span class="badge ${statusClass}">
+            <i class="bi ${statusIcon}"></i>
+            ${app.status}
+          </span>
+        </td>
+        <td>
+          <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn btn-outline-primary btn-sm view-btn" data-id="${app.id}" title="Lihat Detail">
+              <i class="bi bi-eye"></i>
+            </button>
+            ${this.renderActionButtons(app)}
+          </div>
+        </td>
       </tr>
     `;
   }
 
+  renderActionButtons(app) {
+    let buttons = '';
+    
+    // Tombol edit hanya untuk status tertentu
+    if (app.status === 'Menunggu Validasi' || app.status === 'Ditolak') {
+      buttons += `
+        <button type="button" class="btn btn-outline-warning btn-sm edit-btn" data-id="${app.id}" title="Edit">
+          <i class="bi bi-pencil"></i>
+        </button>
+      `;
+    }
+    
+    // Tombol hapus hanya untuk status tertentu
+    if (app.status === 'Menunggu Validasi' || app.status === 'Ditolak') {
+      buttons += `
+        <button type="button" class="btn btn-outline-danger btn-sm delete-btn" data-id="${app.id}" title="Hapus">
+          <i class="bi bi-trash"></i>
+        </button>
+      `;
+    }
+    
+    return buttons;
+  }
+
+  setupTableEventListeners() {
+    // Event listeners untuk tombol aksi di tabel
+    const tableBody = document.getElementById("applications-table-body");
+    if (!tableBody) return;
+
+    // View button
+    const viewButtons = tableBody.querySelectorAll('.view-btn');
+    viewButtons.forEach(btn => {
+      const handler = (e) => this.handleViewApplication(e.target.closest('button').dataset.id);
+      btn.addEventListener('click', handler);
+      this.eventListeners.push({ element: btn, type: 'click', handler });
+    });
+
+    // Edit button
+    const editButtons = tableBody.querySelectorAll('.edit-btn');
+    editButtons.forEach(btn => {
+      const handler = (e) => this.handleEditApplication(e.target.closest('button').dataset.id);
+      btn.addEventListener('click', handler);
+      this.eventListeners.push({ element: btn, type: 'click', handler });
+    });
+
+    // Delete button
+    const deleteButtons = tableBody.querySelectorAll('.delete-btn');
+    deleteButtons.forEach(btn => {
+      const handler = (e) => this.handleDeleteApplication(e.target.closest('button').dataset.id);
+      btn.addEventListener('click', handler);
+      this.eventListeners.push({ element: btn, type: 'click', handler });
+    });
+  }
+
+  handleViewApplication(applicationId) {
+    const event = new CustomEvent("view-application", { 
+      detail: { applicationId } 
+    });
+    document.dispatchEvent(event);
+  }
+
+  handleEditApplication(applicationId) {
+    const event = new CustomEvent("edit-application", { 
+      detail: { applicationId } 
+    });
+    document.dispatchEvent(event);
+  }
+
+  handleDeleteApplication(applicationId) {
+    if (confirm('Apakah Anda yakin ingin menghapus pengajuan ini?')) {
+      const event = new CustomEvent("delete-application", { 
+        detail: { applicationId } 
+      });
+      document.dispatchEvent(event);
+    }
+  }
+
   getStatusStyles(status) {
     const statusMap = {
-      Diterima: { class: "bg-info bg-opacity-10", icon: "bi-clipboard-check" },
-      Ditolak: { class: "bg-danger bg-opacity-10", icon: "bi-x-circle" },
-      Dikirim: { class: "bg-warning bg-opacity-10", icon: "bi-truck" },
-      Selesai: { class: "bg-success bg-opacity-10", icon: "bi-check-circle" },
-      default: { class: "bg-light", icon: "bi-hourglass-split" },
+      'Menunggu Validasi': { class: "bg-warning bg-opacity-10 text-warning", icon: "bi-hourglass-split" },
+      'Diterima': { class: "bg-info bg-opacity-10 text-info", icon: "bi-clipboard-check" },
+      'Ditolak': { class: "bg-danger bg-opacity-10 text-danger", icon: "bi-x-circle" },
+      'Penjemputan': { class: "bg-primary bg-opacity-10 text-primary", icon: "bi-truck" },
+      'Selesai': { class: "bg-success bg-opacity-10 text-success", icon: "bi-check-circle" },
+      default: { class: "bg-light text-muted", icon: "bi-hourglass-split" },
     };
 
     return statusMap[status] || statusMap.default;
   }
 
+  formatCurrency(amount) {
+    return new Intl.NumberFormat('id-ID').format(amount);
+  }
+
   initDataTable() {
+    // Destroy existing DataTable if it exists
     if ($.fn.DataTable.isDataTable("#datatable")) {
       $("#datatable").DataTable().destroy();
     }
 
+    // Initialize DataTable with Indonesian language
     $(document).ready(() => {
       $("#datatable").DataTable({
         responsive: true,
+        order: [[2, 'desc']], // Sort by date column (index 2) descending
+        columnDefs: [
+          { orderable: false, targets: [0, 7] }, // Disable sorting for checkbox and actions columns
+          { searchable: false, targets: [0, 7] }, // Disable search for checkbox and actions columns
+        ],
         language: {
           search: "Cari:",
           lengthMenu: "Tampilkan _MENU_ data per halaman",
           info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+          infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
+          infoFiltered: "(difilter dari _MAX_ total data)",
+          loadingRecords: "Memuat...",
+          processing: "Memproses...",
+          emptyTable: "Tidak ada data yang tersedia",
+          zeroRecords: "Tidak ditemukan data yang sesuai",
           paginate: {
             first: "<<",
             last: ">>",
@@ -273,12 +386,29 @@ export default class DashboardUserView {
             previous: "<",
           },
         },
+        pageLength: 10,
+        lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
       });
     });
   }
 
-  renderDashboardData(applicationsData) {
+  updateStatCards(stats) {
+    // Update stat numbers if stats object is provided
+    if (!stats) return;
+    
+    const statCards = document.querySelectorAll('.stat-number');
+    if (statCards.length >= 5) {
+      statCards[0].textContent = stats.menungguValidasi || '0';
+      statCards[1].textContent = stats.diterima || '0';
+      statCards[2].textContent = stats.ditolak || '0';
+      statCards[3].textContent = stats.penjemputan || '0';
+      statCards[4].textContent = stats.selesai || '0';
+    }
+  }
+
+  renderDashboardData(applicationsData, stats = null) {
     this.renderApplicationsTable(applicationsData);
+    this.updateStatCards(stats);
   }
 
   removeEventListeners() {

@@ -1,3 +1,4 @@
+//src/pages/dashboard-user/penjemputanView.js
 import "../../assets/styles/sidebar.css";
 import "../../assets/styles/dashboard.css";
 import userPlaceholder from "../../assets/images/unsplash_HaNi1rsZ6Nc.png";
@@ -12,8 +13,12 @@ export default class PenjemputanView {
         this.sidebarCollapsed = false;
         this.currentFilter = 'all';
         this.applicationsData = [];
-        this.currentPage = 1;
-        this.itemsPerPage = 10;
+        this.dataTable = null;
+        this.statsData = {
+            dijemput: 0,
+            diantar: 0,
+            total: 0
+        };
     }
     
     render() {
@@ -36,14 +41,14 @@ export default class PenjemputanView {
                 <header>
                     <div class="header-section">
                         <div class="dashboard-title">
-                        <div class="title-content">
-                            <h1>Dashboard</h1>
-                            <p>Ringkasan status penjemputan Anda secara real-time.</p>
-                        </div>
-                        <div class="user-profile">
-                            <img id="user-avatar" src="${userPlaceholder}" alt="User">
-                            <span id="user-name">Loading...</span>
-                        </div>
+                            <div class="title-content">
+                                <h1>Dashboard Penjemputan</h1>
+                                <p>Kelola status penjemputan sampah Anda secara real-time.</p>
+                            </div>
+                            <div class="user-profile">
+                                <img id="user-avatar" src="${userPlaceholder}" alt="User">
+                                <span id="user-name">Loading...</span>
+                            </div>
                         </div>
             
                         <!-- Stats Grid -->
@@ -61,42 +66,38 @@ export default class PenjemputanView {
                 <div class="data-section">
                     <div class="section-header">
                         <h2 class="section-title">Data Penjemputan</h2>
-                        <button id="refresh-btn" class="btn btn-outline-secondary btn-sm">
-                        <i class="bi bi-arrow-clockwise"></i> Refresh
-                        </button>
                     </div>
             
                     <!-- Filter Tabs -->
                     <div class="filter-tabs">
                         <button class="filter-tab active" data-filter="all">
-                            Semua <span class="badge bg-light text-dark ms-1" id="badge-all">80</span>
+                            Semua <span class="badge bg-light text-dark ms-1" id="badge-all">0</span>
                         </button>
-                        <button class="filter-tab" data-filter="pending">
-                            Dijemput <span class="badge bg-light text-dark ms-1" id="badge-pending">16</span>
+                        <button class="filter-tab" data-filter="dijemput">
+                            Dijemput <span class="badge bg-light text-dark ms-1" id="badge-dijemput">0</span>
                         </button>
-                        <button class="filter-tab" data-filter="accepted">
-                            Diantar <span class="badge bg-light text-dark ms-1" id="badge-accepted">8</span>
+                        <button class="filter-tab" data-filter="diantar">
+                            Diantar <span class="badge bg-light text-dark ms-1" id="badge-diantar">0</span>
                         </button>
                     </div>
             
                     <!-- Table Container -->
                     <div class="table-container">
                         <div class="table-responsive">
-                            <table class="table" id="datatable">
+                            <table class="table table-striped" id="datatable" style="width:100%">
                                 <thead>
-                                <tr>
-                                    <th><input type="checkbox" id="select-all" class="form-check-input"></th>
-                                    <th>Nama</th>
-                                    <th>No HP</th>
-                                    <th>Kategori Sampah</th>
-                                    <th>Gambar</th>
-                                    <th>Berat</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                </tr>
+                                    <tr>
+                                        <th><input type="checkbox" id="select-all" class="form-check-input"></th>
+                                        <th>Kategori Sampah</th>
+                                        <th>Berat (kg)</th>
+                                        <th>Harga (Rp/kg)</th>
+                                        <th>Total Harga (Rp)</th>
+                                        <th>Tanggal Penjemputan</th>
+                                        <th>Action</th>
+                                    </tr>
                                 </thead>
                                 <tbody id="applications-table-body">
-                                <!-- Dynamic content will be inserted here -->
+                                    <!-- Dynamic content will be inserted here -->
                                 </tbody>
                             </table>
                         </div>
@@ -106,16 +107,15 @@ export default class PenjemputanView {
                     <div class="empty-state" id="empty-state" style="display: none;">
                         <i class="bi bi-inbox"></i>
                         <h4>Tidak ada data</h4>
-                        <p>Belum ada penejemputan dengan status yang dipilih.</p>
+                        <p>Belum ada penjemputan dengan status yang dipilih.</p>
                     </div>
-            
-                    <!-- Pagination -->
-                    <div class="pagination-container" id="pagination-container">
-                        <nav>
-                            <ul class="pagination" id="pagination-list">
-                                <!-- Pagination will be generated dynamically -->
-                            </ul>
-                        </nav>
+                    
+                    <!-- Loading State -->
+                    <div class="loading-state" id="loading-state" style="display: none;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p>Memuat data...</p>
                     </div>
                 </div>
             </div>
@@ -124,18 +124,18 @@ export default class PenjemputanView {
 
     renderStatCard(number, label, icon, colorClass, link) {
         return `
-        <div class="stat-card">
-            <div class="stat-content">
-                <div class="stat-number">${number}</div>
-                <div class="stat-label">${label}</div>
-            </div>
-            <div class="stat-icon ${colorClass}">
-                <i class="bi ${icon}"></i>
-            </div>
-            <a href="${link}" class="stat-more" aria-label="View more ${label} items">
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div class="stat-number">${number}</div>
+                    <div class="stat-label">${label}</div>
+                </div>
+                <div class="stat-icon ${colorClass}">
+                    <i class="bi ${icon}"></i>
+                </div>
+                <a href="${link}" class="stat-more" aria-label="View more ${label} items">
                 <i class="bi bi-arrow-down"></i>
-            </a>
-        </div>
+                </a>
+            </div>
         `;
     }
 
@@ -145,62 +145,54 @@ export default class PenjemputanView {
         // Mobile menu toggle
         const mobileMenuBtn = document.getElementById("mobile-menu-toggle");
         if (mobileMenuBtn) {
-        const handler = () => this.toggleSidebar();
-        mobileMenuBtn.addEventListener("click", handler);
-        this.eventListeners.push({
-            element: mobileMenuBtn,
-            type: "click",
-            handler,
-        });
+            const handler = () => this.toggleSidebar();
+            mobileMenuBtn.addEventListener("click", handler);
+            this.eventListeners.push({
+                element: mobileMenuBtn,
+                type: "click",
+                handler,
+            });
         }
 
         // Sidebar overlay click
         const overlay = document.querySelector(".sidebar-overlay");
         if (overlay) {
-        const handler = () => this.toggleSidebar(false);
-        overlay.addEventListener("click", handler);
-        this.eventListeners.push({ element: overlay, type: "click", handler });
+            const handler = () => this.toggleSidebar(false);
+            overlay.addEventListener("click", handler);
+            this.eventListeners.push({ element: overlay, type: "click", handler });
         }
 
         // Window resize
         const resizeHandler = () => this.handleResize();
         window.addEventListener("resize", resizeHandler);
         this.eventListeners.push({
-        element: window,
-        type: "resize",
-        handler: resizeHandler,
+            element: window,
+            type: "resize",
+            handler: resizeHandler,
         });
 
         // Refresh button
         const refreshBtn = document.getElementById("refresh-btn");
         if (refreshBtn) {
-        const handler = () => this.handleRefresh();
-        refreshBtn.addEventListener("click", handler);
-        this.eventListeners.push({ element: refreshBtn, type: "click", handler });
+            const handler = () => this.handleRefresh();
+            refreshBtn.addEventListener("click", handler);
+            this.eventListeners.push({ element: refreshBtn, type: "click", handler });
         }
 
         // Select all checkbox
         const selectAll = document.getElementById("select-all");
         if (selectAll) {
-        const handler = (e) => this.toggleSelectAll(e.target.checked);
-        selectAll.addEventListener("change", handler);
-        this.eventListeners.push({ element: selectAll, type: "change", handler });
+            const handler = (e) => this.toggleSelectAll(e.target.checked);
+            selectAll.addEventListener("change", handler);
+            this.eventListeners.push({ element: selectAll, type: "change", handler });
         }
 
         // Filter tabs
         const filterTabs = document.querySelectorAll('.filter-tab');
         filterTabs.forEach(tab => {
-        const handler = (e) => this.handleFilterTab(e);
-        tab.addEventListener('click', handler);
-        this.eventListeners.push({ element: tab, type: 'click', handler });
-        });
-
-        // Stat cards click handlers
-        const statCards = document.querySelectorAll('.stat-card');
-        statCards.forEach(card => {
-        const handler = () => this.handleStatCardClick(card);
-        card.addEventListener('click', handler);
-        this.eventListeners.push({ element: card, type: 'click', handler });
+            const handler = (e) => this.handleFilterTab(e);
+            tab.addEventListener('click', handler);
+            this.eventListeners.push({ element: tab, type: 'click', handler });
         });
     }
 
@@ -213,320 +205,326 @@ export default class PenjemputanView {
         // Add active class to clicked tab
         e.target.classList.add('active');
         
-        // Get filter value and render table
+        // Get filter value and apply to DataTable
         const filter = e.target.dataset.filter;
         this.currentFilter = filter;
-        this.currentPage = 1; // Reset to first page
-        this.renderFilteredTable();
+        this.applyDataTableFilter();
     }
 
-    handleStatCardClick(card) {
-        const status = card.dataset.status;
-        if (status) {
-        // Find corresponding tab and trigger click
-        const tab = document.querySelector(`[data-filter="${status}"]`);
-        if (tab) {
-            tab.click();
+    applyDataTableFilter() {
+        if (!this.dataTable) return;
+        
+        if (this.currentFilter === 'all') {
+            this.dataTable.search('').columns().search('').draw();
+        } else {
+            // Apply filter to status column (index 6)
+            const statusText = this.getFilterStatusText(this.currentFilter);
+            this.dataTable.column(6).search(statusText).draw();
         }
-        }
+        
+        this.checkEmptyState();
     }
 
-    renderFilteredTable() {
-        const tableBody = document.getElementById('applications-table-body');
+    getFilterStatusText(filter) {
+        const filterMap = {
+            'dijemput': 'Dijemput',
+            'diantar': 'Diantar'
+        };
+        return filterMap[filter] || '';
+    }
+
+    checkEmptyState() {
+        setTimeout(() => {
+            if (!this.dataTable) return;
+            
+            const visibleRows = this.dataTable.rows({ filter: 'applied' }).count();
+            const emptyState = document.getElementById('empty-state');
+            const tableContainer = document.querySelector('.table-container');
+            
+            if (visibleRows === 0) {
+                emptyState.style.display = 'block';
+                tableContainer.style.display = 'none';
+            } else {
+                emptyState.style.display = 'none';
+                tableContainer.style.display = 'block';
+            }
+        }, 100);
+    }
+
+    showLoading(show = true) {
+        const loadingState = document.getElementById('loading-state');
+        const tableContainer = document.querySelector('.table-container');
         const emptyState = document.getElementById('empty-state');
         
-        if (!this.applicationsData || this.applicationsData.length === 0) {
-        tableBody.innerHTML = '';
-        emptyState.style.display = 'block';
-        this.hidePagination();
-        return;
+        if (show) {
+            loadingState.style.display = 'block';
+            tableContainer.style.display = 'none';
+            emptyState.style.display = 'none';
+        } else {
+            loadingState.style.display = 'none';
+            tableContainer.style.display = 'block';
         }
+    }
 
-        // Filter data based on current filter
-        let filteredData = this.currentFilter === 'all' 
-        ? this.applicationsData 
-        : this.applicationsData.filter(item => item.status === this.currentFilter);
+    renderApplicationsTable(applicationsData) {
+        this.applicationsData = applicationsData || [];
+        this.showLoading(false);
         
-        if (filteredData.length === 0) {
-        tableBody.innerHTML = '';
-        emptyState.style.display = 'block';
-        this.hidePagination();
-        return;
-        }
-        
-        emptyState.style.display = 'none';
-        
-        // Implement pagination
-        const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-        const endIndex = startIndex + this.itemsPerPage;
-        const paginatedData = filteredData.slice(startIndex, endIndex);
-        
-        // Render table rows
-        const tableHTML = paginatedData
-        .map((app) => this.renderApplicationRow(app))
-        .join("");
+        const tableBody = document.getElementById("applications-table-body");
+        if (!tableBody) return;
+
+        const tableHTML = this.applicationsData
+            .map((app) => this.renderApplicationRow(app))
+            .join("");
         tableBody.innerHTML = tableHTML;
-        
-        // Setup row event listeners
-        this.setupRowEventListeners();
-        
-        // Render pagination
-        this.renderPagination(filteredData.length);
+
+        this.updateStats();
+        this.updateTabBadges();
+        this.initDataTable();
     }
 
     renderApplicationRow(app) {
-        const { statusClass, statusIcon, statusLabel } = this.getStatusStyles(app.status);
-        //ini diperbaiki sesuai dengan data yang ada
+        const formattedDate = this.formatDate(app.date || app.tanggal || new Date());
+        const formattedPrice = this.formatCurrency(app.price || 0);
+        const formattedTotalPrice = this.formatCurrency(app.totalPrice || 0);
+
         return `
         <tr>
-            <td><input type="checkbox" class="form-check-input row-checkbox" value="${app.id}"></td>
-            <td>${app.name || app.nama || 'N/A'}</td>
-            <td>${app.phone || app.noHp || app.no_hp || 'N/A'}</td>
             <td>${app.category || app.jenisSampah || app.kategori || 'N/A'}</td>
-            <td><img src="${app.image || app.imageUrl || 'https://via.placeholder.com/50'}" alt="Sampah" class="waste-img"></td>
-            <td>${app.weight || app.berat || app.kuantitas || 0} kg</td>
+            <td>${app.weight || app.berat || 0}</td>
+            <td>${formattedPrice}</td>
+            <td>${formattedTotalPrice}</td>
+            <td>${formattedDate}</td>
             <td>
-            <span class="status-badge ${statusClass}">
-                <i class="bi ${statusIcon}"></i>
-                ${statusLabel}
-            </span>
-            </td>
-            <td>
-            <button class="btn btn-primary action-btn btn-sm detail-btn" data-id="${app.id}">
-                <i class="bi bi-eye"></i> Detail
-            </button>
+                <button class="btn btn-primary btn-sm detail-btn" data-id="${app.id}">
+                    <i class="bi bi-eye"></i> Detail
+                </button>
             </td>
         </tr>
         `;
     }
 
+    formatCurrency(amount) {
+        return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0
+        }).format(amount).replace('Rp', 'Rp ');
+    }
+
+    normalizeStatus(status) {
+        const statusMap = {
+            'shipped': 'dijemput',
+            'completed': 'diantar',
+            'Dikirim': 'dijemput',
+            'Selesai': 'diantar'
+        };
+        return statusMap[status] || status;
+    }
+
     getStatusStyles(status) {
         const statusMap = {
-        'pending': { 
-            class: 'pending', 
-            icon: 'bi-hourglass-split', 
-            label: 'Menunggu Validasi' 
-        },
-        'accepted': { 
-            class: 'accepted', 
-            icon: 'bi-clipboard-check', 
-            label: 'Diterima' 
-        },
-        'rejected': { 
-            class: 'rejected', 
-            icon: 'bi-x-circle', 
-            label: 'Ditolak' 
-        },
-        'shipped': { 
-            class: 'shipped', 
-            icon: 'bi-truck', 
-            label: 'Dikirim' 
-        },
-        'completed': { 
-            class: 'completed', 
-            icon: 'bi-check-circle', 
-            label: 'Selesai' 
-        },
-        'Diterima': { 
-            class: 'accepted', 
-            icon: 'bi-clipboard-check', 
-            label: 'Diterima' 
-        },
-        'Ditolak': { 
-            class: 'rejected', 
-            icon: 'bi-x-circle', 
-            label: 'Ditolak' 
-        },
-        'Dikirim': { 
-            class: 'shipped', 
-            icon: 'bi-truck', 
-            label: 'Dikirim' 
-        },
-        'Selesai': { 
-            class: 'completed', 
-            icon: 'bi-check-circle', 
-            label: 'Selesai' 
-        }
+            'dijemput': { 
+                class: 'status-shipped', 
+                icon: 'bi-truck', 
+                label: 'Dijemput' 
+            },
+            'diantar': { 
+                class: 'status-completed', 
+                icon: 'bi-check-circle', 
+                label: 'Diantar' 
+            }
         };
 
         return statusMap[status] || { 
-        class: 'pending', 
-        icon: 'bi-hourglass-split', 
-        label: status || 'Unknown' 
+            class: 'status-pending', 
+            icon: 'bi-hourglass-split', 
+            label: status || 'Unknown' 
         };
     }
+
+    formatDate(date) {
+        if (!date) return 'N/A';
+        
+        const d = new Date(date);
+        if (isNaN(d.getTime())) return 'N/A';
+        
+        return d.toLocaleDateString('id-ID', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+    }
+
+    initDataTable() {
+        if (this.dataTable) {
+            this.dataTable.destroy();
+        }
+
+        if (typeof $ === 'undefined' || typeof $.fn.DataTable === 'undefined') {
+            console.error('jQuery DataTables is not loaded');
+            return;
+        }
+
+        try {
+            this.dataTable = $("#datatable").DataTable({
+                responsive: true,
+                pageLength: 10,
+                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
+                language: {
+                    search: "Cari:",
+                    lengthMenu: "Tampilkan _MENU_ data per halaman",
+                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                    infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
+                    infoFiltered: "(difilter dari _MAX_ total data)",
+                    paginate: {
+                        first: "<<",
+                        last: ">>",
+                        next: ">",
+                        previous: "<",
+                    },
+                    emptyTable: "Tidak ada data tersedia",
+                    zeroRecords: "Tidak ada data yang cocok dengan pencarian"
+                },
+                columnDefs: [
+                    { orderable: false, targets: [5] }, // Action column
+                    { 
+                        type: 'currency', 
+                        targets: [2, 3] // Harga dan Total Harga columns
+                    },
+                    { 
+                        type: 'date', 
+                        targets: [4], // Tanggal column
+                        render: function(data) {
+                            return new Date(data).toLocaleDateString('id-ID');
+                        }
+                    }
+                ],
+                order: [[4, 'desc']], // Sort by tanggal column (newest first)
+                drawCallback: () => {
+                    this.setupRowEventListeners();
+                    this.checkEmptyState();
+                }
+            });
+
+            setTimeout(() => {
+                this.applyDataTableFilter();
+            }, 100);
+
+        } catch (error) {
+            console.error('Error initializing DataTable:', error);
+        }
+    }
+
 
     setupRowEventListeners() {
         // Detail button event listeners
         const detailBtns = document.querySelectorAll('.detail-btn');
         detailBtns.forEach(btn => {
-        const handler = (e) => this.handleDetailClick(e);
-        btn.addEventListener('click', handler);
-        this.eventListeners.push({ element: btn, type: 'click', handler });
+            // Remove existing listeners to prevent duplicates
+            const newBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(newBtn, btn);
+            
+            newBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.handleDetailClick(e);
+            });
         });
 
         // Row checkbox event listeners
         const rowCheckboxes = document.querySelectorAll('.row-checkbox');
         rowCheckboxes.forEach(checkbox => {
-        const handler = () => this.updateSelectAllState();
-        checkbox.addEventListener('change', handler);
-        this.eventListeners.push({ element: checkbox, type: 'change', handler });
+            const newCheckbox = checkbox.cloneNode(true);
+            checkbox.parentNode.replaceChild(newCheckbox, checkbox);
+            
+            newCheckbox.addEventListener('change', () => this.updateSelectAllState());
         });
     }
 
     handleDetailClick(e) {
         const id = e.target.closest('.detail-btn').dataset.id;
+        console.log('Detail clicked for ID:', id);
+        
         // Dispatch custom event for detail view
         const event = new CustomEvent('show-application-detail', { 
-        detail: { id: id } 
+            detail: { id: id } 
         });
         document.dispatchEvent(event);
     }
 
-    renderPagination(totalItems) {
-        const totalPages = Math.ceil(totalItems / this.itemsPerPage);
-        const paginationList = document.getElementById('pagination-list');
-        const paginationContainer = document.getElementById('pagination-container');
-        
-        if (totalPages <= 1) {
-        paginationContainer.style.display = 'none';
-        return;
-        }
-        
-        paginationContainer.style.display = 'flex';
-        
-        let paginationHTML = '';
-        
-        // Previous button
-        paginationHTML += `
-        <li class="page-item ${this.currentPage === 1 ? 'disabled' : ''}">
-            <a class="page-link" href="#" data-page="${this.currentPage - 1}">
-            <i class="bi bi-chevron-left"></i>
-            </a>
-        </li>
-        `;
-        
-        // Page numbers
-        const startPage = Math.max(1, this.currentPage - 2);
-        const endPage = Math.min(totalPages, this.currentPage + 2);
-        
-        if (startPage > 1) {
-        paginationHTML += `<li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>`;
-        if (startPage > 2) {
-            paginationHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
-        }
-        }
-        
-        for (let i = startPage; i <= endPage; i++) {
-        paginationHTML += `
-            <li class="page-item ${i === this.currentPage ? 'active' : ''}">
-            <a class="page-link" href="#" data-page="${i}">${i}</a>
-            </li>
-        `;
-        }
-        
-        if (endPage < totalPages) {
-        if (endPage < totalPages - 1) {
-            paginationHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
-        }
-        paginationHTML += `<li class="page-item"><a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a></li>`;
-        }
-        
-        // Next button
-        paginationHTML += `
-        <li class="page-item ${this.currentPage === totalPages ? 'disabled' : ''}">
-            <a class="page-link" href="#" data-page="${this.currentPage + 1}">
-            <i class="bi bi-chevron-right"></i>
-            </a>
-        </li>
-        `;
-        
-        paginationList.innerHTML = paginationHTML;
-        
-        // Add pagination event listeners
-        const pageLinks = paginationList.querySelectorAll('a.page-link');
-        pageLinks.forEach(link => {
-        const handler = (e) => this.handlePaginationClick(e);
-        link.addEventListener('click', handler);
-        this.eventListeners.push({ element: link, type: 'click', handler });
-        });
-    }
+    updateStats() {
+        if (!this.applicationsData) return;
 
-    handlePaginationClick(e) {
-        e.preventDefault();
-        const page = parseInt(e.target.closest('a').dataset.page);
-        if (page && page !== this.currentPage) {
-        this.currentPage = page;
-        this.renderFilteredTable();
-        }
-    }
+        this.statsData = {
+            total: this.applicationsData.length,
+            dijemput: this.applicationsData.filter(item => 
+                this.normalizeStatus(item.status) === 'dijemput'
+            ).length,
+            diantar: this.applicationsData.filter(item => 
+                this.normalizeStatus(item.status) === 'diantar'
+            ).length
+        };
 
-    hidePagination() {
-        const paginationContainer = document.getElementById('pagination-container');
-        if (paginationContainer) {
-        paginationContainer.style.display = 'none';
-        }
+        // Update stat cards
+        const totalStat = document.getElementById('stat-total-penjemputan');
+        const dijemputStat = document.getElementById('stat-dijemput');
+        const diantarStat = document.getElementById('stat-diantar');
+
+        if (totalStat) totalStat.textContent = this.statsData.total;
+        if (dijemputStat) dijemputStat.textContent = this.statsData.dijemput;
+        if (diantarStat) diantarStat.textContent = this.statsData.diantar;
     }
 
     updateTabBadges() {
         if (!this.applicationsData) return;
 
         const counts = {
-        all: this.applicationsData.length,
-        pending: this.applicationsData.filter(item => 
-            item.status === 'pending' || item.status === 'Menunggu Validasi'
-        ).length,
-        accepted: this.applicationsData.filter(item => 
-            item.status === 'accepted' || item.status === 'Diterima'
-        ).length,
-        rejected: this.applicationsData.filter(item => 
-            item.status === 'rejected' || item.status === 'Ditolak'
-        ).length,
-        shipped: this.applicationsData.filter(item => 
-            item.status === 'shipped' || item.status === 'Dikirim'
-        ).length,
-        completed: this.applicationsData.filter(item => 
-            item.status === 'completed' || item.status === 'Selesai'
-        ).length
+            all: this.applicationsData.length,
+            dijemput: this.applicationsData.filter(item => 
+                this.normalizeStatus(item.status) === 'dijemput'
+            ).length,
+            diantar: this.applicationsData.filter(item => 
+                this.normalizeStatus(item.status) === 'diantar'
+            ).length
         };
 
         // Update tab badges
         Object.keys(counts).forEach(status => {
-        const badge = document.getElementById(`badge-${status}`);
-        const stat = document.getElementById(`stat-${status}`);
-        if (badge) badge.textContent = counts[status];
-        if (stat) stat.textContent = counts[status];
+            const badge = document.getElementById(`badge-${status}`);
+            if (badge) badge.textContent = counts[status];
         });
     }
 
     updateSelectAllState() {
         const selectAll = document.getElementById('select-all');
         const checkboxes = document.querySelectorAll('.row-checkbox');
-        const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+        const visibleCheckboxes = Array.from(checkboxes).filter(cb => 
+            cb.closest('tr').style.display !== 'none'
+        );
+        const checkedBoxes = visibleCheckboxes.filter(cb => cb.checked);
         
-        if (selectAll) {
-        selectAll.indeterminate = checkedBoxes.length > 0 && checkedBoxes.length < checkboxes.length;
-        selectAll.checked = checkboxes.length > 0 && checkedBoxes.length === checkboxes.length;
+        if (selectAll && visibleCheckboxes.length > 0) {
+            selectAll.indeterminate = checkedBoxes.length > 0 && checkedBoxes.length < visibleCheckboxes.length;
+            selectAll.checked = checkedBoxes.length === visibleCheckboxes.length;
         }
     }
 
     toggleSidebar(show = null) {
         const sidebar = document.querySelector(".sidebar");
         const overlay = document.querySelector(".sidebar-overlay");
-        const mainContent = document.querySelector(".main-content");
 
         if (show === null) {
-        show = !sidebar.classList.contains("mobile-open");
+            show = !sidebar.classList.contains("mobile-open");
         }
 
         if (show) {
-        sidebar.classList.add("mobile-open");
-        overlay.classList.add("active");
-        document.body.style.overflow = "hidden";
+            sidebar.classList.add("mobile-open");
+            overlay.classList.add("active");
+            document.body.style.overflow = "hidden";
         } else {
-        sidebar.classList.remove("mobile-open");
-        overlay.classList.remove("active");
-        document.body.style.overflow = "";
+            sidebar.classList.remove("mobile-open");
+            overlay.classList.remove("active");
+            document.body.style.overflow = "";
         }
     }
 
@@ -535,7 +533,7 @@ export default class PenjemputanView {
         this.isMobile = window.matchMedia("(max-width: 768px)").matches;
 
         if (wasMobile !== this.isMobile) {
-        this.checkMobileView();
+            this.checkMobileView();
         }
     }
 
@@ -544,20 +542,24 @@ export default class PenjemputanView {
         if (!mainContent) return;
 
         if (this.isMobile) {
-        mainContent.classList.add("full-width");
-        mainContent.classList.remove("collapsed");
+            mainContent.classList.add("full-width");
+            mainContent.classList.remove("collapsed");
         } else {
-        mainContent.classList.remove("full-width");
-        if (this.sidebarCollapsed) {
-            mainContent.classList.add("collapsed");
-        }
+            mainContent.classList.remove("full-width");
+            if (this.sidebarCollapsed) {
+                mainContent.classList.add("collapsed");
+            }
         }
     }
 
     toggleSelectAll(checked) {
         const checkboxes = document.querySelectorAll('.row-checkbox');
-        checkboxes.forEach((checkbox) => {
-        checkbox.checked = checked;
+        const visibleCheckboxes = Array.from(checkboxes).filter(cb => 
+            cb.closest('tr').style.display !== 'none'
+        );
+        
+        visibleCheckboxes.forEach((checkbox) => {
+            checkbox.checked = checked;
         });
     }
 
@@ -571,18 +573,12 @@ export default class PenjemputanView {
         const userAvatar = document.getElementById("user-avatar");
         
         if (userNameElement && user) {
-        userNameElement.textContent = user.name || user.username || 'User';
+            userNameElement.textContent = user.name || user.username || 'User';
         }
         
         if (userAvatar && user && user.avatar) {
-        userAvatar.src = user.avatar;
+            userAvatar.src = user.avatar;
         }
-    }
-
-    renderApplicationsTable(applicationsData) {
-        this.applicationsData = applicationsData || [];
-        this.updateTabBadges();
-        this.renderFilteredTable();
     }
 
     renderDashboardData(applicationsData) {
@@ -599,24 +595,31 @@ export default class PenjemputanView {
         const selectAll = document.getElementById('select-all');
         
         checkboxes.forEach(checkbox => checkbox.checked = false);
-        if (selectAll) selectAll.checked = false;
+        if (selectAll) {
+            selectAll.checked = false;
+            selectAll.indeterminate = false;
+        }
     }
 
     setFilter(filter) {
         const tab = document.querySelector(`[data-filter="${filter}"]`);
         if (tab) {
-        tab.click();
+            tab.click();
         }
     }
 
     removeEventListeners() {
         this.eventListeners.forEach(({ element, type, handler }) => {
-        element.removeEventListener(type, handler);
+            element.removeEventListener(type, handler);
         });
         this.eventListeners = [];
     }
 
     destroy() {
         this.removeEventListeners();
+        if (this.dataTable) {
+            this.dataTable.destroy();
+            this.dataTable = null;
+        }
     }
 }

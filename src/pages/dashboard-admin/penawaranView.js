@@ -55,11 +55,6 @@ export default class PenawaranView {
         <div class="data-section">
           <div class="data-header">
             <h3>Data Penawaran</h3>
-            <div class="table-actions">
-              <button id="refresh-btn" class="btn btn-sm btn-outline-secondary">
-                <i class="bi bi-arrow-clockwise"></i> Refresh
-              </button>
-            </div>
           </div>
 
           <div class="table-responsive">

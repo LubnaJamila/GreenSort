@@ -24,8 +24,11 @@ export default class Router {
       penjualanSampah: "#/penjualan-sampah",
       dataRekening: "#/rekening",
       tambahRekening: "#/rekening/tambah",
-      ubahRekening: "#/rekening/edit", // tambahkan ini
-
+      ubahRekening: "#/rekening/edit", 
+      formPenolakan: "#/form-penolakan",
+      formPenawaran: "#/form-penawaran",
+      formOngkir: "#/form-ongkir",
+      formSelesai: "#/form-selesai", 
     };
 
     // Inisialisasi

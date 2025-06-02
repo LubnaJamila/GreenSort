@@ -1,190 +1,77 @@
-// src/models/pengajuan-model.js
-export default class PengajuanModel {
-  constructor() {}
+const dummyApplicationsData = [
+    {
+        id: 1,
+        name: "Ahmad Rizki",
+        phone: "08123456789",
+        category: "Plastik",
+        image: "https://images.unsplash.com/photo-1572879443656-6ad30358e8c8?w=100&h=100&fit=crop&crop=center",
+        weight: "2.5",
+        status: "pending"
+    },
+    {
+        id: 2,
+        name: "Siti Nurhaliza",
+        phone: "08234567890",
+        category: "Kertas", 
+        image: "https://images.unsplash.com/photo-1594736797933-d0c18c2e5d9c?w=100&h=100&fit=crop&crop=center",
+        weight: "1.8",
+        status: "pending"
+    },
+    {
+        id: 3,
+        name: "Budi Santoso",
+        phone: "08345678901",
+        category: "Logam",
+        image: "https://images.unsplash.com/photo-1558618666-fbcd85c25e02?w=100&h=100&fit=crop&crop=center", 
+        weight: "5.2",
+        status: "pending"
+    },
+    {
+        id: 4,
+        name: "Maya Sari",
+        phone: "08456789012",
+        category: "Elektronik",
+        image: "https://images.unsplash.com/photo-1586323392860-b0669593e398?w=100&h=100&fit=crop&crop=center",
+        weight: "3.7", 
+        status: "accepted"
+    },
+    {
+        id: 5,
+        name: "Dedi Kurniawan", 
+        phone: "08567890123",
+        category: "Kaca",
+        image: "https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=100&h=100&fit=crop&crop=center",
+        weight: "4.1",
+        status: "rejected"
+    }
+];
 
-  getApplications() {
-    // Simulasi data (bisa diganti dengan fetch API ke backend)
-    return [
-        {
-            "id": 1,
-            "name": "Sherry Rowe",
-            "status": "Menunggu Validasi",
-            "jenisSampah": "Glass",
-            "kuantitas": 6,
-            "total": "Rp. 300,000",
-            "imageUrl": "../assets/images/image 44.png"
-        },
-        {
-            "id": 2,
-            "name": "John Doe",
-            "status": "Sudah Diverifikasi",
-            "jenisSampah": "Plastic",
-            "kuantitas": 8,
-            "total": "Rp. 400,000",
-            "imageUrl": "../assets/images/image 45.png"
-        },
-        {
-            "id": 3,
-            "name": "Anna Smith",
-            "status": "Menunggu Validasi",
-            "jenisSampah": "Metal",
-            "kuantitas": 10,
-            "total": "Rp. 500,000",
-            "imageUrl": "../assets/images/image 46.png"
-        },
-        {
-            "id": 4,
-            "name": "Tom Brown",
-            "status": "Sudah Diverifikasi",
-            "jenisSampah": "Glass",
-            "kuantitas": 5,
-            "total": "Rp. 250,000",
-            "imageUrl": "../assets/images/image 47.png"
-        },
-        {
-            "id": 5,
-            "name": "Lisa Green",
-            "status": "Menunggu Validasi",
-            "jenisSampah": "Organic",
-            "kuantitas": 12,
-            "total": "Rp. 600,000",
-            "imageUrl": "../assets/images/image 48.png"
-        },
-        {
-            "id": 6,
-            "name": "David Harris",
-            "status": "Sudah Diverifikasi",
-            "jenisSampah": "Plastic",
-            "kuantitas": 9,
-            "total": "Rp. 450,000",
-            "imageUrl": "../assets/images/image 49.png"
-        },
-        {
-            "id": 7,
-            "name": "Emma Clark",
-            "status": "Menunggu Validasi",
-            "jenisSampah": "Paper",
-            "kuantitas": 7,
-            "total": "Rp. 350,000",
-            "imageUrl": "../assets/images/image 50.png"
-        },
-        {
-            "id": 8,
-            "name": "George Miller",
-            "status": "Sudah Diverifikasi",
-            "jenisSampah": "Glass",
-            "kuantitas": 4,
-            "total": "Rp. 200,000",
-            "imageUrl": "../assets/images/image 51.png"
-        },
-        {
-            "id": 9,
-            "name": "Rachel Walker",
-            "status": "Menunggu Validasi",
-            "jenisSampah": "Plastic",
-            "kuantitas": 11,
-            "total": "Rp. 550,000",
-            "imageUrl": "../assets/images/image 52.png"
-        },
-        {
-            "id": 10,
-            "name": "James White",
-            "status": "Sudah Diverifikasi",
-            "jenisSampah": "Metal",
-            "kuantitas": 6,
-            "total": "Rp. 300,000",
-            "imageUrl": "../assets/images/image 53.png"
-        },
-        {
-            "id": 11,
-            "name": "Olivia King",
-            "status": "Menunggu Validasi",
-            "jenisSampah": "Organic",
-            "kuantitas": 8,
-            "total": "Rp. 400,000",
-            "imageUrl": "../assets/images/image 54.png"
-        },
-        {
-            "id": 12,
-            "name": "William Adams",
-            "status": "Sudah Diverifikasi",
-            "jenisSampah": "Glass",
-            "kuantitas": 10,
-            "total": "Rp. 500,000",
-            "imageUrl": "../assets/images/image 55.png"
-        },
-        {
-            "id": 13,
-            "name": "Sophia Thomas",
-            "status": "Menunggu Validasi",
-            "jenisSampah": "Plastic",
-            "kuantitas": 13,
-            "total": "Rp. 650,000",
-            "imageUrl": "../assets/images/image 56.png"
-        },
-        {
-            "id": 14,
-            "name": "Benjamin Lee",
-            "status": "Sudah Diverifikasi",
-            "jenisSampah": "Paper",
-            "kuantitas": 5,
-            "total": "Rp. 250,000",
-            "imageUrl": "../assets/images/image 57.png"
-        },
-        {
-            "id": 15,
-            "name": "Charlotte Moore",
-            "status": "Menunggu Validasi",
-            "jenisSampah": "Metal",
-            "kuantitas": 7,
-            "total": "Rp. 350,000",
-            "imageUrl": "../assets/images/image 58.png"
-        },
-        {
-            "id": 16,
-            "name": "Daniel Scott",
-            "status": "Sudah Diverifikasi",
-            "jenisSampah": "Organic",
-            "kuantitas": 6,
-            "total": "Rp. 300,000",
-            "imageUrl": "../assets/images/image 59.png"
-        },
-        {
-            "id": 17,
-            "name": "Ava Rodriguez",
-            "status": "Menunggu Validasi",
-            "jenisSampah": "Plastic",
-            "kuantitas": 9,
-            "total": "Rp. 450,000",
-            "imageUrl": "../assets/images/image 60.png"
-        },
-        {
-            "id": 18,
-            "name": "Lucas Perez",
-            "status": "Sudah Diverifikasi",
-            "jenisSampah": "Glass",
-            "kuantitas": 5,
-            "total": "Rp. 250,000",
-            "imageUrl": "../assets/images/image 61.png"
-        },
-        {
-            "id": 19,
-            "name": "Mia Turner",
-            "status": "Menunggu Validasi",
-            "jenisSampah": "Paper",
-            "kuantitas": 6,
-            "total": "Rp. 300,000",
-            "imageUrl": "../assets/images/image 62.png"
-        },
-        {
-            "id": 20,
-            "name": "Ethan Carter",
-            "status": "Sudah Diverifikasi",
-            "jenisSampah": "Metal",
-            "kuantitas": 12,
-            "total": "Rp. 600,000",
-            "imageUrl": "../assets/images/image 63.png"
+export default class PengajuanModel {
+    constructor() {
+        // PENTING: Inisialisasi dengan data dummy
+        this.applications = dummyApplicationsData;
+        console.log("PengajuanModel initialized with", this.applications.length, "applications");
+    }
+
+    getApplications() {
+        console.log("Getting applications:", this.applications);
+        return this.applications || [];
+    }
+
+    getApplicationById(id) {
+        const app = this.applications.find(app => app.id === parseInt(id));
+        console.log("Getting application by ID", id, ":", app);
+        return app;
+    }
+
+    updateApplicationStatus(id, status) {
+        const index = this.applications.findIndex(app => app.id === parseInt(id));
+        if (index !== -1) {
+        this.applications[index].status = status;
+        console.log("Updated application status:", this.applications[index]);
+        return this.applications[index];
         }
-    ];
-  }
+        console.warn("Application not found for ID:", id);
+        return null;
+    }
 }

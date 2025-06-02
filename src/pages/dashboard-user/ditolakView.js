@@ -54,11 +54,6 @@ export default class DitolakView {
                 <div class="data-section">
                     <div class="data-header">
                         <h3>Data Pengajuan Ditolak</h3>
-                        <div class="table-actions">
-                        <button id="refresh-btn" class="btn btn-sm btn-outline-secondary">
-                            <i class="bi bi-arrow-clockwise"></i> Refresh
-                        </button>
-                        </div>
                     </div>
             
                     <div class="table-responsive">
@@ -71,6 +66,8 @@ export default class DitolakView {
                             <th>Berat</th>
                             <th>Harga</th>
                             <th>Total Harga</th>
+                            <th>Status</th>
+                            <th>Keterangan</th>
                             </tr>
                         </thead>
                         <tbody id="applications-table-body">
@@ -218,7 +215,12 @@ export default class DitolakView {
         const tableBody = document.getElementById("applications-table-body");
         if (!tableBody) return;
     
-        const tableHTML = applicationsData
+        // Filter hanya data yang ditolak
+        const rejectedApplications = applicationsData.filter(app => 
+            app.status === "Ditolak" || app.status === "ditolak"
+        );
+    
+        const tableHTML = rejectedApplications
           .map((app) => this.renderApplicationRow(app))
           .join("");
         tableBody.innerHTML = tableHTML;
@@ -232,39 +234,78 @@ export default class DitolakView {
         return `
           <tr>
             <td><input type="checkbox" class="row-checkbox" value="${app.id}"></td>
-            <td>${app.jenisSampah}</td>
-            <td>${app.tanggalPembelian}</td>
-            <td>${app.kuantitas}</td>
-            <td>${app.harga}</td>
-            <td>${app.total}</td>
+            <td>${app.jenisSampah || '-'}</td>
+            <td>${app.tanggalPembelian || '-'}</td>
+            <td>${app.kuantitas || app.berat || '-'}</td>
+            <td>${app.harga || '-'}</td>
+            <td>${app.total || '-'}</td>
+            <td>
+                <span class="badge ${statusClass}">
+                    <i class="bi ${statusIcon}"></i> ${app.status}
+                </span>
+            </td>
+            <td>
+                <span class="text-muted small">${app.keterangan || app.reason || 'Tidak ada keterangan'}</span>
+            </td>
           </tr>
         `;
     }
     
     getStatusStyles(status) {
         const statusMap = {
-          Diterima: { class: "bg-info bg-opacity-10", icon: "bi-clipboard-check" },
-          Ditolak: { class: "bg-danger bg-opacity-10", icon: "bi-x-circle" },
-          Dikirim: { class: "bg-warning bg-opacity-10", icon: "bi-truck" },
-          Selesai: { class: "bg-success bg-opacity-10", icon: "bi-check-circle" },
-          default: { class: "bg-light", icon: "bi-hourglass-split" },
+          Diterima: { class: "bg-info bg-opacity-10 text-info", icon: "bi-clipboard-check" },
+          Ditolak: { class: "bg-danger bg-opacity-10 text-danger", icon: "bi-x-circle" },
+          Dikirim: { class: "bg-warning bg-opacity-10 text-warning", icon: "bi-truck" },
+          Penjemputan: { class: "bg-warning bg-opacity-10 text-warning", icon: "bi-truck" },
+          Selesai: { class: "bg-success bg-opacity-10 text-success", icon: "bi-check-circle" },
+          "Menunggu Validasi": { class: "bg-secondary bg-opacity-10 text-secondary", icon: "bi-hourglass-split" },
+          default: { class: "bg-light text-muted", icon: "bi-hourglass-split" },
         };
     
-        return statusMap[status] || statusMap.default;
+        return {
+            statusClass: statusMap[status]?.class || statusMap.default.class,
+            statusIcon: statusMap[status]?.icon || statusMap.default.icon
+        };
     }
     
     initDataTable() {
+        // Destroy existing DataTable if it exists
         if ($.fn.DataTable.isDataTable("#datatable")) {
           $("#datatable").DataTable().destroy();
         }
     
+        // Initialize DataTable with proper configuration
         $(document).ready(() => {
           $("#datatable").DataTable({
             responsive: true,
+            pageLength: 10,
+            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+            order: [[2, 'desc']], // Sort by date column (index 2) descending
+            columnDefs: [
+                {
+                    targets: 0, // Checkbox column
+                    orderable: false,
+                    searchable: false,
+                    className: 'text-center'
+                },
+                {
+                    targets: 6, // Status column
+                    className: 'text-center'
+                },
+                {
+                    targets: 7, // Keterangan column
+                    className: 'text-wrap',
+                    width: '200px'
+                }
+            ],
             language: {
               search: "Cari:",
               lengthMenu: "Tampilkan _MENU_ data per halaman",
-              info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+              info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data ditolak",
+              infoEmpty: "Tidak ada data ditolak",
+              infoFiltered: "(difilter dari _MAX_ total data)",
+              emptyTable: "Tidak ada pengajuan yang ditolak",
+              zeroRecords: "Tidak ditemukan data yang sesuai",
               paginate: {
                 first: "<<",
                 last: ">>",
@@ -272,12 +313,58 @@ export default class DitolakView {
                 previous: "<",
               },
             },
+            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+                 '<"row"<"col-sm-12"tr>>' +
+                 '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
           });
         });
     }
     
     renderDashboardData(applicationsData) {
         this.renderApplicationsTable(applicationsData);
+    }
+    
+    // Method khusus untuk update data ditolak
+    updateRejectedData(applicationsData) {
+        this.renderApplicationsTable(applicationsData);
+    }
+    
+    // Method untuk mendapatkan data yang dipilih
+    getSelectedRows() {
+        const selectedCheckboxes = document.querySelectorAll(
+            '#applications-table-body input[type="checkbox"]:checked'
+        );
+        return Array.from(selectedCheckboxes).map(checkbox => checkbox.value);
+    }
+    
+    // Method untuk clear selection
+    clearSelection() {
+        const selectAll = document.getElementById("select-all");
+        const checkboxes = document.querySelectorAll(
+            '#applications-table-body input[type="checkbox"]'
+        );
+        
+        if (selectAll) selectAll.checked = false;
+        checkboxes.forEach(checkbox => checkbox.checked = false);
+    }
+    
+    // Method untuk show/hide loading state
+    showLoading(show = true) {
+        const tableBody = document.getElementById("applications-table-body");
+        if (!tableBody) return;
+        
+        if (show) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <div class="mt-2">Memuat data...</div>
+                    </td>
+                </tr>
+            `;
+        }
     }
     
     removeEventListeners() {

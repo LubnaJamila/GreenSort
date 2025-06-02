@@ -1,4 +1,4 @@
-//src/pages/dashboard-admin/pengajuanPresenter.js
+// src/pages/dashboard-admin/pengajuanPresenter.js
 import PengajuanView from "./pengajuanView"; 
 import { getCurrentUser } from "../../models/authModel";
 import SidebarView from "../../views/sidebarView.js";
@@ -7,197 +7,194 @@ import PengajuanModel from "../../models/pengajuan-model.js";
 export default class PengajuanPresenter {
   constructor() {
     this.view = new PengajuanView();
+    this.pengajuanModel = new PengajuanModel();
     this.currentUser = null;
-    this.pengajuanModel = new PengajuanModel(); // Fixed naming consistency
     this.sidebarView = new SidebarView();
-    this.applications = []; // Store applications data
+    this.applications = [];
 
     // Bind methods
     this.handleLogout = this.handleLogout.bind(this);
-    this.handleAddPengajuan = this.handleAddPengajuan.bind(this);
-    this.handleFilterChange = this.handleFilterChange.bind(this);
     this.handleStatusUpdate = this.handleStatusUpdate.bind(this);
+    this.handleFilterChange = this.handleFilterChange.bind(this);
   }
 
   async init() {
-    console.log("Initializing PengajuanPresenter");
-
-    // Check user authentication
     this.currentUser = getCurrentUser();
     if (!this.currentUser) {
-      console.log("User not logged in, redirecting to login");
       const event = new CustomEvent("navigate", { detail: { page: "login" } });
       document.dispatchEvent(event);
       return;
     }
 
-    // Render view
     this.view.render();
-    
-    // Display user info
     this.view.displayUserInfo(this.currentUser);
-    
-    // Load and display applications data
     await this.loadApplications();
-    
-    // Setup event listeners
     this.setupEventListeners();
-    
-    // Bind event handlers
-    this.view.bindAddPengajuan(this.handleAddPengajuan);
-    this.view.bindFilterChange(this.handleFilterChange);
-    this.view.bindStatusUpdate(this.handleStatusUpdate);
   }
 
   async loadApplications() {
     try {
-      console.log("Loading applications data...");
+      const rawApplications = this.pengajuanModel.getApplications();
+      console.log("Raw applications from model:", rawApplications);
       
-      // Get applications from model
-      this.applications = this.pengajuanModel.getApplications();
+      this.rawApplications = rawApplications;
       
-      // Display applications in view
-      this.view.displayApplications(this.applications);
+      this.applications = rawApplications.map(app => ({
+        ...app,
+        id: app.id || Math.random().toString(36).substr(2, 9), // Generate ID jika tidak ada
+        status: this.mapStatus(app.status), // Status untuk display (Indonesian)
+        statusOriginal: app.status || 'pending', // Status asli (English) untuk filtering
+        name: app.name || app.userName || 'N/A',
+        phone: app.phone || app.phoneNumber || 'N/A',
+        category: app.category || app.wasteCategory || 'N/A',
+        weight: app.weight || app.wasteWeight || 0,
+        image: app.image || app.wasteImage || 'https://via.placeholder.com/50'
+      }));
       
-      // Update statistics
+      console.log("Processed applications:", this.applications);
+      
+      this.view.renderApplicationsTable(this.applications);
       this.updateStatistics();
-      
-      console.log(`Loaded ${this.applications.length} applications`);
     } catch (error) {
       console.error("Error loading applications:", error);
-      this.view.showError("Gagal memuat data pengajuan");
+      this.applications = [];
+      this.view.renderApplicationsTable([]);
+      this.view.showError(`Gagal memuat data pengajuan: ${error.message}`);
     }
+  }
+
+  async refreshApplications() {
+    console.log("Refreshing applications...");
+    await this.loadApplications();
+  }
+
+  async updateApplicationStatus(id, newStatus) {
+    try {
+      if (this.pengajuanModel.updateApplicationStatus) {
+        await this.pengajuanModel.updateApplicationStatus(id, newStatus);
+      }
+      
+      const applicationIndex = this.applications.findIndex(app => app.id === id);
+      if (applicationIndex !== -1) {
+        this.applications[applicationIndex].statusOriginal = newStatus;
+        this.applications[applicationIndex].status = this.mapStatus(newStatus);
+        
+        this.view.renderApplicationsTable(this.applications);
+        this.updateStatistics();
+        this.view.showSuccess(`Status berhasil diperbarui menjadi "${this.mapStatus(newStatus)}"`);
+      } else {
+        throw new Error("Pengajuan tidak ditemukan");
+      }
+    } catch (error) {
+      console.error("Error updating application status:", error);
+      this.view.showError(`Gagal memperbarui status: ${error.message}`);
+    }
+  }
+
+  mapStatus(status) {
+    const statusMap = {
+      'pending': 'Menunggu Validasi',
+      'accepted': 'Diterima',
+      'rejected': 'Ditolak'
+    };
+    return statusMap[status] || status;
   }
 
   updateStatistics() {
-    const stats = this.calculateStatistics(this.applications);
+    const stats = {
+      total: this.applications.length,
+      pending: this.applications.filter(app => 
+        app.statusOriginal === 'pending' || app.status === 'Menunggu Validasi'
+      ).length,
+      verified: this.applications.filter(app => 
+        app.statusOriginal === 'accepted' || app.status === 'Diterima'
+      ).length,
+      rejected: this.applications.filter(app => 
+        app.statusOriginal === 'rejected' || app.status === 'Ditolak'
+      ).length
+    };
+    
+    console.log("Statistics updated:", stats);
     this.view.displayStatistics(stats);
   }
 
-  calculateStatistics(applications) {
-    const total = applications.length;
-    const pending = applications.filter(app => app.status === "Menunggu Validasi").length;
-    const verified = applications.filter(app => app.status === "Sudah Diverifikasi").length;
-    
-    // Calculate total value
-    const totalValue = applications.reduce((sum, app) => {
-      const value = parseInt(app.total.replace(/[Rp.,\s]/g, ''));
-      return sum + value;
-    }, 0);
-
-    // Calculate waste type distribution
-    const wasteTypes = {};
-    applications.forEach(app => {
-      wasteTypes[app.jenisSampah] = (wasteTypes[app.jenisSampah] || 0) + 1;
-    });
-
-    return {
-      total,
-      pending,
-      verified,
-      totalValue: `Rp. ${totalValue.toLocaleString('id-ID')}`,
-      wasteTypes
-    };
-  }
-
   handleFilterChange(filterType, filterValue) {
-    console.log(`Filtering by ${filterType}:`, filterValue);
+    console.log("Filter change:", filterType, filterValue);
     
-    let filteredApplications = [...this.applications];
-    
-    if (filterType === 'status' && filterValue !== 'all') {
-      filteredApplications = filteredApplications.filter(app => 
-        app.status === filterValue
-      );
-    } else if (filterType === 'wasteType' && filterValue !== 'all') {
-      filteredApplications = filteredApplications.filter(app => 
-        app.jenisSampah === filterValue
-      );
-    } else if (filterType === 'search' && filterValue.trim() !== '') {
-      const searchTerm = filterValue.toLowerCase();
-      filteredApplications = filteredApplications.filter(app => 
-        app.name.toLowerCase().includes(searchTerm) ||
-        app.jenisSampah.toLowerCase().includes(searchTerm)
-      );
+    if (filterType === 'status') {
+      // Update filter di view
+      this.view.currentFilter = filterValue;
+      this.view.currentPage = 1; // Reset ke halaman pertama
+      
+      // Render ulang table dengan filter baru
+      this.view.renderFilteredTable();
     }
-    
-    this.view.displayApplications(filteredApplications);
-    this.view.displayStatistics(this.calculateStatistics(filteredApplications));
   }
 
   handleStatusUpdate(applicationId, newStatus) {
-    console.log(`Updating status for application ${applicationId} to ${newStatus}`);
-    
-    // Find and update application
     const applicationIndex = this.applications.findIndex(app => app.id === applicationId);
     if (applicationIndex !== -1) {
       this.applications[applicationIndex].status = newStatus;
-      
-      // In a real app, you would send this to the backend
-      // await this.pengajuanModel.updateApplicationStatus(applicationId, newStatus);
-      
-      // Refresh display
       this.view.displayApplications(this.applications);
       this.updateStatistics();
-      
       this.view.showSuccess(`Status berhasil diperbarui menjadi "${newStatus}"`);
     } else {
       this.view.showError("Pengajuan tidak ditemukan");
     }
   }
 
-  setupEventListeners() {
-    document.addEventListener("user-logout", this.handleLogout);
-  }
-
-  handleLogout() {
-    console.log("Logout initiated from PengajuanPresenter");
-    
-    this.destroy();
-    
-    const event = new CustomEvent("navigate", { detail: { page: "login" } });
-    document.dispatchEvent(event);
-  }
-
-  handleAddPengajuan() {
-    console.log("Navigating to add pengajuan form");
-    const event = new CustomEvent("navigate", { 
-      detail: { page: "add-pengajuan" } 
-    });
-    document.dispatchEvent(event);
-  }
-
-  // Method to refresh data
-  async refresh() {
-    await this.loadApplications();
-  }
-
-  // Method to get application by ID
   getApplicationById(id) {
     return this.applications.find(app => app.id === id);
   }
 
-  // Method to export data (if needed)
-  exportApplications(format = 'json') {
-    if (format === 'json') {
-      return JSON.stringify(this.applications, null, 2);
-    }
-    // Add other export formats as needed
+  setupEventListeners() {
+    document.removeEventListener("user-logout", this.handleLogout);
+    document.removeEventListener("filter-change", this.handleFilterChangeEvent);
+    document.removeEventListener("status-update", this.handleStatusUpdateEvent);
+    document.removeEventListener("refresh-applications", this.handleRefreshApplications);
+    
+    this.handleFilterChangeEvent = (e) => {
+      this.handleFilterChange(e.detail.filterType, e.detail.filterValue);
+    };
+    
+    this.handleStatusUpdateEvent = (e) => {
+      this.handleStatusUpdate(e.detail.id, e.detail.status);
+    };
+    
+    this.handleRefreshApplications = () => {
+      this.refreshApplications();
+    };
+    
+    document.addEventListener("user-logout", this.handleLogout);
+    document.addEventListener("filter-change", this.handleFilterChangeEvent);
+    document.addEventListener("status-update", this.handleStatusUpdateEvent);
+    document.addEventListener("refresh-applications", this.handleRefreshApplications);
+  }
+
+  handleLogout() {
+    this.destroy();
+    const event = new CustomEvent("navigate", { detail: { page: "login" } });
+    document.dispatchEvent(event);
   }
 
   destroy() {
-    console.log("Destroying PengajuanPresenter");
-    
-    // Remove event listeners
     document.removeEventListener("user-logout", this.handleLogout);
+    if (this.handleFilterChangeEvent) {
+      document.removeEventListener("filter-change", this.handleFilterChangeEvent);
+    }
+    if (this.handleStatusUpdateEvent) {
+      document.removeEventListener("status-update", this.handleStatusUpdateEvent);
+    }
+    if (this.handleRefreshApplications) {
+      document.removeEventListener("refresh-applications", this.handleRefreshApplications);
+    }
     
-    // Destroy view
     if (this.view && this.view.destroy) {
       this.view.destroy();
     }
     
-    // Clear data
     this.applications = [];
+    this.rawApplications = [];
     this.currentUser = null;
   }
 }

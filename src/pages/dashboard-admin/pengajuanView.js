@@ -4,14 +4,15 @@ import "../../assets/styles/dashboard.css";
 import userPlaceholder from "../../assets/images/unsplash_HaNi1rsZ6Nc.png";
 import SidebarView from "../../views/sidebarView";
 
-export default class DashboardPengajuanView {
+export default class PengajuanView {
+  
   constructor() {
     this.app = document.getElementById("content");
     this.sidebar = new SidebarView();
     this.eventListeners = [];
     this.isMobile = window.matchMedia("(max-width: 768px)").matches;
     this.sidebarCollapsed = false;
-    this.currentFilter = 'all';
+    this.currentFilter = 'pending'; 
     this.applicationsData = [];
     this.currentPage = 1;
     this.itemsPerPage = 10;
@@ -22,6 +23,13 @@ export default class DashboardPengajuanView {
     this.renderMainContent();
     this.setupEventListeners();
     this.checkMobileView();
+
+    setTimeout(() => {
+      const defaultTab = document.querySelector('[data-filter="pending"]');
+      if (defaultTab) {
+        defaultTab.classList.add('active');
+      }
+    }, 100);
   }
 
   renderMainContent() {
@@ -63,16 +71,10 @@ export default class DashboardPengajuanView {
         <div class="data-section">
           <div class="section-header">
             <h2 class="section-title">Data Pengajuan</h2>
-            <button id="refresh-btn" class="btn btn-outline-secondary btn-sm">
-              <i class="bi bi-arrow-clockwise"></i> Refresh
-            </button>
           </div>
 
           <!-- Filter Tabs -->
           <div class="filter-tabs">
-            <button class="filter-tab active" data-filter="all">
-              Semua <span class="badge bg-light text-dark ms-1" id="badge-all">80</span>
-            </button>
             <button class="filter-tab" data-filter="pending">
               Menunggu Validasi <span class="badge bg-light text-dark ms-1" id="badge-pending">16</span>
             </button>
@@ -146,7 +148,6 @@ export default class DashboardPengajuanView {
 
   setupEventListeners() {
     this.removeEventListeners();
-
     // Mobile menu toggle
     const mobileMenuBtn = document.getElementById("mobile-menu-toggle");
     if (mobileMenuBtn) {
@@ -158,7 +159,6 @@ export default class DashboardPengajuanView {
         handler,
       });
     }
-
     // Sidebar overlay click
     const overlay = document.querySelector(".sidebar-overlay");
     if (overlay) {
@@ -166,7 +166,6 @@ export default class DashboardPengajuanView {
       overlay.addEventListener("click", handler);
       this.eventListeners.push({ element: overlay, type: "click", handler });
     }
-
     // Window resize
     const resizeHandler = () => this.handleResize();
     window.addEventListener("resize", resizeHandler);
@@ -175,7 +174,6 @@ export default class DashboardPengajuanView {
       type: "resize",
       handler: resizeHandler,
     });
-
     // Refresh button
     const refreshBtn = document.getElementById("refresh-btn");
     if (refreshBtn) {
@@ -183,7 +181,6 @@ export default class DashboardPengajuanView {
       refreshBtn.addEventListener("click", handler);
       this.eventListeners.push({ element: refreshBtn, type: "click", handler });
     }
-
     // Select all checkbox
     const selectAll = document.getElementById("select-all");
     if (selectAll) {
@@ -191,7 +188,6 @@ export default class DashboardPengajuanView {
       selectAll.addEventListener("change", handler);
       this.eventListeners.push({ element: selectAll, type: "change", handler });
     }
-
     // Filter tabs
     const filterTabs = document.querySelectorAll('.filter-tab');
     filterTabs.forEach(tab => {
@@ -199,7 +195,6 @@ export default class DashboardPengajuanView {
       tab.addEventListener('click', handler);
       this.eventListeners.push({ element: tab, type: 'click', handler });
     });
-
     // Stat cards click handlers
     const statCards = document.querySelectorAll('.stat-card');
     statCards.forEach(card => {
@@ -212,23 +207,46 @@ export default class DashboardPengajuanView {
   handleFilterTab(e) {
     e.preventDefault();
     
-    // Remove active class from all tabs
     document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
     
-    // Add active class to clicked tab
-    e.target.classList.add('active');
-    
-    // Get filter value and render table
-    const filter = e.target.dataset.filter;
-    this.currentFilter = filter;
-    this.currentPage = 1; // Reset to first page
-    this.renderFilteredTable();
+    const clickedTab = e.target.closest('.filter-tab');
+    if (clickedTab) {
+      clickedTab.classList.add('active');
+      
+      const filter = clickedTab.dataset.filter;
+      this.currentFilter = filter;
+      this.currentPage = 1; // Reset ke halaman pertama
+      
+      console.log("Filter changed to:", filter);
+      
+      this.renderFilteredTable();
+    }
+  }
+
+  getCurrentDisplayData() {
+    if (!this.applicationsData || this.applicationsData.length === 0) {
+      return [];
+    }
+
+    let filteredData;
+    if (this.currentFilter === 'all') {
+      filteredData = this.applicationsData;
+    } else {
+      filteredData = this.applicationsData.filter(item => {
+        const matchesOriginal = item.statusOriginal === this.currentFilter;
+        const matchesMapped = this.mapStatusToOriginal(item.status) === this.currentFilter;
+        return matchesOriginal || matchesMapped;
+      });
+    }
+
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    return filteredData.slice(startIndex, endIndex);
   }
 
   handleStatCardClick(card) {
     const status = card.dataset.status;
     if (status) {
-      // Find corresponding tab and trigger click
       const tab = document.querySelector(`[data-filter="${status}"]`);
       if (tab) {
         tab.click();
@@ -236,61 +254,138 @@ export default class DashboardPengajuanView {
     }
   }
 
-  renderFilteredTable() {
-    const tableBody = document.getElementById('applications-table-body');
-    const emptyState = document.getElementById('empty-state');
-    
-    if (!this.applicationsData || this.applicationsData.length === 0) {
-      tableBody.innerHTML = '';
-      emptyState.style.display = 'block';
-      this.hidePagination();
+  searchApplications(searchTerm) {
+    if (!searchTerm || searchTerm.trim() === '') {
+      this.renderFilteredTable();
       return;
     }
 
-    // Filter data based on current filter
-    let filteredData = this.currentFilter === 'all' 
-      ? this.applicationsData 
-      : this.applicationsData.filter(item => item.status === this.currentFilter);
+    const tableBody = document.getElementById('applications-table-body');
+    const emptyState = document.getElementById('empty-state');
+    
+    const searchLower = searchTerm.toLowerCase();
+    
+    let filteredData = this.applicationsData.filter(item => {
+      let statusMatches = true;
+      if (this.currentFilter !== 'all') {
+        const matchesOriginal = item.statusOriginal === this.currentFilter;
+        const matchesMapped = this.mapStatusToOriginal(item.status) === this.currentFilter;
+        statusMatches = matchesOriginal || matchesMapped;
+      }
+      
+      const textMatches = 
+        (item.name && item.name.toLowerCase().includes(searchLower)) ||
+        (item.phone && item.phone.toLowerCase().includes(searchLower)) ||
+        (item.category && item.category.toLowerCase().includes(searchLower));
+      
+      return statusMatches && textMatches;
+    });
     
     if (filteredData.length === 0) {
-      tableBody.innerHTML = '';
-      emptyState.style.display = 'block';
+      if (tableBody) tableBody.innerHTML = '';
+      if (emptyState) {
+        emptyState.style.display = 'block';
+        emptyState.querySelector('p').textContent = `Tidak ada data yang cocok dengan pencarian "${searchTerm}"`;
+      }
       this.hidePagination();
       return;
     }
     
-    emptyState.style.display = 'none';
+    if (emptyState) {
+      emptyState.style.display = 'none';
+      emptyState.querySelector('p').textContent = 'Belum ada pengajuan dengan status yang dipilih.';
+    }
     
-    // Implement pagination
+    this.currentPage = 1;
+    
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
     const endIndex = startIndex + this.itemsPerPage;
     const paginatedData = filteredData.slice(startIndex, endIndex);
     
-    // Render table rows
     const tableHTML = paginatedData
       .map((app) => this.renderApplicationRow(app))
       .join("");
-    tableBody.innerHTML = tableHTML;
     
-    // Setup row event listeners
+    if (tableBody) {
+      tableBody.innerHTML = tableHTML;
+    }
+    
     this.setupRowEventListeners();
-    
-    // Render pagination
     this.renderPagination(filteredData.length);
   }
 
-  renderApplicationRow(app) {
-    const { statusClass, statusIcon, statusLabel } = this.getStatusStyles(app.status);
+  renderFilteredTable() {
+    const tableBody = document.getElementById('applications-table-body');
+    const emptyState = document.getElementById('empty-state');
+    
+    console.log("Rendering filtered table. Current filter:", this.currentFilter);
+    console.log("Applications data:", this.applicationsData);
+    
+    if (!this.applicationsData || this.applicationsData.length === 0) {
+      if (tableBody) tableBody.innerHTML = '';
+      if (emptyState) emptyState.style.display = 'block';
+      this.hidePagination();
+      return;
+    }
 
-    //ini diperbaiki sesuai dengan data yang ada
-    return `
+    let filteredData;
+    if (this.currentFilter === 'all') {
+      filteredData = this.applicationsData;
+    } else {
+      filteredData = this.applicationsData.filter(item => {
+        const matchesOriginal = item.statusOriginal === this.currentFilter;
+        const matchesMapped = this.mapStatusToOriginal(item.status) === this.currentFilter;
+        return matchesOriginal || matchesMapped;
+      });
+    }
+    
+    console.log("Filtered data length:", filteredData.length);
+    
+    if (filteredData.length === 0) {
+      if (tableBody) tableBody.innerHTML = '';
+      if (emptyState) emptyState.style.display = 'block';
+      this.hidePagination();
+      return;
+    }
+    
+    if (emptyState) emptyState.style.display = 'none';
+    
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    const paginatedData = filteredData.slice(startIndex, endIndex);
+    
+    const tableHTML = paginatedData
+      .map((app) => this.renderApplicationRow(app))
+      .join("");
+    
+    if (tableBody) {
+      tableBody.innerHTML = tableHTML;
+    }
+    
+    this.setupRowEventListeners();
+    this.renderPagination(filteredData.length);
+  }
+
+  mapStatusToOriginal(displayStatus) {
+    const reverseStatusMap = {
+      'Menunggu Validasi': 'pending',
+      'Diterima': 'accepted',
+      'Ditolak': 'rejected'
+    };
+    return reverseStatusMap[displayStatus] || displayStatus;
+  }
+  
+  renderApplicationRow(app) {
+  const { statusClass, statusIcon, statusLabel } = this.getStatusStyles(app.status);
+
+  return `
       <tr>
         <td><input type="checkbox" class="form-check-input row-checkbox" value="${app.id}"></td>
-        <td>${app.name || app.nama || 'N/A'}</td>
-        <td>${app.phone || app.noHp || app.no_hp || 'N/A'}</td>
-        <td>${app.category || app.jenisSampah || app.kategori || 'N/A'}</td>
-        <td><img src="${app.image || app.imageUrl || 'https://via.placeholder.com/50'}" alt="Sampah" class="waste-img"></td>
-        <td>${app.weight || app.berat || app.kuantitas || 0} kg</td>
+        <td>${app.name || 'N/A'}</td>
+        <td>${app.phone || 'N/A'}</td>
+        <td>${app.category || 'N/A'}</td>
+        <td><img src="${app.image || 'https://via.placeholder.com/50'}" alt="Sampah" class="waste-img"></td>
+        <td>${app.weight || 0} kg</td>
         <td>
           <span class="status-badge ${statusClass}">
             <i class="bi ${statusIcon}"></i>
@@ -298,72 +393,59 @@ export default class DashboardPengajuanView {
           </span>
         </td>
         <td>
-          <button class="btn btn-primary action-btn btn-sm detail-btn" data-id="${app.id}">
-            <i class="bi bi-eye"></i> Detail
-          </button>
+          <a href="#/form-penawaran" class="btn btn-success action-btn btn-sm accept-btn" data-id="${app.id}">
+            <i class="bi bi-check-circle"></i> Diterima
+          </a>
+          <a href="#/form-penolakan" class="btn btn-danger action-btn btn-sm reject-btn" data-id="${app.id}">
+            <i class="bi bi-x-circle"></i> Ditolak
+          </a>
         </td>
       </tr>
     `;
   }
 
   getStatusStyles(status) {
-    const statusMap = {
-      'pending': { 
+      const statusMap = {
+        'Menunggu Validasi': { 
+          class: 'pending', 
+          icon: 'bi-hourglass-split', 
+          label: 'Menunggu Validasi' 
+        },
+        'Diterima': { 
+          class: 'accepted', 
+          icon: 'bi-clipboard-check', 
+          label: 'Diterima' 
+        },
+        'Ditolak': { 
+          class: 'rejected', 
+          icon: 'bi-x-circle', 
+          label: 'Ditolak' 
+        },
+        'pending': { 
+          class: 'pending', 
+          icon: 'bi-hourglass-split', 
+          label: 'Menunggu Validasi' 
+        },
+        'accepted': { 
+          class: 'accepted', 
+          icon: 'bi-clipboard-check', 
+          label: 'Diterima' 
+        },
+        'rejected': { 
+          class: 'rejected', 
+          icon: 'bi-x-circle', 
+          label: 'Ditolak' 
+        }
+      };
+
+      return statusMap[status] || { 
         class: 'pending', 
         icon: 'bi-hourglass-split', 
-        label: 'Menunggu Validasi' 
-      },
-      'accepted': { 
-        class: 'accepted', 
-        icon: 'bi-clipboard-check', 
-        label: 'Diterima' 
-      },
-      'rejected': { 
-        class: 'rejected', 
-        icon: 'bi-x-circle', 
-        label: 'Ditolak' 
-      },
-      'shipped': { 
-        class: 'shipped', 
-        icon: 'bi-truck', 
-        label: 'Dikirim' 
-      },
-      'completed': { 
-        class: 'completed', 
-        icon: 'bi-check-circle', 
-        label: 'Selesai' 
-      },
-      'Diterima': { 
-        class: 'accepted', 
-        icon: 'bi-clipboard-check', 
-        label: 'Diterima' 
-      },
-      'Ditolak': { 
-        class: 'rejected', 
-        icon: 'bi-x-circle', 
-        label: 'Ditolak' 
-      },
-      'Dikirim': { 
-        class: 'shipped', 
-        icon: 'bi-truck', 
-        label: 'Dikirim' 
-      },
-      'Selesai': { 
-        class: 'completed', 
-        icon: 'bi-check-circle', 
-        label: 'Selesai' 
-      }
-    };
-
-    return statusMap[status] || { 
-      class: 'pending', 
-      icon: 'bi-hourglass-split', 
-      label: status || 'Unknown' 
-    };
+        label: status || 'Unknown' 
+      };
   }
 
   setupRowEventListeners() {
-    // Detail button event listeners
     const detailBtns = document.querySelectorAll('.detail-btn');
     detailBtns.forEach(btn => {
       const handler = (e) => this.handleDetailClick(e);
@@ -371,7 +453,6 @@ export default class DashboardPengajuanView {
       this.eventListeners.push({ element: btn, type: 'click', handler });
     });
 
-    // Row checkbox event listeners
     const rowCheckboxes = document.querySelectorAll('.row-checkbox');
     rowCheckboxes.forEach(checkbox => {
       const handler = () => this.updateSelectAllState();
@@ -382,7 +463,6 @@ export default class DashboardPengajuanView {
 
   handleDetailClick(e) {
     const id = e.target.closest('.detail-btn').dataset.id;
-    // Dispatch custom event for detail view
     const event = new CustomEvent('show-application-detail', { 
       detail: { id: id } 
     });
@@ -394,7 +474,12 @@ export default class DashboardPengajuanView {
     const paginationList = document.getElementById('pagination-list');
     const paginationContainer = document.getElementById('pagination-container');
     
-    if (totalPages <= 1) {
+    if (!paginationList || !paginationContainer) {
+      console.warn('Pagination elements not found');
+      return;
+    }
+    
+    if (totalPages <= 1 || totalItems === 0) {
       paginationContainer.style.display = 'none';
       return;
     }
@@ -403,7 +488,6 @@ export default class DashboardPengajuanView {
     
     let paginationHTML = '';
     
-    // Previous button
     paginationHTML += `
       <li class="page-item ${this.currentPage === 1 ? 'disabled' : ''}">
         <a class="page-link" href="#" data-page="${this.currentPage - 1}">
@@ -412,7 +496,6 @@ export default class DashboardPengajuanView {
       </li>
     `;
     
-    // Page numbers
     const startPage = Math.max(1, this.currentPage - 2);
     const endPage = Math.min(totalPages, this.currentPage + 2);
     
@@ -438,7 +521,6 @@ export default class DashboardPengajuanView {
       paginationHTML += `<li class="page-item"><a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a></li>`;
     }
     
-    // Next button
     paginationHTML += `
       <li class="page-item ${this.currentPage === totalPages ? 'disabled' : ''}">
         <a class="page-link" href="#" data-page="${this.currentPage + 1}">
@@ -449,7 +531,6 @@ export default class DashboardPengajuanView {
     
     paginationList.innerHTML = paginationHTML;
     
-    // Add pagination event listeners
     const pageLinks = paginationList.querySelectorAll('a.page-link');
     pageLinks.forEach(link => {
       const handler = (e) => this.handlePaginationClick(e);
@@ -460,11 +541,14 @@ export default class DashboardPengajuanView {
 
   handlePaginationClick(e) {
     e.preventDefault();
-    const page = parseInt(e.target.closest('a').dataset.page);
-    if (page && page !== this.currentPage) {
-      this.currentPage = page;
-      this.renderFilteredTable();
-    }
+    const pageLink = e.target.closest('a');
+    if (!pageLink || !pageLink.dataset.page) return;
+    
+    const page = parseInt(pageLink.dataset.page);
+    if (isNaN(page) || page < 1 || page === this.currentPage) return;
+    
+    this.currentPage = page;
+    this.renderFilteredTable();
   }
 
   hidePagination() {
@@ -475,34 +559,30 @@ export default class DashboardPengajuanView {
   }
 
   updateTabBadges() {
-    if (!this.applicationsData) return;
+    if (!this.applicationsData || !Array.isArray(this.applicationsData)) return;
 
     const counts = {
-      all: this.applicationsData.length,
-      pending: this.applicationsData.filter(item => 
-        item.status === 'pending' || item.status === 'Menunggu Validasi'
-      ).length,
-      accepted: this.applicationsData.filter(item => 
-        item.status === 'accepted' || item.status === 'Diterima'
-      ).length,
-      rejected: this.applicationsData.filter(item => 
-        item.status === 'rejected' || item.status === 'Ditolak'
-      ).length,
-      shipped: this.applicationsData.filter(item => 
-        item.status === 'shipped' || item.status === 'Dikirim'
-      ).length,
-      completed: this.applicationsData.filter(item => 
-        item.status === 'completed' || item.status === 'Selesai'
-      ).length
+      pending: 0,
+      accepted: 0,
+      rejected: 0
     };
 
-    // Update tab badges
-    Object.keys(counts).forEach(status => {
-      const badge = document.getElementById(`badge-${status}`);
-      const stat = document.getElementById(`stat-${status}`);
-      if (badge) badge.textContent = counts[status];
-      if (stat) stat.textContent = counts[status];
+    this.applicationsData.forEach(item => {
+      const originalStatus = item.statusOriginal || this.mapStatusToOriginal(item.status);
+      if (originalStatus === 'pending') counts.pending++;
+      else if (originalStatus === 'accepted') counts.accepted++;
+      else if (originalStatus === 'rejected') counts.rejected++;
     });
+
+    console.log("Tab badge counts:", counts);
+
+    const pendingBadge = document.getElementById('badge-pending');
+    const acceptedBadge = document.getElementById('badge-accepted');
+    const rejectedBadge = document.getElementById('badge-rejected');
+    
+    if (pendingBadge) pendingBadge.textContent = counts.pending;
+    if (acceptedBadge) acceptedBadge.textContent = counts.accepted;
+    if (rejectedBadge) rejectedBadge.textContent = counts.rejected;
   }
 
   updateSelectAllState() {
@@ -585,9 +665,66 @@ export default class DashboardPengajuanView {
     }
   }
 
+  displayApplications(applicationsData) {
+    this.renderApplicationsTable(applicationsData);
+  }
+
+  displayStatistics(stats) {
+    if (stats) {
+      const statCards = document.querySelectorAll('.stat-number');
+      if (statCards.length >= 3) {
+        statCards[0].textContent = stats.total || '0';
+        statCards[1].textContent = stats.pending || '0';
+        statCards[2].textContent = stats.verified || '0';
+      }
+    }
+  }
+
+  showError(message) {
+    console.error(message);
+    alert(message);
+  }
+
+  showSuccess(message) {
+    console.log(message);
+    alert(message);
+  }
+
   renderApplicationsTable(applicationsData) {
-    this.applicationsData = applicationsData || [];
+    console.log("Rendering applications table with data:", applicationsData);
+    
+    if (!Array.isArray(applicationsData)) {
+      console.warn("Applications data is not an array:", applicationsData);
+      this.applicationsData = [];
+    } else {
+      this.applicationsData = applicationsData.map(app => ({
+        ...app,
+        statusOriginal: app.statusOriginal || this.mapStatusToOriginal(app.status) || 'pending'
+      }));
+    }
+    
+    console.log("Applications data set to:", this.applicationsData.length, "items");
+    
+    this.currentPage = 1;
+    
     this.updateTabBadges();
+    this.renderFilteredTable();
+    console.log("Table rendered successfully");
+  }
+
+  resetFilters() {
+    this.currentFilter = 'pending';
+    this.currentPage = 1;
+    
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+      tab.classList.remove('active');
+    });
+    
+    const defaultTab = document.querySelector('[data-filter="pending"]');
+    if (defaultTab) {
+      defaultTab.classList.add('active');
+    }
+    
     this.renderFilteredTable();
   }
 

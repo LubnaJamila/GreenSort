@@ -54,12 +54,7 @@ export default class SelesaiView {
 
         <div class="data-section">
           <div class="data-header">
-            <h3>Semua Data</h3>
-            <div class="table-actions">
-              <button id="refresh-btn" class="btn btn-sm btn-outline-secondary">
-                <i class="bi bi-arrow-clockwise"></i> Refresh
-              </button>
-            </div>
+            <h3>Data Selesai</h3>
           </div>
 
           <div class="table-responsive">
@@ -229,20 +224,37 @@ export default class SelesaiView {
     this.initDataTable();
   }
 
-  // renderApplicationRow(app) {
-  //   const { statusClass, statusIcon } = this.getStatusStyles(app.status);
+  // Perbaikan untuk method renderApplicationRow di SelesaiView
+renderApplicationRow(app) {
+  const { statusClass, statusIcon } = this.getStatusStyles(app.status);
 
-  //   return `
-  //     <tr>
-  //       <td><input type="checkbox" class="row-checkbox" value="${app.id}"></td>
-  //       <td>${app.name}</td>
-  //       <td>${app.tanggalPembelian}</td>
-  //       <td>${app.kuantitas}</td>
-  //       <td>${app.harga}</td>
-  //       <td>${app.total}</td>
-  //     </tr>
-  //   `;
-  // }
+  return `
+    <tr>
+      <td><input type="checkbox" class="row-checkbox" value="${app.id}"></td>
+      <td>${app.nama || 'N/A'}</td>
+      <td>${app.jenisSampah || 'N/A'}</td>
+      <td>${app.berat || app.kuantitas || 'N/A'}</td>
+      <td>${app.harga || 'N/A'}</td>
+      <td>${app.totalHarga || app.total || 'N/A'}</td>
+      <td>
+        ${app.gambarSampah ? 
+          `<img src="${app.gambarSampah}" alt="Sampah" style="width: 50px; height: 50px; object-fit: cover;">` : 
+          '<span class="text-muted">No Image</span>'
+        }
+      </td>
+      <td>
+        <div class="btn-group">
+          <button class="btn btn-sm btn-outline-primary" onclick="viewDetail(${app.id})" title="View Detail">
+            <i class="bi bi-eye"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-success" onclick="downloadReceipt(${app.id})" title="Download Receipt">
+            <i class="bi bi-download"></i>
+          </button>
+        </div>
+      </td>
+    </tr>
+  `;
+}
 
   getStatusStyles(status) {
     const statusMap = {

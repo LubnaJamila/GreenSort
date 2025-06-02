@@ -41,37 +41,55 @@ export default class SelesaiPresenter {
   }
 
   // ✅ Tambahkan method untuk data dummy sementara
-  getDummySelesaiData() {
-    return [
-      {
-        id: 1,
-        jenisSampah: "Plastik Botol",
-        tanggalPembelian: "2024-01-15",
-        kuantitas: "5 kg",
-        harga: "Rp 2.000",
-        total: "Rp 10.000",
-        status: "Selesai"
-      },
-      {
-        id: 2,
-        jenisSampah: "Kertas Bekas",
-        tanggalPembelian: "2024-01-14",
-        kuantitas: "3 kg",
-        harga: "Rp 1.500",
-        total: "Rp 4.500",
-        status: "Selesai"
-      },
-      {
-        id: 3,
-        jenisSampah: "Kaleng Aluminium",
-        tanggalPembelian: "2024-01-13",
-        kuantitas: "2 kg",
-        harga: "Rp 5.000",
-        total: "Rp 10.000",
-        status: "Selesai"
-      }
-    ];
-  }
+  // Perbaikan untuk data dummy di SelesaiPresenter
+getDummySelesaiData() {
+  return [
+    {
+      id: 1,
+      nama: "John Doe",
+      jenisSampah: "Plastik Botol",
+      berat: "5 kg",
+      harga: "Rp 2.000",
+      totalHarga: "Rp 10.000",
+      gambarSampah: "https://via.placeholder.com/100x100?text=Plastik",
+      status: "Selesai",
+      tanggalPembelian: "2024-01-15"
+    },
+    {
+      id: 2,
+      nama: "Jane Smith",
+      jenisSampah: "Kertas Bekas",
+      berat: "3 kg", 
+      harga: "Rp 1.500",
+      totalHarga: "Rp 4.500",
+      gambarSampah: "https://via.placeholder.com/100x100?text=Kertas",
+      status: "Selesai",
+      tanggalPembelian: "2024-01-14"
+    },
+    {
+      id: 3,
+      nama: "Bob Wilson",
+      jenisSampah: "Kaleng Aluminium",
+      berat: "2 kg",
+      harga: "Rp 5.000", 
+      totalHarga: "Rp 10.000",
+      gambarSampah: "https://via.placeholder.com/100x100?text=Kaleng",
+      status: "Selesai",
+      tanggalPembelian: "2024-01-13"
+    },
+    {
+      id: 4,
+      nama: "Alice Brown",
+      jenisSampah: "Kardus",
+      berat: "7 kg",
+      harga: "Rp 1.000",
+      totalHarga: "Rp 7.000", 
+      gambarSampah: null, // Test case untuk gambar kosong
+      status: "Selesai",
+      tanggalPembelian: "2024-01-12"
+    }
+  ];
+}
 
   setupEventListeners() {
     // ✅ Event listener untuk logout
