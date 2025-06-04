@@ -11,6 +11,7 @@ export default class DashboardUserView {
     this.eventListeners = [];
     this.isMobile = window.matchMedia("(max-width: 768px)").matches;
     this.sidebarCollapsed = false;
+    this.baseImageUrl = "http://localhost:3000/uploads/";
   }
 
   render() {
@@ -44,17 +45,50 @@ export default class DashboardUserView {
           </div>
 
           <div class="stats-grid">
-            ${this.renderStatCard("80", "Menunggu Validasi", "bi-hourglass-split", "yellow-bg", "#/dashboardUser")}
-            ${this.renderStatCard("16", "Diterima", "bi-clipboard-check", "blue-bg", "#/diterima")}
-            ${this.renderStatCard("8", "Ditolak", "bi-x-circle", "red-bg", "#/ditolak")}
-            ${this.renderStatCard("24", "Penjemputan", "bi-truck", "orange-bg", "#/penjemputan")}
-            ${this.renderStatCard("42", "Selesai", "bi-check-circle", "green-bg", "#/selesaiUser")}
+            ${this.renderStatCard(
+              "0",
+              "Menunggu Validasi",
+              "bi-hourglass-split",
+              "yellow-bg",
+              "#/dashboardUser"
+            )}
+            ${this.renderStatCard(
+              "0",
+              "Diterima",
+              "bi-clipboard-check",
+              "blue-bg",
+              "#/diterima"
+            )}
+            ${this.renderStatCard(
+              "0",
+              "Ditolak",
+              "bi-x-circle",
+              "red-bg",
+              "#/ditolak"
+            )}
+            ${this.renderStatCard(
+              "0",
+              "Penjemputan",
+              "bi-truck",
+              "orange-bg",
+              "#/penjemputan"
+            )}
+            ${this.renderStatCard(
+              "0",
+              "Selesai",
+              "bi-check-circle",
+              "green-bg",
+              "#/selesaiUser"
+            )}
           </div>
         </header>
 
         <div class="data-section">
           <div class="data-header">
-            <h3>Data Pengajuan</h3>
+            <h3>Data Pengajuan Sampah</h3>
+            <button id="refresh-btn" class="btn btn-outline-primary btn-sm">
+              <i class="bi bi-arrow-clockwise"></i> Refresh
+            </button>
           </div>
 
           <div class="table-responsive">
@@ -62,17 +96,22 @@ export default class DashboardUserView {
               <thead>
                 <tr>
                   <th><input type="checkbox" id="select-all"></th>
+                  <th>Gambar Sampah</th>
                   <th>Jenis Sampah</th>
-                  <th>Tanggal Pembelian</th>
-                  <th>Berat</th>
-                  <th>Harga</th>
-                  <th>Total Harga</th>
+                  <th>Berat (kg)</th>
                   <th>Status</th>
                   <th>Aksi</th>
                 </tr>
               </thead>
               <tbody id="applications-table-body">
-                <!-- Dynamic content will be inserted here -->
+                <tr>
+                  <td colspan="6" class="text-center py-4">
+                    <div class="text-muted">
+                      <i class="bi bi-clock-history" style="font-size: 2rem;"></i>
+                      <p class="mt-2">Memuat data...</p>
+                    </div>
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -150,7 +189,6 @@ export default class DashboardUserView {
   toggleSidebar(show = null) {
     const sidebar = document.querySelector(".sidebar");
     const overlay = document.querySelector(".sidebar-overlay");
-    const mainContent = document.querySelector(".main-content");
 
     if (show === null) {
       show = !sidebar.classList.contains("mobile-open");
@@ -208,11 +246,11 @@ export default class DashboardUserView {
   displayUserInfo(user) {
     const userNameElement = document.getElementById("user-name");
     const userAvatar = document.getElementById("user-avatar");
-    
+
     if (userNameElement && user) {
-      userNameElement.textContent = user.name || user.username;
+      userNameElement.textContent = user.name || user.username || "User";
     }
-    
+
     if (userAvatar && user && user.avatar) {
       userAvatar.src = user.avatar;
     }
@@ -221,6 +259,20 @@ export default class DashboardUserView {
   renderApplicationsTable(applicationsData) {
     const tableBody = document.getElementById("applications-table-body");
     if (!tableBody) return;
+
+    if (!applicationsData || applicationsData.length === 0) {
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="6" class="text-center py-4">
+            <div class="text-muted">
+              <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+              <p class="mt-2">Belum ada data pengajuan sampah</p>
+            </div>
+          </td>
+        </tr>
+      `;
+      return;
+    }
 
     const tableHTML = applicationsData
       .map((app) => this.renderApplicationRow(app))
@@ -232,177 +284,183 @@ export default class DashboardUserView {
   }
 
   renderApplicationRow(app) {
-    const { statusClass, statusIcon } = this.getStatusStyles(app.status);
+    const statusStyles = this.getStatusStyles(app.status);
+    const imageUrl = app.gambar_sampah
+      ? `${this.baseImageUrl}${app.gambar_sampah}`
+      : "";
 
     return `
       <tr>
         <td><input type="checkbox" class="row-checkbox" value="${app.id}"></td>
-        <td>${app.jenisSampah}</td>
-        <td>${app.tanggalPembelian}</td>
-        <td>${app.kuantitas} kg</td>
-        <td>Rp ${this.formatCurrency(app.harga)}</td>
-        <td>Rp ${this.formatCurrency(app.total)}</td>
         <td>
-          <span class="badge ${statusClass}">
-            <i class="bi ${statusIcon}"></i>
-            ${app.status}
+          ${
+            imageUrl
+              ? `
+            <img src="${imageUrl}" 
+                 alt="Gambar Sampah" 
+                 class="img-thumbnail application-image" 
+                 style="width: 60px; height: 60px; object-fit: cover; cursor: pointer;"
+                 onclick="this.parentElement.querySelector('.image-modal').style.display='block'"
+                 onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjRjVGNUY1Ii8+CjxwYXRoIGQ9Ik0yMCAyMEw0MCA0ME0yMCA0MEw0MCAyMCIgc3Ryb2tlPSIjQ0NDIiBzdHJva2Utd2lkdGg9IjIiLz4KPHN2Zz4K'; this.style.objectFit='contain';">
+            <div class="image-modal" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.8); cursor:pointer;" onclick="this.style.display='none'">
+              <img src="${imageUrl}" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); max-width:90%; max-height:90%; object-fit:contain;">
+            </div>
+          `
+              : `
+            <div style="width: 60px; height: 60px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+              <i class="bi bi-image text-muted"></i>
+            </div>
+          `
+          }
+        </td>
+        <td>${app.jenisSampah || "-"}</td>
+        <td>${app.berat ? app.berat.toFixed(2) + " kg" : "-"}</td>
+        <td>
+          <span class="badge ${statusStyles.class}">
+            <i class="bi ${statusStyles.icon}"></i>
+            ${this.formatStatus(app.status)}
           </span>
         </td>
         <td>
-          <div class="btn-group btn-group-sm" role="group">
-            <button type="button" class="btn btn-outline-primary btn-sm view-btn" data-id="${app.id}" title="Lihat Detail">
-              <i class="bi bi-eye"></i>
-            </button>
-            ${this.renderActionButtons(app)}
-          </div>
+          <button type="button" class="btn btn-outline-primary btn-sm view-btn" data-id="${
+            app.id
+          }" title="Lihat Detail">
+            <i class="bi bi-eye"></i>
+          </button>
         </td>
       </tr>
     `;
   }
 
-  renderActionButtons(app) {
-    let buttons = '';
-    
-    // Tombol edit hanya untuk status tertentu
-    if (app.status === 'Menunggu Validasi' || app.status === 'Ditolak') {
-      buttons += `
-        <button type="button" class="btn btn-outline-warning btn-sm edit-btn" data-id="${app.id}" title="Edit">
-          <i class="bi bi-pencil"></i>
-        </button>
-      `;
-    }
-    
-    // Tombol hapus hanya untuk status tertentu
-    if (app.status === 'Menunggu Validasi' || app.status === 'Ditolak') {
-      buttons += `
-        <button type="button" class="btn btn-outline-danger btn-sm delete-btn" data-id="${app.id}" title="Hapus">
-          <i class="bi bi-trash"></i>
-        </button>
-      `;
-    }
-    
-    return buttons;
-  }
-
   setupTableEventListeners() {
-    // Event listeners untuk tombol aksi di tabel
     const tableBody = document.getElementById("applications-table-body");
     if (!tableBody) return;
 
-    // View button
-    const viewButtons = tableBody.querySelectorAll('.view-btn');
-    viewButtons.forEach(btn => {
-      const handler = (e) => this.handleViewApplication(e.target.closest('button').dataset.id);
-      btn.addEventListener('click', handler);
-      this.eventListeners.push({ element: btn, type: 'click', handler });
-    });
-
-    // Edit button
-    const editButtons = tableBody.querySelectorAll('.edit-btn');
-    editButtons.forEach(btn => {
-      const handler = (e) => this.handleEditApplication(e.target.closest('button').dataset.id);
-      btn.addEventListener('click', handler);
-      this.eventListeners.push({ element: btn, type: 'click', handler });
-    });
-
-    // Delete button
-    const deleteButtons = tableBody.querySelectorAll('.delete-btn');
-    deleteButtons.forEach(btn => {
-      const handler = (e) => this.handleDeleteApplication(e.target.closest('button').dataset.id);
-      btn.addEventListener('click', handler);
-      this.eventListeners.push({ element: btn, type: 'click', handler });
+    // View buttons
+    const viewButtons = tableBody.querySelectorAll(".view-btn");
+    viewButtons.forEach((btn) => {
+      const handler = (e) => {
+        e.preventDefault();
+        this.handleViewApplication(e.target.closest("button").dataset.id);
+      };
+      btn.addEventListener("click", handler);
+      this.eventListeners.push({ element: btn, type: "click", handler });
     });
   }
 
   handleViewApplication(applicationId) {
-    const event = new CustomEvent("view-application", { 
-      detail: { applicationId } 
+    const event = new CustomEvent("view-application", {
+      detail: { applicationId },
     });
     document.dispatchEvent(event);
-  }
-
-  handleEditApplication(applicationId) {
-    const event = new CustomEvent("edit-application", { 
-      detail: { applicationId } 
-    });
-    document.dispatchEvent(event);
-  }
-
-  handleDeleteApplication(applicationId) {
-    if (confirm('Apakah Anda yakin ingin menghapus pengajuan ini?')) {
-      const event = new CustomEvent("delete-application", { 
-        detail: { applicationId } 
-      });
-      document.dispatchEvent(event);
-    }
   }
 
   getStatusStyles(status) {
+    const normalizedStatus = status ? status.toLowerCase() : "";
+
     const statusMap = {
-      'Menunggu Validasi': { class: "bg-warning bg-opacity-10 text-warning", icon: "bi-hourglass-split" },
-      'Diterima': { class: "bg-info bg-opacity-10 text-info", icon: "bi-clipboard-check" },
-      'Ditolak': { class: "bg-danger bg-opacity-10 text-danger", icon: "bi-x-circle" },
-      'Penjemputan': { class: "bg-primary bg-opacity-10 text-primary", icon: "bi-truck" },
-      'Selesai': { class: "bg-success bg-opacity-10 text-success", icon: "bi-check-circle" },
-      default: { class: "bg-light text-muted", icon: "bi-hourglass-split" },
+      pengajuan: {
+        class: "bg-warning bg-opacity-10 text-warning border border-warning",
+        icon: "bi-hourglass-split",
+      },
+      "menunggu validasi": {
+        class: "bg-warning bg-opacity-10 text-warning border border-warning",
+        icon: "bi-hourglass-split",
+      },
+      diterima: {
+        class: "bg-info bg-opacity-10 text-info border border-info",
+        icon: "bi-clipboard-check",
+      },
+      ditolak: {
+        class: "bg-danger bg-opacity-10 text-danger border border-danger",
+        icon: "bi-x-circle",
+      },
+      penjemputan: {
+        class: "bg-primary bg-opacity-10 text-primary border border-primary",
+        icon: "bi-truck",
+      },
+      selesai: {
+        class: "bg-success bg-opacity-10 text-success border border-success",
+        icon: "bi-check-circle",
+      },
     };
 
-    return statusMap[status] || statusMap.default;
+    return (
+      statusMap[normalizedStatus] || {
+        class: "bg-light text-muted border",
+        icon: "bi-question-circle",
+      }
+    );
   }
 
-  formatCurrency(amount) {
-    return new Intl.NumberFormat('id-ID').format(amount);
+  formatStatus(status) {
+    if (!status) return "Tidak Diketahui";
+
+    const statusMap = {
+      pengajuan: "Pengajuan",
+      diterima: "Diterima",
+      ditolak: "Ditolak",
+      penjemputan: "Penjemputan",
+      selesai: "Selesai",
+    };
+
+    return statusMap[status.toLowerCase()] || status;
   }
 
   initDataTable() {
     // Destroy existing DataTable if it exists
-    if ($.fn.DataTable.isDataTable("#datatable")) {
+    if ($.fn.DataTable && $.fn.DataTable.isDataTable("#datatable")) {
       $("#datatable").DataTable().destroy();
     }
 
-    // Initialize DataTable with Indonesian language
-    $(document).ready(() => {
-      $("#datatable").DataTable({
-        responsive: true,
-        order: [[2, 'desc']], // Sort by date column (index 2) descending
-        columnDefs: [
-          { orderable: false, targets: [0, 7] }, // Disable sorting for checkbox and actions columns
-          { searchable: false, targets: [0, 7] }, // Disable search for checkbox and actions columns
-        ],
-        language: {
-          search: "Cari:",
-          lengthMenu: "Tampilkan _MENU_ data per halaman",
-          info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-          infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
-          infoFiltered: "(difilter dari _MAX_ total data)",
-          loadingRecords: "Memuat...",
-          processing: "Memproses...",
-          emptyTable: "Tidak ada data yang tersedia",
-          zeroRecords: "Tidak ditemukan data yang sesuai",
-          paginate: {
-            first: "<<",
-            last: ">>",
-            next: ">",
-            previous: "<",
+    // Check if jQuery and DataTables are available
+    if (typeof $ !== "undefined" && $.fn.DataTable) {
+      $(document).ready(() => {
+        $("#datatable").DataTable({
+          responsive: true,
+          order: [[2, "asc"]], // Sort by jenis sampah column
+          columnDefs: [
+            { orderable: false, targets: [0, 1, 5] }, // Disable sorting for checkbox, image, and actions columns
+            { searchable: false, targets: [0, 1, 5] }, // Disable search for checkbox, image, and actions columns
+          ],
+          language: {
+            search: "Cari:",
+            lengthMenu: "Tampilkan _MENU_ data per halaman",
+            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+            infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
+            infoFiltered: "(difilter dari _MAX_ total data)",
+            loadingRecords: "Memuat...",
+            processing: "Memproses...",
+            emptyTable: "Tidak ada data yang tersedia",
+            zeroRecords: "Tidak ditemukan data yang sesuai",
+            paginate: {
+              first: "<<",
+              last: ">>",
+              next: ">",
+              previous: "<",
+            },
           },
-        },
-        pageLength: 10,
-        lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+          pageLength: 10,
+          lengthMenu: [
+            [10, 25, 50, 100],
+            [10, 25, 50, 100],
+          ],
+        });
       });
-    });
+    }
   }
 
   updateStatCards(stats) {
     // Update stat numbers if stats object is provided
     if (!stats) return;
-    
-    const statCards = document.querySelectorAll('.stat-number');
+
+    const statCards = document.querySelectorAll(".stat-number");
     if (statCards.length >= 5) {
-      statCards[0].textContent = stats.menungguValidasi || '0';
-      statCards[1].textContent = stats.diterima || '0';
-      statCards[2].textContent = stats.ditolak || '0';
-      statCards[3].textContent = stats.penjemputan || '0';
-      statCards[4].textContent = stats.selesai || '0';
+      statCards[0].textContent = stats.menungguValidasi || "0";
+      statCards[1].textContent = stats.diterima || "0";
+      statCards[2].textContent = stats.ditolak || "0";
+      statCards[3].textContent = stats.penjemputan || "0";
+      statCards[4].textContent = stats.selesai || "0";
     }
   }
 

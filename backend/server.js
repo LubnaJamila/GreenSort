@@ -3,6 +3,9 @@ const mysql = require("mysql2");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
 const banks = require('./data/bankList');
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 
 const app = express();
 const port = 3000;
@@ -26,6 +29,7 @@ db.connect((err) => {
 
 app.use(cors());
 app.use(express.json());
+
 
 app.get('/api/banks', (req, res) => {
   res.json(banks);
@@ -452,6 +456,150 @@ app.delete('/api/alamat/user/:id_user', (req, res) => {
     });
   });
 });
+
+const uploadDir = path.resolve(__dirname, "../src/uploads");
+
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+  console.log(`Folder uploads dibuat di ${uploadDir}`);
+}
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueName = `sampah-${Date.now()}${path.extname(file.originalname)}`;
+    cb(null, uniqueName);
+  },
+});
+
+const upload = multer({ storage });
+
+// Serve file statis dari folder uploads supaya bisa diakses via URL
+app.use("/uploads", express.static(uploadDir));
+// Pengajuan endpoint
+app.post("/api/pengajuan", upload.single("gambar"), (req, res) => {
+  const { user_id, kategori_sampah, berat } = req.body;
+  const gambar_sampah = req.file ? `/uploads/${req.file.filename}` : null;
+
+  if (!user_id || !kategori_sampah || !berat || !gambar_sampah) {
+    return res.status(400).json({ success: false, message: "Data tidak lengkap" });
+  }
+
+  const sql = `INSERT INTO penjualan_sampah (user_id, gambar_sampah, jenis_sampah, berat, status)
+               VALUES (?, ?, ?, ?, 'pengajuan')`;
+
+  db.query(sql, [user_id, gambar_sampah, kategori_sampah, berat], (err, result) => {
+    if (err) return res.status(500).json({ success: false, message: "DB Error" });
+    res.json({ success: true, message: "Pengajuan berhasil", id_pengajuan: result.insertId });
+  });
+});
+
+// Update endpoint di server.js untuk mengambil semua pengajuan berdasarkan user_id
+// Ganti endpoint yang ada dengan yang ini:
+
+app.get("/api/pengajuan/:user_id", (req, res) => {
+  const { user_id } = req.params;
+  
+  // Validasi user_id
+  if (!user_id || isNaN(user_id)) {
+    return res.status(400).json({ 
+      success: false, 
+      message: "User ID tidak valid" 
+    });
+  }
+
+  // Query untuk mengambil semua pengajuan user dengan semua status
+  const sql = `
+    SELECT 
+      id,
+      user_id,
+      gambar_sampah, 
+      jenis_sampah, 
+      berat, 
+      status
+    FROM penjualan_sampah 
+    WHERE user_id = ? 
+  `;
+
+  db.query(sql, [user_id], (err, results) => {
+    if (err) {
+      console.error("Error fetching pengajuan:", err);
+      return res.status(500).json({ 
+        success: false, 
+        message: "Gagal mengambil data pengajuan" 
+      });
+    }
+
+    // Format data untuk frontend
+    const formattedResults = results.map(item => ({
+      id: item.id_penjualan,
+      user_id: item.user_id,
+      gambar_sampah: item.gambar_sampah ? item.gambar_sampah.replace('/uploads/', '') : null,
+      jenis_sampah: item.jenis_sampah,
+      berat: parseFloat(item.berat),
+      status: item.status,
+    }));
+
+    res.json({ 
+      success: true, 
+      data: formattedResults,
+      count: formattedResults.length
+    });
+  });
+});
+
+// Tambahan: Endpoint untuk mengambil pengajuan berdasarkan status tertentu
+app.get("/api/pengajuan/:user_id/status/:status", (req, res) => {
+  const { user_id, status } = req.params;
+  
+  if (!user_id || isNaN(user_id)) {
+    return res.status(400).json({ 
+      success: false, 
+      message: "User ID tidak valid" 
+    });
+  }
+
+  const sql = `
+    SELECT 
+      id,
+      user_id,
+      gambar_sampah, 
+      jenis_sampah, 
+      berat, 
+      status
+    FROM penjualan_sampah 
+    WHERE user_id = ? AND status = ?
+  `;
+
+  db.query(sql, [user_id, status], (err, results) => {
+    if (err) {
+      console.error("Error fetching pengajuan by status:", err);
+      return res.status(500).json({ 
+        success: false, 
+        message: "Gagal mengambil data pengajuan" 
+      });
+    }
+
+    const formattedResults = results.map(item => ({
+      id: item.id_penjualan,
+      user_id: item.user_id,
+      gambar_sampah: item.gambar_sampah ? item.gambar_sampah.replace('/uploads/', '') : null,
+      jenis_sampah: item.jenis_sampah,
+      berat: parseFloat(item.berat),
+      status: item.status,
+    }));
+
+    res.json({ 
+      success: true, 
+      data: formattedResults,
+      count: formattedResults.length,
+      status: status
+    });
+  });
+});
+
 
 app.listen(port, () => {
   console.log(`Server backend berjalan di http://localhost:${port}`);
