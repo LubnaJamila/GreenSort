@@ -141,104 +141,84 @@ export default class FormPenolakanView {
     }
 
     renderApplicationDetail(application) {
-        const detailContainer = document.getElementById('application-detail');
-        if (!detailContainer || !application) return;
+    const detailContainer = document.getElementById('application-detail');
+    if (!detailContainer || !application) return;
 
-        const { statusClass, statusIcon, statusLabel } = this.getStatusStyles(application.status);
+    const { statusClass, statusIcon, statusLabel } = this.getStatusStyles(application.status);
 
-        detailContainer.innerHTML = `
-        <div class="application-info">
-            <div class="row">
-                <div class="col-12 mb-3">
-                    <div class="info-group">
-                        <label class="info-label">Status Saat Ini</label>
-                        <div class="info-value">
-                            <span class="status-badge ${statusClass}">
-                            <i class="bi ${statusIcon}"></i>
-                            ${statusLabel}
-                            </span>
-                        </div>
-                    </div>
+    detailContainer.innerHTML = `
+    <div class="application-info">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <div class="info-group">
+                    <label class="info-label">Nama Lengkap</label>
+                    <div class="info-value">${application.name || 'N/A'}</div>
                 </div>
             </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <div class="info-group">
-                        <label class="info-label">Nama Pengaju</label>
-                        <div class="info-value">${application.name || 'N/A'}</div>
-                    </div>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <div class="info-group">
-                        <label class="info-label">No. HP</label>
-                        <div class="info-value">${application.phone || 'N/A'}</div>
-                    </div>
+            <div class="col-md-6 mb-3">
+                <div class="info-group">
+                    <label class="info-label">No. HP</label>
+                    <div class="info-value">${application.phone || 'N/A'}</div>
                 </div>
             </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <div class="info-group">
-                        <label class="info-label">Kategori Sampah</label>
-                        <div class="info-value">${application.category || 'N/A'}</div>
-                    </div>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <div class="info-group">
-                        <label class="info-label">Berat</label>
-                        <div class="info-value">${application.weight || 0} kg</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-12 mb-3">
-                    <div class="info-group">
-                        <label class="info-label">Tanggal Pengajuan</label>
-                        <div class="info-value">${this.formatDate(application.createdAt)}</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-12 mb-3">
-                    <div class="info-group">
-                        <label class="info-label">Foto Sampah</label>
-                        <div class="info-value">
-                            <div class="image-container">
-                            <img 
-                                src="${application.image || 'https://via.placeholder.com/300x200'}" 
-                                alt="Foto Sampah" 
-                                class="img-thumbnail waste-detail-img"
-                                style="max-width: 100%; height: auto; cursor: pointer;"
-                                onclick="this.requestFullscreen()"
-                            >
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            ${application.description ? `
-            <div class="row">
-                <div class="col-12 mb-3">
-                    <div class="info-group">
-                        <label class="info-label">Deskripsi</label>
-                        <div class="info-value">${application.description}</div>
-                    </div>
-                </div>
-            </div>
-            ` : ''}
         </div>
-        `;
 
-        // Enable submit button after data is loaded
-        const submitBtn = document.getElementById('submit-rejection');
-        if (submitBtn) {
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <div class="info-group">
+                    <label class="info-label">Kategori Sampah</label>
+                    <div class="info-value">${application.category || 'N/A'}</div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="info-group">
+                    <label class="info-label">Berat</label>
+                    <div class="info-value">${application.weight || 0} kg</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12 mb-3">
+                <div class="info-group">
+                    <label class="info-label">Foto Sampah</label>
+                    <div class="info-value">
+                        <div class="image-container">
+                        <img 
+                            src="${application.image || 'https://via.placeholder.com/300x200'}" 
+                            alt="Foto Sampah" 
+                            class="img-thumbnail waste-detail-img"
+                            style="max-width: 100%; height: auto; cursor: pointer;"
+                            onclick="this.requestFullscreen()"
+                        >
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        ${application.description ? `
+        <div class="row">
+            <div class="col-12 mb-3">
+                <div class="info-group">
+                    <label class="info-label">Deskripsi</label>
+                    <div class="info-value">${application.description}</div>
+                </div>
+            </div>
+        </div>
+        ` : ''}
+    </div>
+    `;
+
+    const submitBtn = document.getElementById('submit-rejection');
+    if (submitBtn) {
         submitBtn.disabled = false;
-        }
     }
+
+    // ✅ Fix penting — simpan data ke state
+    this.applicationData = application;
+}
+
 
     getStatusStyles(status) {
         const statusMap = {
@@ -500,14 +480,11 @@ export default class FormPenolakanView {
     }
 
     showSuccess(message) {
-        this.showMessage(message, 'success');
-        this.updateSubmitButton(false);
-        
-        // Redirect after success
-        setTimeout(() => {
-        window.location.hash = '#/pengajuan';
-        }, 2000);
+    this.updateSubmitButton(false);
+    alert(message); 
+    window.location.hash = '#/pengajuan'; 
     }
+
 
     // Mobile and responsive methods
     toggleSidebar(show = null) {

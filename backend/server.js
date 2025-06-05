@@ -599,7 +599,161 @@ app.get("/api/pengajuan/:user_id/status/:status", (req, res) => {
     });
   });
 });
+app.get('/api/penjualan-sampah', (req, res) => {
+  const sql = `
+    SELECT 
+      id,
+      jenis_sampah,
+      berat,
+      status,
+      harga_tawaran,
+      created_at
+    FROM penjualan_sampah
+    ORDER BY created_at DESC
+  `;
 
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("DB Error:", err);
+      return res.status(500).json({ success: false, message: "Gagal ambil data penjualan" });
+    }
+
+    res.json({ success: true, data: results });
+  });
+});
+app.get("/api/pengajuan/status/:status", (req, res) => {
+  const { status } = req.params;
+
+  const sql = `
+    SELECT 
+      ps.id AS id,
+      ps.user_id,
+      ps.jenis_sampah,
+      ps.berat,
+      ps.status,
+      ps.gambar_sampah,
+      u.nama_lengkap AS name,
+      u.no_hp AS phone
+    FROM penjualan_sampah ps
+    JOIN users u ON ps.user_id = u.id_user
+    WHERE ps.status = ?
+    ORDER BY ps.created_at DESC
+  `;
+
+  db.query(sql, [status], (err, results) => {
+    if (err) {
+      console.error("Error:", err);
+      return res.status(500).json({ success: false, message: "Gagal ambil data" });
+    }
+
+    const formatted = results.map(row => ({
+      id: row.id,
+      name: row.name,
+      phone: row.phone,
+      category: row.jenis_sampah,
+      weight: parseFloat(row.berat),
+      image: row.gambar_sampah || null,
+      status: row.status
+    }));
+
+    res.json({ success: true, data: formatted });
+  });
+});
+app.get("/api/pengajuan/id/:id", (req, res) => {
+  const { id } = req.params;
+
+  const sql = `
+    SELECT 
+      ps.id AS id,
+      ps.user_id,
+      ps.jenis_sampah,
+      ps.berat,
+      ps.status,
+      ps.gambar_sampah,
+      u.nama_lengkap AS name,
+      u.no_hp AS phone
+    FROM penjualan_sampah ps
+    JOIN users u ON ps.user_id = u.id_user
+    WHERE ps.id = ?
+    LIMIT 1
+  `;
+
+  db.query(sql, [id], (err, results) => {
+    if (err) {
+      console.error("Error:", err);
+      return res.status(500).json({ success: false, message: "Gagal mengambil data pengajuan" });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ success: false, message: "Pengajuan tidak ditemukan" });
+    }
+
+    const row = results[0];
+
+    res.json({
+      success: true,
+      data: {
+        id: row.id,
+        user_id: row.user_id,
+        name: row.name,
+        phone: row.phone,
+        category: row.jenis_sampah,
+        weight: parseFloat(row.berat),
+       image: row.gambar_sampah || null,
+      }
+    });
+  });
+});
+app.put('/api/pengajuan/terima/:id', (req, res) => {
+  const id = req.params.id;
+  const { alamat_id, harga_per_kg, total_harga } = req.body;
+
+  if (!alamat_id || !harga_per_kg || !total_harga) {
+    return res.status(400).json({ success: false, message: 'Data tidak lengkap' });
+  }
+
+  const sql = `
+    UPDATE penjualan_sampah 
+    SET status = 'pengajuan diterima',
+        alamat_admin_id = ?,        
+        harga_tawaran = ?,         
+        total = ?,                  
+        updated_at = NOW()
+    WHERE id = ?
+  `;
+
+  db.query(sql, [alamat_id, harga_per_kg, total_harga, id], (err, result) => {
+    if (err) {
+      console.error("DB Error:", err);
+      return res.status(500).json({ success: false, message: 'Gagal update pengajuan' });
+    }
+
+    res.json({ success: true, message: 'Pengajuan berhasil diterima' });
+  });
+});
+app.put('/api/pengajuan/tolak/:id', (req, res) => {
+  const { id } = req.params;
+  const { reason } = req.body;
+
+  if (!reason || reason.trim().length < 10) {
+    return res.status(400).json({ success: false, message: 'Alasan penolakan wajib diisi (min 10 karakter)' });
+  }
+
+  const sql = `
+    UPDATE penjualan_sampah 
+    SET status = 'pengajuan ditolak', alasan_penolakan = ?, updated_at = NOW()
+    WHERE id = ?
+  `;
+
+  db.query(sql, [reason.trim(), id], (err, result) => {
+    if (err) {
+      console.error('DB Error (penolakan):', err);
+      return res.status(500).json({ success: false, message: 'Gagal menolak pengajuan' });
+    }
+
+    res.json({ success: true, message: 'Pengajuan berhasil ditolak' });
+  });
+});
 
 app.listen(port, () => {
   console.log(`Server backend berjalan di http://localhost:${port}`);

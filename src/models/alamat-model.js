@@ -239,4 +239,15 @@ export default class AlamatModel {
       throw new Error(`Failed to delete alamat: ${error.message}`);
     }
   }
+  async getAddresses(userId) {
+  const result = await this.getUserAlamat(userId);
+
+  return result.data.map(item => ({
+    id: item.id_alamat,
+    name: `${item.desa}, ${item.kecamatan}, ${item.kabupaten}`,
+    address: item.alamat_lengkap,
+  }));
+}
+
+
 }

@@ -33,35 +33,44 @@ export default class PengajuanPresenter {
   }
 
   async loadApplications() {
-    try {
-      const rawApplications = this.pengajuanModel.getApplications();
-      console.log("Raw applications from model:", rawApplications);
-      
-      this.rawApplications = rawApplications;
-      
-      this.applications = rawApplications.map(app => ({
+  try {
+    const allStatuses = ['pengajuan', 'pengajuan diterima', 'pengajuan ditolak'];
+    let allApplications = [];
+
+    for (const status of allStatuses) {
+      const data = await this.pengajuanModel.getApplicationsByStatus(status);
+      allApplications = [...allApplications, ...data.map(app => ({
         ...app,
-        id: app.id || Math.random().toString(36).substr(2, 9), // Generate ID jika tidak ada
-        status: this.mapStatus(app.status), // Status untuk display (Indonesian)
-        statusOriginal: app.status || 'pending', // Status asli (English) untuk filtering
-        name: app.name || app.userName || 'N/A',
-        phone: app.phone || app.phoneNumber || 'N/A',
-        category: app.category || app.wasteCategory || 'N/A',
-        weight: app.weight || app.wasteWeight || 0,
-        image: app.image || app.wasteImage || 'https://via.placeholder.com/50'
-      }));
-      
-      console.log("Processed applications:", this.applications);
-      
-      this.view.renderApplicationsTable(this.applications);
-      this.updateStatistics();
-    } catch (error) {
-      console.error("Error loading applications:", error);
-      this.applications = [];
-      this.view.renderApplicationsTable([]);
-      this.view.showError(`Gagal memuat data pengajuan: ${error.message}`);
+        statusOriginal: status,
+        status: this.mapStatus(status)
+      }))];
     }
+
+    this.allApplications = allApplications;
+
+    this.view.updateTabBadges(allApplications);
+
+    let filterStatus = 'pengajuan';
+    if (this.view.currentFilter === 'accepted') {
+      filterStatus = 'pengajuan diterima';
+    } else if (this.view.currentFilter === 'rejected') {
+      filterStatus = 'pengajuan ditolak';
+    }
+
+    const filteredApps = allApplications.filter(app => app.statusOriginal === filterStatus);
+    this.applications = filteredApps;
+
+    this.view.renderApplicationsTable(this.applications);
+
+    this.updateStatistics();
+
+  } catch (error) {
+    console.error("Error loading applications:", error);
+    this.applications = [];
+    this.view.renderApplicationsTable([]);
+    this.view.showError("Gagal memuat data.");
   }
+}
 
   async refreshApplications() {
     console.log("Refreshing applications...");
@@ -91,45 +100,41 @@ export default class PengajuanPresenter {
     }
   }
 
-  mapStatus(status) {
-    const statusMap = {
-      'pending': 'Menunggu Validasi',
-      'accepted': 'Diterima',
-      'rejected': 'Ditolak'
-    };
-    return statusMap[status] || status;
-  }
-
+ mapStatus(status) {
+  const statusMap = {
+    'pengajuan': 'Menunggu Validasi',
+    'pengajuan diterima': 'Diterima',
+    'pengajuan ditolak': 'Ditolak'
+  };
+  return statusMap[status] || status;
+}
   updateStatistics() {
-    const stats = {
-      total: this.applications.length,
-      pending: this.applications.filter(app => 
-        app.statusOriginal === 'pending' || app.status === 'Menunggu Validasi'
-      ).length,
-      verified: this.applications.filter(app => 
-        app.statusOriginal === 'accepted' || app.status === 'Diterima'
-      ).length,
-      rejected: this.applications.filter(app => 
-        app.statusOriginal === 'rejected' || app.status === 'Ditolak'
-      ).length
-    };
-    
-    console.log("Statistics updated:", stats);
-    this.view.displayStatistics(stats);
-  }
+  const stats = {
+    total: this.allApplications.length,
+    pending: 0,
+    accepted: 0,
+    rejected: 0,
+    shipped: 0,     
+    completed: 0    
+  };
 
+  this.allApplications.forEach(item => {
+    const status = item.statusOriginal.toLowerCase();
+    if (status === 'pengajuan') stats.pending++;
+    if (status === 'pengajuan diterima') stats.accepted++;
+    if (status === 'pengajuan ditolak') stats.rejected++;
+  });
+
+  this.view.displayStatistics(stats);
+}
   handleFilterChange(filterType, filterValue) {
-    console.log("Filter change:", filterType, filterValue);
-    
-    if (filterType === 'status') {
-      // Update filter di view
-      this.view.currentFilter = filterValue;
-      this.view.currentPage = 1; // Reset ke halaman pertama
-      
-      // Render ulang table dengan filter baru
-      this.view.renderFilteredTable();
-    }
+  if (filterType === 'status') {
+    this.view.currentFilter = filterValue;
+    this.view.currentPage = 1;
+    this.loadApplications(); 
   }
+}
+
 
   handleStatusUpdate(applicationId, newStatus) {
     const applicationIndex = this.applications.findIndex(app => app.id === applicationId);
@@ -169,6 +174,7 @@ export default class PengajuanPresenter {
     document.addEventListener("filter-change", this.handleFilterChangeEvent);
     document.addEventListener("status-update", this.handleStatusUpdateEvent);
     document.addEventListener("refresh-applications", this.handleRefreshApplications);
+    document.addEventListener("dashboard-refresh", this.handleRefreshApplications);
   }
 
   handleLogout() {

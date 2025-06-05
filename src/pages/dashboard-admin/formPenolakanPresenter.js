@@ -2,11 +2,13 @@
 import FormPenolakanView from "./formPenolakanView.js";
 import AlamatModel from "../../models/alamat-model.js";
 import { getCurrentUser } from "../../models/authModel.js";
+import PengajuanModel from "../../models/pengajuan-model.js";
 
 export default class FormPenolakanPresenter {
     constructor() {
         this.view = new FormPenolakanView();
         this.model = new AlamatModel();
+        this.pengajuanModel = new PengajuanModel();
         this.user = null;
         this.currentApplicationId = null;
         this.setupEventListeners();
@@ -73,34 +75,24 @@ export default class FormPenolakanPresenter {
     }
 
     async loadApplicationDetail(applicationId) {
-        try {
-            console.log('Loading application detail for ID:', applicationId);
-            
-            // Call model to get application data
-            const applicationData = await this.model.getApplicationById(applicationId);
-            
-            if (!applicationData) {
-                throw new Error('Data pengajuan tidak ditemukan.');
-            }
+    try {
+        console.log('Loading application detail for ID:', applicationId);
 
-            // Check if application can be rejected
-            if (!this.canRejectApplication(applicationData)) {
-                this.view.showError('Pengajuan ini tidak dapat ditolak. Status sudah berubah.');
-                setTimeout(() => {
-                    window.location.hash = '#/pengajuan';
-                }, 2000);
-                return;
-            }
+        const applicationData = await this.pengajuanModel.getApplicationById(applicationId); 
 
-            // Store current application ID and display data
-            this.currentApplicationId = applicationId;
-            this.view.displayApplicationData(applicationData);
-            
-        } catch (error) {
-            console.error('Error loading application detail:', error);
-            this.view.showError(error.message || 'Terjadi kesalahan saat memuat data pengajuan.');
+        if (!applicationData) {
+            throw new Error('Data pengajuan tidak ditemukan.');
         }
+
+        // Simpan & tampilkan
+        this.currentApplicationId = applicationId;
+        this.view.renderApplicationDetail(applicationData); // Panggil method dari View
+    } catch (error) {
+        console.error('Error loading application detail:', error);
+        this.view.showError(error.message || 'Terjadi kesalahan saat memuat data pengajuan.');
     }
+}
+
 
     canRejectApplication(application) {
         // Check if application status allows rejection
@@ -129,7 +121,7 @@ export default class FormPenolakanPresenter {
             rejectionData.rejectedAt = new Date().toISOString();
 
             // Call model to submit rejection
-            const result = await this.model.rejectApplication(rejectionData);
+            const result = await this.pengajuanModel.rejectApplication(rejectionData);
             
             if (result && result.success) {
                 this.view.showSuccess('Pengajuan berhasil ditolak.');

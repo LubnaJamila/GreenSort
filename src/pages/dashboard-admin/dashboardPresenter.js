@@ -1,14 +1,13 @@
 // src/presenters/dashboardPresenter.js
 import DashboardView from "../dashboard-admin/dashboardView.js";
 import SidebarView from "../../views/sidebarView.js";
-import DashboardModel from "../../models/dashboard-model.js";
+import { getDataPenjualanSampah } from "../../models/penjualanModel.js";
 import { getCurrentUser, logoutUser } from "../../models/authModel.js";
 
 export default class DashboardPresenter {
   constructor() {
     this.dashboardView = new DashboardView();
     this.sidebarView = new SidebarView();
-    this.dashboardModel = new DashboardModel();
     this.currentUser = null;
  
     this.handleLogout = this.handleLogout.bind(this);
@@ -30,9 +29,29 @@ export default class DashboardPresenter {
 
     this.dashboardView.displayUserInfo(this.currentUser);
 
-    const applications = this.dashboardModel.getApplications();
+    getDataPenjualanSampah().then((applications) => {
+  this.dashboardView.renderDashboardData(applications);
 
-    this.dashboardView.renderDashboardData(applications);
+  // ✅ Hitung statistik berdasarkan status
+  const counts = {
+    total: applications.length,
+    pengajuan: 0,
+    penawaran: 0,
+    pengiriman: 0,
+    selesai: 0,
+  };
+
+  applications.forEach(app => {
+    const status = app.status?.toLowerCase();
+
+    if (status === 'pengajuan') counts.pengajuan++;
+    else if (status === 'pengajuan diterima') counts.penawaran++;
+    else if (status === 'dikirim') counts.pengiriman++;
+    else if (status === 'selesai') counts.selesai++;
+  });
+
+  this.dashboardView.updateStatCards(counts);
+});
 
     this.setupEventListeners();
   }

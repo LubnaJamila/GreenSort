@@ -45,16 +45,18 @@ export default class Router {
   }
 
   getCurrentRoute() {
-    const hash = window.location.hash || "#/";
-    const route = Object.entries(this.routes).find(
-      ([_, path]) => path === hash
-    );
-    return route ? route[0] : "index";
-  }
+  const hash = window.location.hash.split("?")[0] || "#/";
+  const route = Object.entries(this.routes).find(
+    ([_, path]) => path === hash
+  );
+  return route ? route[0] : "index";
+}
+
 
   getCurrentPath() {
-    return window.location.hash || "#/";
-  }
+  return window.location.hash.split("?")[0] || "#/";
+}
+
 
   navigateTo(page, options = {}) {
     let targetHash = page.startsWith("#") ? page : this.routes[page] || "#/";

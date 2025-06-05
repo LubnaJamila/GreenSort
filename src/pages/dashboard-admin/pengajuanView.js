@@ -72,7 +72,11 @@ export default class PengajuanView {
           <div class="section-header">
             <h2 class="section-title">Data Pengajuan</h2>
           </div>
-
+          <div class="d-flex justify-content-end mb-2">
+          <button id="refresh-btn" class="btn btn-outline-success">
+            <i class="bi bi-arrow-clockwise"></i> Refresh Data
+          </button>
+        </div>
           <!-- Filter Tabs -->
           <div class="filter-tabs">
             <button class="filter-tab" data-filter="pending">
@@ -98,8 +102,7 @@ export default class PengajuanView {
                     <th>Kategori Sampah</th>
                     <th>Gambar</th>
                     <th>Berat</th>
-                    <th>Status</th>
-                    <th>Action</th>
+                    <th id="action-header">Action</th>
                   </tr>
                 </thead>
                 <tbody id="applications-table-body">
@@ -174,28 +177,24 @@ export default class PengajuanView {
       type: "resize",
       handler: resizeHandler,
     });
-    // Refresh button
     const refreshBtn = document.getElementById("refresh-btn");
     if (refreshBtn) {
       const handler = () => this.handleRefresh();
       refreshBtn.addEventListener("click", handler);
       this.eventListeners.push({ element: refreshBtn, type: "click", handler });
     }
-    // Select all checkbox
     const selectAll = document.getElementById("select-all");
     if (selectAll) {
       const handler = (e) => this.toggleSelectAll(e.target.checked);
       selectAll.addEventListener("change", handler);
       this.eventListeners.push({ element: selectAll, type: "change", handler });
     }
-    // Filter tabs
     const filterTabs = document.querySelectorAll('.filter-tab');
     filterTabs.forEach(tab => {
       const handler = (e) => this.handleFilterTab(e);
       tab.addEventListener('click', handler);
       this.eventListeners.push({ element: tab, type: 'click', handler });
     });
-    // Stat cards click handlers
     const statCards = document.querySelectorAll('.stat-card');
     statCards.forEach(card => {
       const handler = () => this.handleStatCardClick(card);
@@ -205,23 +204,24 @@ export default class PengajuanView {
   }
 
   handleFilterTab(e) {
-    e.preventDefault();
-    
-    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-    
-    const clickedTab = e.target.closest('.filter-tab');
-    if (clickedTab) {
-      clickedTab.classList.add('active');
-      
-      const filter = clickedTab.dataset.filter;
-      this.currentFilter = filter;
-      this.currentPage = 1; // Reset ke halaman pertama
-      
-      console.log("Filter changed to:", filter);
-      
-      this.renderFilteredTable();
-    }
+  e.preventDefault();
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+
+  const clickedTab = e.target.closest('.filter-tab');
+  if (clickedTab) {
+    clickedTab.classList.add('active');
+    const filter = clickedTab.dataset.filter;
+
+    this.currentFilter = filter;
+    this.currentPage = 1;
+
+    const filterEvent = new CustomEvent("filter-change", {
+      detail: { filterType: "status", filterValue: filter }
+    });
+    document.dispatchEvent(filterEvent);
   }
+}
+
 
   getCurrentDisplayData() {
     if (!this.applicationsData || this.applicationsData.length === 0) {
@@ -315,95 +315,92 @@ export default class PengajuanView {
   }
 
   renderFilteredTable() {
-    const tableBody = document.getElementById('applications-table-body');
-    const emptyState = document.getElementById('empty-state');
-    
-    console.log("Rendering filtered table. Current filter:", this.currentFilter);
-    console.log("Applications data:", this.applicationsData);
-    
-    if (!this.applicationsData || this.applicationsData.length === 0) {
-      if (tableBody) tableBody.innerHTML = '';
-      if (emptyState) emptyState.style.display = 'block';
-      this.hidePagination();
-      return;
-    }
+  const tableBody = document.getElementById('applications-table-body');
+  const emptyState = document.getElementById('empty-state');
 
-    let filteredData;
-    if (this.currentFilter === 'all') {
-      filteredData = this.applicationsData;
-    } else {
-      filteredData = this.applicationsData.filter(item => {
-        const matchesOriginal = item.statusOriginal === this.currentFilter;
-        const matchesMapped = this.mapStatusToOriginal(item.status) === this.currentFilter;
-        return matchesOriginal || matchesMapped;
-      });
-    }
-    
-    console.log("Filtered data length:", filteredData.length);
-    
-    if (filteredData.length === 0) {
-      if (tableBody) tableBody.innerHTML = '';
-      if (emptyState) emptyState.style.display = 'block';
-      this.hidePagination();
-      return;
-    }
-    
-    if (emptyState) emptyState.style.display = 'none';
-    
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    const paginatedData = filteredData.slice(startIndex, endIndex);
-    
-    const tableHTML = paginatedData
-      .map((app) => this.renderApplicationRow(app))
-      .join("");
-    
-    if (tableBody) {
-      tableBody.innerHTML = tableHTML;
-    }
-    
-    this.setupRowEventListeners();
-    this.renderPagination(filteredData.length);
+  console.log("Rendering filtered table. Current filter:", this.currentFilter);
+  console.log("Applications data:", this.applicationsData);
+
+  if (!this.applicationsData || this.applicationsData.length === 0) {
+    if (tableBody) tableBody.innerHTML = '';
+    if (emptyState) emptyState.style.display = 'block';
+    this.hidePagination();
+    return;
   }
 
-  mapStatusToOriginal(displayStatus) {
-    const reverseStatusMap = {
-      'Menunggu Validasi': 'pending',
-      'Diterima': 'accepted',
-      'Ditolak': 'rejected'
-    };
-    return reverseStatusMap[displayStatus] || displayStatus;
+  let filterValue = this.currentFilter;
+  if (filterValue === 'pending') filterValue = 'pengajuan';
+  else if (filterValue === 'accepted') filterValue = 'pengajuan diterima';
+  else if (filterValue === 'rejected') filterValue = 'pengajuan ditolak';
+
+  let filteredData = this.applicationsData.filter(item => item.statusOriginal === filterValue);
+
+  const isPendingTab = this.currentFilter === 'pending';
+  const actionHeader = document.getElementById('action-header');
+  if (actionHeader) {
+    actionHeader.style.display = isPendingTab ? '' : 'none';
   }
-  
+
+  console.log("Filtered data length:", filteredData.length);
+
+  if (filteredData.length === 0) {
+    if (tableBody) tableBody.innerHTML = '';
+    if (emptyState) emptyState.style.display = 'block';
+    this.hidePagination();
+    return;
+  }
+
+  if (emptyState) emptyState.style.display = 'none';
+
+  const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+  const endIndex = startIndex + this.itemsPerPage;
+  const paginatedData = filteredData.slice(startIndex, endIndex);
+
+  const tableHTML = paginatedData.map(app => this.renderApplicationRow(app)).join("");
+
+  if (tableBody) {
+    tableBody.innerHTML = tableHTML;
+  }
+
+  this.setupRowEventListeners();
+  this.renderPagination(filteredData.length);
+}
+ mapStatusToOriginal(displayStatus) {
+  const reverseStatusMap = {
+    'Menunggu Validasi': 'pengajuan',
+    'Diterima': 'pengajuan diterima',
+    'Ditolak': 'pengajuan ditolak'
+  };
+  return reverseStatusMap[displayStatus] || displayStatus;
+}
+
   renderApplicationRow(app) {
   const { statusClass, statusIcon, statusLabel } = this.getStatusStyles(app.status);
+  const isPending = app.status === 'Menunggu Validasi';
 
   return `
-      <tr>
-        <td><input type="checkbox" class="form-check-input row-checkbox" value="${app.id}"></td>
-        <td>${app.name || 'N/A'}</td>
-        <td>${app.phone || 'N/A'}</td>
-        <td>${app.category || 'N/A'}</td>
-        <td><img src="${app.image || 'https://via.placeholder.com/50'}" alt="Sampah" class="waste-img"></td>
-        <td>${app.weight || 0} kg</td>
+    <tr>
+      <td><input type="checkbox" class="form-check-input row-checkbox" value="${app.id}"></td>
+      <td>${app.name || 'N/A'}</td>
+      <td>${app.phone || 'N/A'}</td>
+      <td>${app.category || 'N/A'}</td>
+      <td><img src="${app.image || 'https://via.placeholder.com/50'}" alt="Sampah" class="waste-img"></td>
+      <td>${app.weight || 0} kg</td>
+      ${isPending ? `
         <td>
-          <span class="status-badge ${statusClass}">
-            <i class="bi ${statusIcon}"></i>
-            ${statusLabel}
-          </span>
-        </td>
-        <td>
-          <a href="#/form-penawaran" class="btn btn-success action-btn btn-sm accept-btn" data-id="${app.id}">
+          <a href="#/form-penawaran?id=${app.id}" 
+            class="btn btn-success action-btn btn-sm accept-btn" 
+            data-id="${app.id}">
             <i class="bi bi-check-circle"></i> Diterima
           </a>
-          <a href="#/form-penolakan" class="btn btn-danger action-btn btn-sm reject-btn" data-id="${app.id}">
+          <a href="#/form-penolakan?id=${app.id}" class="btn btn-danger action-btn btn-sm reject-btn" data-id="${app.id}">
             <i class="bi bi-x-circle"></i> Ditolak
           </a>
         </td>
-      </tr>
-    `;
-  }
-
+      ` : ''}
+    </tr>
+  `;
+}
   getStatusStyles(status) {
       const statusMap = {
         'Menunggu Validasi': { 
@@ -446,20 +443,39 @@ export default class PengajuanView {
   }
 
   setupRowEventListeners() {
-    const detailBtns = document.querySelectorAll('.detail-btn');
-    detailBtns.forEach(btn => {
-      const handler = (e) => this.handleDetailClick(e);
-      btn.addEventListener('click', handler);
-      this.eventListeners.push({ element: btn, type: 'click', handler });
-    });
+  // Tombol detail (jika ada)
+  const detailBtns = document.querySelectorAll('.detail-btn');
+  detailBtns.forEach(btn => {
+    const handler = (e) => this.handleDetailClick(e);
+    btn.addEventListener('click', handler);
+    this.eventListeners.push({ element: btn, type: 'click', handler });
+  });
 
-    const rowCheckboxes = document.querySelectorAll('.row-checkbox');
-    rowCheckboxes.forEach(checkbox => {
-      const handler = () => this.updateSelectAllState();
-      checkbox.addEventListener('change', handler);
-      this.eventListeners.push({ element: checkbox, type: 'change', handler });
-    });
-  }
+  // Checkbox baris
+  const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+  rowCheckboxes.forEach(checkbox => {
+    const handler = () => this.updateSelectAllState();
+    checkbox.addEventListener('change', handler);
+    this.eventListeners.push({ element: checkbox, type: 'change', handler });
+  });
+
+  // Tombol "Diterima"
+  const acceptBtns = document.querySelectorAll('.accept-btn');
+  acceptBtns.forEach((btn) => {
+    const handler = (e) => {
+      e.preventDefault();
+      const id = btn.dataset.id;
+      if (!id) {
+        alert("ID pengajuan tidak ditemukan.");
+        return;
+      }
+      window.location.href = `#/form-penawaran?id=${id}`;
+    };
+    btn.addEventListener('click', handler);
+    this.eventListeners.push({ element: btn, type: 'click', handler });
+  });
+}
+
 
   handleDetailClick(e) {
     const id = e.target.closest('.detail-btn').dataset.id;
@@ -558,32 +574,32 @@ export default class PengajuanView {
     }
   }
 
-  updateTabBadges() {
-    if (!this.applicationsData || !Array.isArray(this.applicationsData)) return;
+  updateTabBadges(allData) {
+  if (!Array.isArray(allData)) return;
 
-    const counts = {
-      pending: 0,
-      accepted: 0,
-      rejected: 0
-    };
+  const counts = {
+    pending: 0,
+    accepted: 0,
+    rejected: 0
+  };
 
-    this.applicationsData.forEach(item => {
-      const originalStatus = item.statusOriginal || this.mapStatusToOriginal(item.status);
-      if (originalStatus === 'pending') counts.pending++;
-      else if (originalStatus === 'accepted') counts.accepted++;
-      else if (originalStatus === 'rejected') counts.rejected++;
-    });
+  allData.forEach(item => {
+    const original = item.statusOriginal?.toLowerCase();
+    if (original === 'pengajuan') counts.pending++;
+    else if (original === 'pengajuan diterima') counts.accepted++;
+    else if (original === 'pengajuan ditolak') counts.rejected++;
+  });
 
-    console.log("Tab badge counts:", counts);
+  const pendingBadge = document.getElementById('badge-pending');
+  const acceptedBadge = document.getElementById('badge-accepted');
+  const rejectedBadge = document.getElementById('badge-rejected');
 
-    const pendingBadge = document.getElementById('badge-pending');
-    const acceptedBadge = document.getElementById('badge-accepted');
-    const rejectedBadge = document.getElementById('badge-rejected');
-    
-    if (pendingBadge) pendingBadge.textContent = counts.pending;
-    if (acceptedBadge) acceptedBadge.textContent = counts.accepted;
-    if (rejectedBadge) rejectedBadge.textContent = counts.rejected;
-  }
+  if (pendingBadge) pendingBadge.textContent = counts.pending;
+  if (acceptedBadge) acceptedBadge.textContent = counts.accepted;
+  if (rejectedBadge) rejectedBadge.textContent = counts.rejected;
+}
+
+
 
   updateSelectAllState() {
     const selectAll = document.getElementById('select-all');
@@ -670,15 +686,17 @@ export default class PengajuanView {
   }
 
   displayStatistics(stats) {
-    if (stats) {
-      const statCards = document.querySelectorAll('.stat-number');
-      if (statCards.length >= 3) {
-        statCards[0].textContent = stats.total || '0';
-        statCards[1].textContent = stats.pending || '0';
-        statCards[2].textContent = stats.verified || '0';
-      }
+  if (stats) {
+    const statCards = document.querySelectorAll('.stat-number');
+    if (statCards.length >= 5) {
+      statCards[0].textContent = stats.total || '0';        
+      statCards[1].textContent = stats.pending || '0';      
+      statCards[2].textContent = stats.rejected || '0';     
+      statCards[3].textContent = stats.shipped || '0';     
+      statCards[4].textContent = stats.completed || '0';    
     }
   }
+}
 
   showError(message) {
     console.error(message);

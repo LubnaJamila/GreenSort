@@ -19,6 +19,18 @@ export default class DashboardView {
     this.setupEventListeners();
     this.checkMobileView();
   }
+  updateStatCards(counts) {
+  const statNumbers = document.querySelectorAll(".stat-number");
+
+  if (statNumbers.length >= 5) {
+    statNumbers[0].textContent = counts.total || '0';           // Semua
+    statNumbers[1].textContent = counts.pengajuan || '0';       // Pengajuan
+    statNumbers[2].textContent = counts.penawaran || '0';       // Penawaran
+    statNumbers[3].textContent = counts.pengiriman || '0';      // Pengiriman
+    statNumbers[4].textContent = counts.selesai || '0';         // Selesai
+  }
+}
+
 
   renderMainContent() {
     this.app.innerHTML = `
@@ -60,15 +72,15 @@ export default class DashboardView {
           <div class="table-responsive">
             <table id="datatable" class="table table-striped" style="width:100%">
               <thead>
-                <tr>
-                  <th><input type="checkbox" id="select-all"></th>
-                  <th>Jenis Sampah</th>
-                  <th>Tanggal Pembelian</th>
-                  <th>Berat</th>
-                  <th>Harga</th>
-                  <th>Total Harga</th>
-                </tr>
-              </thead>
+              <tr>
+                <th><input type="checkbox" id="select-all"></th>
+                <th>Jenis Sampah</th>
+                <th>Tanggal Pengajuan</th>
+                <th>Berat</th>
+                <th>Harga</th>
+                <th>Status</th>
+              </tr>
+            </thead>
               <tbody id="applications-table-body">
                 <!-- Dynamic content will be inserted here -->
               </tbody>
@@ -95,6 +107,33 @@ export default class DashboardView {
       </div>
     `;
   }
+  getStatusBadge(status) {
+  const map = {
+    'pengajuan': {
+      label: 'Pengajuan',
+      class: 'badge bg-warning text-dark',
+      icon: 'bi-hourglass'
+    },
+    'pengajuan diterima': {
+      label: 'Pengajuan Diterima',
+      class: 'badge bg-success text-white',
+      icon: 'bi-check-circle'
+    },
+    'pengajuan ditolak': {
+      label: 'Pengajuan Ditolak',
+      class: 'badge bg-danger text-white',
+      icon: 'bi-x-circle'
+    }
+  };
+
+  const data = map[status.toLowerCase()] || {
+    label: status,
+    class: 'badge bg-secondary',
+    icon: 'bi-question-circle'
+  };
+
+  return `<span class="${data.class}"><i class="bi ${data.icon} me-1"></i> ${data.label}</span>`;
+}
 
   setupEventListeners() {
     this.removeEventListeners();
@@ -223,19 +262,35 @@ export default class DashboardView {
   }
 
   renderApplicationRow(app) {
-    const { statusClass, statusIcon } = this.getStatusStyles(app.status);
+  const harga = app.status === "pengajuan diterima"
+    ? `Rp. ${this.formatRupiah(app.harga_tawaran)}`
+    : "-";
 
-    return `
-      <tr>
-        <td><input type="checkbox" class="row-checkbox" value="${app.id}"></td>
-        <td>${app.jenisSampah}</td>
-        <td>${app.tanggalPembelian}</td>
-        <td>${app.kuantitas}</td>
-        <td>${app.harga}</td>
-        <td>${app.total}</td>
-      </tr>
-    `;
-  }
+  return `
+    <tr>
+      <td><input type="checkbox" class="row-checkbox" value="${app.id}"></td>
+      <td>${app.jenis_sampah || "-"}</td>
+      <td>${this.formatTanggal(app.created_at)}</td>
+      <td>${app.berat} kg</td>
+      <td>${harga}</td>
+      <td>${this.getStatusBadge(app.status)}</td>
+    </tr>
+  `;
+}
+formatRupiah(angka) {
+  return Number(angka).toLocaleString("id-ID");
+}
+
+formatTanggal(dateStr) {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
+
+
 
   getStatusStyles(status) {
     const statusMap = {
