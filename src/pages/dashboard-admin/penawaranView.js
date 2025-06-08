@@ -268,45 +268,23 @@ export default class PenawaranView {
   }
 
   renderOfferRow(offer) {
-    const { statusClass, statusText } = this.getStatusStyles(offer.status);
-    const isExpired = new Date(offer.tanggalBerakhir) < new Date();
-    
-    //ini diperbaiki sesuai dengan data yang ada
-    return `
-      <tr ${isExpired ? 'class="table-warning"' : ''}>
-        <td><input type="checkbox" class="row-checkbox" value="${offer.id}"></td>
-        <td>${offer.id}</td>
-        <td>${offer.jenisSampah}</td>
-        <td>Rp ${offer.hargaPerKg.toLocaleString('id-ID')}</td>
-        <td>${offer.beratMinimum} kg</td>
-        <td>${this.formatDate(offer.tanggalBerlaku)}</td>
-        <td>${this.formatDate(offer.tanggalBerakhir)}</td>
-        <td>
-          <span class="badge ${statusClass}">
-            ${isExpired ? 'Kadaluarsa' : statusText}
-          </span>
-        </td>
-        <td>
-          <div class="btn-group btn-group-sm" role="group">
-            <button class="btn btn-outline-primary btn-edit" data-offer-id="${offer.id}" title="Edit">
-              <i class="bi bi-pencil"></i>
-            </button>
-            ${offer.status === 'Menunggu' ? `
-              <button class="btn btn-outline-success btn-approve" data-offer-id="${offer.id}" title="Setujui">
-                <i class="bi bi-check"></i>
-              </button>
-              <button class="btn btn-outline-danger btn-reject" data-offer-id="${offer.id}" title="Tolak">
-                <i class="bi bi-x"></i>
-              </button>
-            ` : ''}
-            <button class="btn btn-outline-danger btn-delete" data-offer-id="${offer.id}" title="Hapus">
-              <i class="bi bi-trash"></i>
-            </button>
-          </div>
-        </td>
-      </tr>
-    `;
-  }
+    console.log("🕵️ Offer row:", offer);
+  const { statusClass, statusText } = this.getStatusStyles(offer.status);
+
+  return `
+    <tr>
+      <td><input type="checkbox" class="row-checkbox" value="${offer.id}"></td>
+      <td>${offer.nama}</td>
+      <td>${offer.jenisSampah}</td>
+      <td>${offer.berat} kg</td>
+      <td>Rp ${offer.harga.toLocaleString("id-ID")}</td>
+      <td>Rp ${offer.total.toLocaleString("id-ID")}</td>
+      <td><span class="badge ${statusClass}">${statusText}</span></td>
+    </tr>
+  `;
+}
+
+
 
   setupTableActions() {
     // Edit buttons
@@ -349,20 +327,17 @@ export default class PenawaranView {
       this.eventListeners.push({ element: btn, type: 'click', handler });
     });
   }
+getStatusStyles(status) {
+  console.log("👀 Status diterima oleh getStatusStyles:", status);
 
-  getStatusStyles(status) {
-    const statusMap = {
-      'Menunggu': { class: 'bg-warning', text: 'Menunggu' },
-      'Diterima': { class: 'bg-success', text: 'Diterima' },
-      'Ditolak': { class: 'bg-danger', text: 'Ditolak' },
-      'Aktif': { class: 'bg-info', text: 'Aktif' },
-      'Tidak Aktif': { class: 'bg-secondary', text: 'Tidak Aktif' },
-      default: { class: 'bg-light text-dark', text: 'Unknown' }
-    };
-
-    return statusMap[status] || statusMap.default;
+  if (status === "penawaran diterima") {
+    return { statusClass: "bg-success", statusText: "penawaran diterima" };
+  } else if (status === "penawaran ditolak") {
+    return { statusClass: "bg-danger", statusText: "penawaran ditolak" };
+  } else {
+    return { statusClass: "bg-secondary", statusText: status || "Tidak diketahui" };
   }
-
+}
   formatDate(dateString) {
     const date = new Date(dateString);
     return date.toLocaleDateString('id-ID', {

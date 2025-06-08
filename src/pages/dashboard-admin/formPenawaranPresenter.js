@@ -189,11 +189,6 @@ export default class FormPenawaranPresenter {
             return false;
         }
 
-        if (data.totalHarga !== undefined && data.totalHarga <= 0) {
-            this.view.showError('Total harga tidak valid');
-            return false;
-        }
-
         if (data.hargaPerKg > 50000) {
             this.view.showError('Harga per kg terlalu tinggi (maksimal Rp 50.000)');
             return false;

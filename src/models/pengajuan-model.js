@@ -49,7 +49,7 @@ export default class PengajuanModel {
     };
   }
 
-  async submitOffer({ applicationId, alamatId, hargaPerKg, totalHarga }) {
+  async submitOffer({ applicationId, alamatId, hargaPerKg}) {
     try {
       const response = await fetch(`${this.baseUrl}/pengajuan/terima/${applicationId}`, {
         method: 'PUT',
@@ -57,7 +57,6 @@ export default class PengajuanModel {
         body: JSON.stringify({
           alamat_id: alamatId,
           harga_per_kg: hargaPerKg,
-          total_harga: totalHarga
         }),
       });
 

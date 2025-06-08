@@ -2,7 +2,7 @@
 import PenawaranView from "./penawaranView.js"; 
 import { getCurrentUser, logoutUser } from "../../models/authModel.js";
 import SidebarView from "../../views/sidebarView.js";
-// import PengajuanModel from "../../models/pengajuan-model.js";
+import { fetchSemuaPenawaran } from "../../models/penawaranModel.js";
 
 export default class PenawaranPresenter {
     constructor() {
@@ -24,21 +24,21 @@ export default class PenawaranPresenter {
             document.dispatchEvent(event);
             return;
         }
-
-        // Render sidebar dan penawaran view
         this.sidebarView.render();
         this.penawaranView.render();
-
-        // Tampilkan info user di penawaran view
+        this.loadPenawaranData();
         this.penawaranView.displayUserInfo(this.currentUser);
-
-        // Load penawaran data (jika ada model untuk penawaran)
-        // const penawaranData = this.penawaranModel.getPenawaranData();
-        // this.penawaranView.renderPenawaranData(penawaranData);
-
         this.setupEventListeners();
     }
-
+    async loadPenawaranData() {
+    try {
+        const data = await fetchSemuaPenawaran();
+        console.log("📦 Semua Penawaran:", data); // Debug log
+        this.penawaranView.renderPenawaranData(data);
+    } catch (error) {
+        console.error("❌ Gagal load semua penawaran:", error);
+    }
+    }
     setupEventListeners() {
         document.addEventListener("user-logout", this.handleLogout);
     }

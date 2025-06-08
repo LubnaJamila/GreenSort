@@ -706,9 +706,9 @@ app.get("/api/pengajuan/id/:id", (req, res) => {
 });
 app.put('/api/pengajuan/terima/:id', (req, res) => {
   const id = req.params.id;
-  const { alamat_id, harga_per_kg, total_harga } = req.body;
+  const { alamat_id, harga_per_kg} = req.body;
 
-  if (!alamat_id || !harga_per_kg || !total_harga) {
+  if (!alamat_id || !harga_per_kg ) {
     return res.status(400).json({ success: false, message: 'Data tidak lengkap' });
   }
 
@@ -716,13 +716,12 @@ app.put('/api/pengajuan/terima/:id', (req, res) => {
     UPDATE penjualan_sampah 
     SET status = 'pengajuan diterima',
         alamat_admin_id = ?,        
-        harga_tawaran = ?,         
-        total = ?,                  
+        harga_tawaran = ?,                       
         updated_at = NOW()
     WHERE id = ?
   `;
 
-  db.query(sql, [alamat_id, harga_per_kg, total_harga, id], (err, result) => {
+  db.query(sql, [alamat_id, harga_per_kg, id], (err, result) => {
     if (err) {
       console.error("DB Error:", err);
       return res.status(500).json({ success: false, message: 'Gagal update pengajuan' });
@@ -752,6 +751,41 @@ app.put('/api/pengajuan/tolak/:id', (req, res) => {
     }
 
     res.json({ success: true, message: 'Pengajuan berhasil ditolak' });
+  });
+});
+app.get("/api/penawaran/status/semua", (req, res) => {
+  const sql = `
+    SELECT 
+      ps.id,
+      ps.jenis_sampah,
+      ps.berat,
+      ps.harga_tawaran,
+      ps.total,
+      ps.status,
+      u.nama_lengkap AS name
+    FROM penjualan_sampah ps
+    JOIN users u ON ps.user_id = u.id_user
+    WHERE ps.status IN ('penawaran diterima', 'penawaran ditolak')
+    ORDER BY ps.created_at DESC
+  `;
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("❌ DB Error (penawaran):", err);
+      return res.status(500).json({ success: false, message: "Gagal mengambil data penawaran" });
+    }
+
+    const data = results.map(row => ({
+      id: row.id,
+      nama: row.name,
+      jenisSampah: row.jenis_sampah,
+      berat: parseFloat(row.berat),
+      harga: parseFloat(row.harga_tawaran),
+      total: parseFloat(row.total),
+      status: row.status 
+    }));
+
+    res.json({ success: true, data });
   });
 });
 
