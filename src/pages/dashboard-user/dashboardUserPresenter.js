@@ -2,7 +2,7 @@
 import DashboardUserView from "./dashboardUserView.js";
 import { getCurrentUser, logoutUser } from "../../models/authModel.js";
 import DashboardModel from "../../models/dashboard-model.js";
-import { getPengajuanByUserId } from "../../models/pengajuan_sampah-model.js";
+import { getPengajuanByUserIdAndStatus } from "../../models/pengajuan_sampah-model.js";
 
 export default class DashboardUserPresenter {
   constructor() {
@@ -44,7 +44,6 @@ export default class DashboardUserPresenter {
 
   async loadDashboardData() {
     try {
-      // Pastikan menggunakan ID user yang benar
       const userId = this.currentUser.id_user || this.currentUser.id;
 
       if (!userId) {
@@ -55,28 +54,41 @@ export default class DashboardUserPresenter {
 
       console.log("Loading dashboard data for user ID:", userId);
 
-      const res = await getPengajuanByUserId(userId);
+      const allStatuses = [
+        "pengajuan",
+        "pengajuan diterima",
+        "pengajuan ditolak",
+        "penjemputan",
+        "selesai",
+      ];
 
-      if (!res.success) {
-        console.error("API Error:", res.message);
-        this.showErrorMessage(res.message || "Gagal memuat data pengajuan");
-        return;
+      let allApplications = [];
+
+      for (const stat of allStatuses) {
+        try {
+          const res = await getPengajuanByUserIdAndStatus(userId, stat);
+          if (res.success && res.data && res.data.length > 0) {
+            allApplications = [...allApplications, ...res.data];
+          }
+        } catch (statusError) {
+          console.warn(
+            `Error fetching data for status '${stat}':`,
+            statusError
+          );
+        }
       }
 
-      // Handle empty data
-      if (!res.data || res.data.length === 0) {
-        console.log("No data found for user");
+      if (allApplications.length === 0) {
+        console.log("No applications found for user");
         this.view.renderDashboardData([], this.calculateUserStats([]));
         return;
       }
 
-      console.log("Raw data from API:", res.data);
-
-      // Transform data sesuai dengan response dari server
-      const applications = res.data.map((item) => ({
+      // Transformasi data
+      const applications = allApplications.map((item) => ({
         id: item.id,
         user_id: item.user_id,
-        gambar_sampah: item.gambar_sampah, // Sudah diformat di server
+        gambar_sampah: item.gambar_sampah,
         jenisSampah: item.jenis_sampah,
         berat: parseFloat(item.berat) || 0,
         status: item.status || "pengajuan",
@@ -84,12 +96,16 @@ export default class DashboardUserPresenter {
         updated_at: item.updated_at,
       }));
 
-      console.log("Transformed applications:", applications);
-
+      // Hitung statistik dari SEMUA aplikasi
       const stats = this.calculateUserStats(applications);
-      console.log("Calculated stats:", stats);
 
-      this.view.renderDashboardData(applications, stats);
+      // Filter hanya yang statusnya "pengajuan" untuk ditampilkan di tabel
+      const pengajuanOnly = applications.filter(
+        (app) => app.status.toLowerCase().trim() === "pengajuan"
+      );
+
+      // Render hanya data status "pengajuan", tapi statistik semua status
+      this.view.renderDashboardData(pengajuanOnly, stats);
     } catch (err) {
       console.error("Error in loadDashboardData:", err);
       this.showErrorMessage("Terjadi kesalahan saat memuat dashboard");
@@ -117,9 +133,11 @@ export default class DashboardUserPresenter {
         case "menunggu validasi":
           stats.menungguValidasi++;
           break;
+        case "pengajuan diterima":
         case "diterima":
           stats.diterima++;
           break;
+        case "pengajuan ditolak":
         case "ditolak":
           stats.ditolak++;
           break;

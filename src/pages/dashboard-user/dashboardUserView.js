@@ -318,7 +318,7 @@ export default class DashboardUserView {
         <td>
           <span class="badge ${statusStyles.class}">
             <i class="bi ${statusStyles.icon}"></i>
-            ${this.formatStatus(app.status)}
+            ${app.status}
           </span>
         </td>
         <td>

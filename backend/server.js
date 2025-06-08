@@ -2,6 +2,7 @@ const express = require("express");
 const mysql = require("mysql2");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
+const crypto = require("crypto");
 const banks = require('./data/bankList');
 const multer = require("multer");
 const path = require("path");
@@ -469,7 +470,11 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    const uniqueName = `sampah-${Date.now()}${path.extname(file.originalname)}`;
+    const ext = path.extname(file.originalname);
+    const uniqueSuffix = `${Date.now()}-${crypto
+      .randomBytes(6)
+      .toString("hex")}`;
+    const uniqueName = `sampah-${uniqueSuffix}${ext}`;
     cb(null, uniqueName);
   },
 });
@@ -553,11 +558,11 @@ app.get("/api/pengajuan/:user_id", (req, res) => {
 // Tambahan: Endpoint untuk mengambil pengajuan berdasarkan status tertentu
 app.get("/api/pengajuan/:user_id/status/:status", (req, res) => {
   const { user_id, status } = req.params;
-  
+
   if (!user_id || isNaN(user_id)) {
-    return res.status(400).json({ 
-      success: false, 
-      message: "User ID tidak valid" 
+    return res.status(400).json({
+      success: false,
+      message: "User ID tidak valid",
     });
   }
 
@@ -568,6 +573,7 @@ app.get("/api/pengajuan/:user_id/status/:status", (req, res) => {
       gambar_sampah, 
       jenis_sampah, 
       berat, 
+      harga_tawaran,
       status
     FROM penjualan_sampah 
     WHERE user_id = ? AND status = ?
@@ -576,26 +582,30 @@ app.get("/api/pengajuan/:user_id/status/:status", (req, res) => {
   db.query(sql, [user_id, status], (err, results) => {
     if (err) {
       console.error("Error fetching pengajuan by status:", err);
-      return res.status(500).json({ 
-        success: false, 
-        message: "Gagal mengambil data pengajuan" 
+      return res.status(500).json({
+        success: false,
+        message: "Gagal mengambil data pengajuan",
       });
     }
 
-    const formattedResults = results.map(item => ({
-      id: item.id_penjualan,
+    const formattedResults = results.map((item) => ({
+      id: item.id,
       user_id: item.user_id,
-      gambar_sampah: item.gambar_sampah ? item.gambar_sampah.replace('/uploads/', '') : null,
+      gambar_sampah: item.gambar_sampah
+        ? item.gambar_sampah.replace("/uploads/", "")
+        : null,
       jenis_sampah: item.jenis_sampah,
       berat: parseFloat(item.berat),
+      harga_tawaran:
+        item.harga_tawaran !== null ? parseFloat(item.harga_tawaran) : null,
       status: item.status,
     }));
 
-    res.json({ 
-      success: true, 
+    res.json({
+      success: true,
       data: formattedResults,
       count: formattedResults.length,
-      status: status
+      status: status,
     });
   });
 });
