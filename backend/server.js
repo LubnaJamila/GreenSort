@@ -798,6 +798,56 @@ app.get("/api/penawaran/status/semua", (req, res) => {
     res.json({ success: true, data });
   });
 });
+// GET detail pengajuan berdasarkan ID
+app.get("/api/pengajuan/detail/:id", (req, res) => {
+  const { id } = req.params;
+
+  const sql = `
+    SELECT 
+      ps.id,
+      ps.user_id,
+      u.nama_lengkap,
+      u.no_hp,
+      ps.gambar_sampah,
+      ps.jenis_sampah,
+      ps.berat,
+      ps.harga_tawaran,
+      ps.status
+    FROM penjualan_sampah ps
+    JOIN users u ON ps.user_id = u.id_user
+    WHERE ps.id = ?
+  `;
+
+  db.query(sql, [id], (err, results) => {
+    if (err) {
+      console.error("Error:", err);
+      return res.status(500).json({ success: false, message: "Gagal mengambil data" });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ success: false, message: "Data tidak ditemukan" });
+    }
+
+    res.json({ success: true, data: results[0] });
+  });
+});
+app.get("/api/admin/alamat", (req, res) => {
+  const sql = `
+    SELECT a.id_alamat AS id, a.alamat_lengkap AS alamat, a.latitude, a.longitude, u.nama_lengkap AS nama
+    FROM alamat a
+    JOIN users u ON a.id_user = u.id_user
+    WHERE u.role = 'admin'
+  `;
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("Gagal ambil alamat admin:", err);
+      return res.status(500).json({ success: false, message: "Gagal mengambil data alamat admin" });
+    }
+
+    res.json({ success: true, data: results });
+  });
+});
 
 app.listen(port, () => {
   console.log(`Server backend berjalan di http://localhost:${port}`);

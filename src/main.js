@@ -272,11 +272,22 @@ class App {
         }
         break;
       case "formOngkir":
+        const hashParams = new URLSearchParams(window.location.hash.split("?")[1]);
+        const applicationId = hashParams.get("id");
         this.currentPresenter = new FormOngkirPresenter();
+        if (applicationId) {
+          this.currentPresenter.init(applicationId);
+        } else {
+          alert("ID pengajuan tidak ditemukan di URL.");
+        }
         if (user) {
           this.sidebarPresenter = new SidebarPresenter(user.role);
+          this.sidebarPresenter.init();
+          setTimeout(() => {
+            this.sidebarPresenter.setActiveRoute(page);
+          }, 100);
         }
-        break;
+        return;
       case "formSelesai":
         this.currentPresenter = new FormSelesaiPresenter();
         if (user) {

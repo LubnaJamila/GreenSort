@@ -248,6 +248,21 @@ export default class AlamatModel {
     address: item.alamat_lengkap,
   }));
 }
+  async getAlamatAdmin() {
+    try {
+      const response = await fetch(`${this.backendUrl}/admin/alamat`);
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.message || "Gagal mengambil data alamat admin");
+      }
+
+      return result.data;
+    } catch (error) {
+      console.error("Error fetching alamat admin:", error);
+      throw new Error(`Failed to fetch alamat admin: ${error.message}`);
+    }
+  }
 
 
 }

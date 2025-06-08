@@ -1,16 +1,11 @@
 // src/pages/dashboard-user/formOngkirPresenter.js
 import FormOngkirView from './formOngkirView.js';
-// Import models yang diperlukan
-// import ApplicationModel from '../../models/applicationModel.js';
-// import AlamatModel from '../../models/alamatModel.js';
-// import UserModel from '../../models/userModel.js';
-
+import { getPengajuanById } from '../../models/pengajuanModel.js';
+import AlamatModel from '../../models/alamat-model.js';
 export default class FormOngkirPresenter {
     constructor() {
         this.view = new FormOngkirView();
-        // this.applicationModel = new ApplicationModel();
-        // this.alamatModel = new AlamatModel();
-        // this.userModel = new UserModel();
+
         
         this.applicationData = null;
         this.userData = null;
@@ -22,59 +17,61 @@ export default class FormOngkirPresenter {
         this.MINIMUM_ONGKIR = 5000; // Minimum Rp 5.000
         
         this.setupEventListeners();
+        this.alamatModel = new AlamatModel();
+
     }
     
     async init(applicationId = null) {
-        try {
-            // Show loading state
-            this.showLoadingState();
-            
-            // Load application data if ID provided
-            if (applicationId) {
-                await this.loadApplicationData(applicationId);
-            }
-            
-            // Load user data
-            await this.loadUserData();
-            
-            // Load master alamat
-            await this.loadMasterAlamat();
-            
-            // Render view with data
-            this.view.render(this.applicationData);
-            
-            // Populate view with loaded data
-            this.populateViewData();
-            
-        } catch (error) {
-            console.error('Error initializing Form Ongkir:', error);
-            this.view.showError('Gagal memuat data. Silakan coba lagi.');
+    try {
+        // Show loading state
+        this.showLoadingState();
+
+        // Load application data if ID provided
+        if (applicationId) {
+        await this.loadApplicationData(applicationId);
         }
+
+        // Load user data
+        await this.loadUserData();
+
+        // Load master alamat (alamat-alamat admin)
+        await this.loadMasterAlamat();
+
+        // Render view (card kosong + form)
+        this.view.render(this.applicationData);
+
+        // Set alamat admin default di card mengantar
+        this.setDefaultAlamatTujuan(); // ✅ Tambahkan baris ini
+
+        // Populate view: user info, alamat, dll
+        this.populateViewData();
+    } catch (error) {
+        console.error('Error initializing Form Ongkir:', error);
+        this.view.showError('Gagal memuat data. Silakan coba lagi.');
     }
-    
+    }    
     async loadApplicationData(applicationId) {
-        try {
-            // Mock data - replace with actual API call
-            this.applicationData = {
-                id: applicationId,
-                namaLengkap: 'John Doe',
-                noHp: '081234567890',
-                kategoriSampah: 'Plastik',
-                beratSampah: 5.5,
-                hargaSampah: 15000,
-                gambarSampah: '/assets/images/sampah-plastik.jpg',
-                status: 'Diterima'
-            };
-            
-            // Actual implementation:
-            // this.applicationData = await this.applicationModel.getById(applicationId);
-            
-        } catch (error) {
-            console.error('Error loading application data:', error);
-            throw new Error('Gagal memuat data pengajuan');
-        }
+    try {
+        const data = await getPengajuanById(applicationId);
+
+        this.applicationData = {
+        id: data.id,
+        namaLengkap: data.nama_lengkap,
+        noHp: data.no_hp,
+        kategoriSampah: data.jenis_sampah,
+        beratSampah: parseFloat(data.berat),
+        hargaSampah: parseFloat(data.harga_tawaran || 0),
+        gambarSampah: data.gambar_sampah 
+            ? `http://localhost:3000${data.gambar_sampah}` 
+            : null,
+        status: data.status,
+        };
+    } catch (error) {
+        console.error('Gagal ambil data pengajuan:', error);
+        throw error;
     }
-    
+    }
+ 
     async loadUserData() {
         try {
             // Mock data - replace with actual API call
@@ -96,44 +93,15 @@ export default class FormOngkirPresenter {
     }
     
     async loadMasterAlamat() {
-        try {
-            // Mock data - replace with actual API call
-            this.masterAlamat = [
-                {
-                    id: 1,
-                    nama: 'Kantor Pusat',
-                    alamat: 'Jl. Kantor Pusat No. 1, Kecamatan A',
-                    latitude: -8.1601,
-                    longitude: 113.7065,
-                    jarak: 5.2
-                },
-                {
-                    id: 2,
-                    nama: 'Cabang Timur',
-                    alamat: 'Jl. Timur Raya No. 25, Kecamatan B',
-                    latitude: -8.1701,
-                    longitude: 113.7165,
-                    jarak: 8.7
-                },
-                {
-                    id: 3,
-                    nama: 'Cabang Selatan',
-                    alamat: 'Jl. Selatan Indah No. 50, Kecamatan C',
-                    latitude: -8.1801,
-                    longitude: 113.6965,
-                    jarak: 12.3
-                }
-            ];
-            
-            // Actual implementation:
-            // this.masterAlamat = await this.alamatModel.getAllAlamat();
-            
-        } catch (error) {
-            console.error('Error loading master alamat:', error);
-            throw new Error('Gagal memuat data alamat');
-        }
+    try {
+        this.masterAlamat = await this.alamatModel.getAlamatAdmin();
+        console.log("Alamat Admin dari DB:", this.masterAlamat);
+    } catch (error) {
+        console.error("Error loading master alamat:", error);
+        throw error;
     }
-    
+    }
+
     populateViewData() {
         // Populate application data to view
         if (this.applicationData) {
@@ -155,25 +123,26 @@ export default class FormOngkirPresenter {
         this.setDefaultAlamatTujuan();
     }
     
-    setDefaultAlamatTujuan() {
-        // Set alamat tujuan default (biasanya kantor pusat)
-        const defaultAlamat = this.masterAlamat.find(alamat => alamat.nama === 'Kantor Pusat') || this.masterAlamat[0];
-        
-        if (defaultAlamat) {
-            const alamatTujuanElement = document.getElementById('alamat-tujuan');
-            const lokasiLink = document.getElementById('lokasi-link');
-            
-            if (alamatTujuanElement) {
-                alamatTujuanElement.textContent = defaultAlamat.alamat;
-            }
-            
-            if (lokasiLink && defaultAlamat.latitude && defaultAlamat.longitude) {
-                // Generate Google Maps link
-                const mapsUrl = `https://www.google.com/maps?q=${defaultAlamat.latitude},${defaultAlamat.longitude}`;
-                lokasiLink.href = mapsUrl;
-                lokasiLink.target = '_blank';
-            }
+   setDefaultAlamatTujuan() {
+    const defaultAlamat =
+        this.masterAlamat.find(alamat => alamat.nama === 'Kantor Pusat') ||
+        this.masterAlamat[0];
+
+    console.log("Default Alamat Admin:", defaultAlamat); // ✅ debug log
+
+    if (defaultAlamat) {
+        const alamatTujuanElement = document.getElementById('alamat-tujuan');
+        const lokasiLink = document.getElementById('lokasi-link');
+
+        if (alamatTujuanElement) {
+        alamatTujuanElement.textContent = defaultAlamat.alamat;
         }
+
+        if (lokasiLink && defaultAlamat.latitude && defaultAlamat.longitude) {
+        lokasiLink.href = `https://www.google.com/maps?q=${defaultAlamat.latitude},${defaultAlamat.longitude}`;
+        lokasiLink.target = "_blank";
+        }
+    }
     }
     
     setupEventListeners() {
@@ -193,21 +162,19 @@ export default class FormOngkirPresenter {
         });
     }
     
-    handleDeliveryMethodChange(method) {
-        console.log('Delivery method changed:', method);
-        
-        // Reset selection when switching methods
-        this.selectedAlamat = null;
-        
-        if (method === 'dijemput') {
-            // Reset alamat dropdown and ongkir calculation
-            const pilihAlamatSelect = document.getElementById('pilih-alamat');
-            if (pilihAlamatSelect) {
-                pilihAlamatSelect.value = '';
-            }
-            this.view.updateEstimasiJarak(null, null);
-        }
-    }
+   handleDeliveryMethodChange(method) {
+  this.selectedAlamat = null;
+
+  if (method === 'dijemput') {
+    const pilihAlamatSelect = document.getElementById('pilih-alamat');
+    if (pilihAlamatSelect) pilihAlamatSelect.value = '';
+    this.view.updateEstimasiJarak(null, null);
+  } else if (method === 'mengantar') {
+    this.setDefaultAlamatTujuan(); // ✅ PENTING
+  }
+}
+
+
     
     handleAlamatChange(alamatId) {
         if (!alamatId) {
