@@ -1,7 +1,10 @@
 // src/pages/dashboard-user/diterimaPresenter.js
 import DiterimaView from "./diterimaView.js";
 import { getCurrentUser } from "../../models/authModel.js";
-import { getPengajuanByUserIdAndStatus } from "../../models/pengajuan_sampah-model.js";
+import {
+  getPengajuanByUserIdAndStatus,
+  rejectPenawaranTanpaAlasan,
+} from "../../models/pengajuan_sampah-model.js";
 
 export default class DiterimaPresenter {
   constructor() {
@@ -161,26 +164,18 @@ export default class DiterimaPresenter {
   }
 
   async rejectApplication(applicationId) {
-    // Konfirmasi sebelum melakukan aksi
-    const reason = prompt("Masukkan alasan penolakan (opsional):");
-    if (reason === null) return; // User cancelled
+    const confirmed = confirm("Apakah Anda yakin ingin menolak tawaran ini?");
+    if (!confirmed) return;
 
     try {
-      // TODO: Implementasi API call untuk menolak pengajuan
-      // const response = await fetch(`${BASE_URL}/api/pengajuan/${applicationId}/reject`, {
-      //     method: 'PUT',
-      //     headers: { 'Content-Type': 'application/json' },
-      //     body: JSON.stringify({ reason })
-      // });
-
-      // Sementara simulasi berhasil
-      this.view.showSuccess("Pengajuan berhasil ditolak");
-
-      // Refresh data
-      await this.loadAcceptedApplications();
+      await rejectPenawaranTanpaAlasan(applicationId);
+      this.view.showSuccess("Penawaran berhasil ditolak");
+      setTimeout(() => {
+        window.location.hash = "#/diterima";
+      }, 1000);
     } catch (error) {
-      console.error("Error rejecting application:", error);
-      throw error;
+      console.error("Error rejecting penawaran:", error);
+      this.view.showError("Gagal menolak penawaran: " + error.message);
     }
   }
 

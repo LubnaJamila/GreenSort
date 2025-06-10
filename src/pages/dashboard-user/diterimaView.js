@@ -264,10 +264,12 @@ export default class DiterimaView {
   }
 
   setupActionListeners() {
-    // Delegated event listener untuk action buttons
     const tableBody = document.getElementById("applications-table-body");
-    if (tableBody) {
-      const actionHandler = (e) => {
+    if (!tableBody) return;
+
+    // Gunakan bound handler supaya bisa dihapus dengan tepat
+    if (!this.boundActionHandler) {
+      this.boundActionHandler = (e) => {
         e.preventDefault();
         const target = e.target.closest(".action-accept, .action-reject");
         if (!target) return;
@@ -275,17 +277,15 @@ export default class DiterimaView {
         const applicationId = target.dataset.id;
         const action = target.dataset.action;
 
-        // Dispatch custom event untuk presenter
         const actionEvent = new CustomEvent("application-action", {
           detail: { id: applicationId, action: action },
         });
         document.dispatchEvent(actionEvent);
       };
-
-      // Remove existing listener if any
-      tableBody.removeEventListener("click", actionHandler);
-      tableBody.addEventListener("click", actionHandler);
     }
+
+    tableBody.removeEventListener("click", this.boundActionHandler);
+    tableBody.addEventListener("click", this.boundActionHandler);
   }
 
   handleRefresh() {

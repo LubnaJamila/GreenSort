@@ -223,6 +223,13 @@ body {
   color: var(--text-dark);
   margin: 0;
 }
+/* Tab aktif berwarna hijau */
+.nav-tabs .nav-link.active {
+  background-color: #198754; /* Bootstrap "success" green */
+  color: white;
+  border-color: #198754 #198754 #fff;
+}
+
 
 /* Filter Tabs */
 .filter-tabs {

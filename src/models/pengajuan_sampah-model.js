@@ -68,3 +68,20 @@ export async function getPengajuanByUserIdAndStatus(userId, status) {
     };
   }
 }
+export async function rejectPenawaranTanpaAlasan(idPengajuan) {
+  const response = await fetch(
+    `http://localhost:3000/api/penawaran/tolak/${idPengajuan}`,
+    {
+      method: "PUT",
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok || !result.success) {
+    throw new Error(result.message || "Gagal menolak penawaran");
+  }
+
+  return result;
+}
+

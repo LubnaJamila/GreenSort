@@ -151,6 +151,13 @@ export default class FormOngkirView {
                                                     </div>
                                                 </div>
                                             </div>
+
+                                            <div class="mb-3">
+                                                <label for="pilih-rekening" class="form-label fw-bold">Pilih rekening Penjemputan:</label>
+                                                <select class="form-select" id="rekening-user-mengantar" name="rekening_id" required>
+                                                    <option value="">-- Pilih rekening --</option>
+                                                </select>
+                                            </div>
                                             
                                             <div class="mb-3">
                                                 <label class="form-label fw-bold">Total Harga:</label>
@@ -160,6 +167,15 @@ export default class FormOngkirView {
                                                            id="total-harga-mengantar" value="0" readonly>
                                                 </div>
                                                 <small class="text-muted">Total harga yang akan Anda terima</small>
+                                            </div>
+
+                                            <div class="mb-3">
+                                              <label class="form-label fw-bold">Estimasi Tanggal Mulai Pengantaran:</label>
+                                              <input type="date" class="form-control" id="estimasi-mulai-mengantar" readonly>
+                                            </div>
+                                            <div class="mb-3">
+                                              <label class="form-label fw-bold">Estimasi Tanggal Selesai Pengantaran:</label>
+                                              <input type="date" class="form-control" id="estimasi-selesai-mengantar" readonly>
                                             </div>
                                             
                                             <div class="mt-4 text-end">
@@ -175,11 +191,13 @@ export default class FormOngkirView {
                                         <!-- Dijemput Form -->
                                         <form id="dijemput-form" class="delivery-form" style="display: none;">
                                             <div class="mb-3">
-                                                <label class="form-label fw-bold">Alamat Lengkap Anda:</label>
+                                                <label class="form-label fw-bold">Alamat Bank Sampah:</label>
                                                 <div class="card bg-light">
                                                     <div class="card-body">
                                                         <p id="alamat-user" class="mb-0">Loading alamat...</p>
                                                     </div>
+                                                    <input type="hidden" id="latitude" name="latitude">
+                                                    <input type="hidden" id="longitude" name="longitude">
                                                 </div>
                                             </div>
                                             
@@ -187,6 +205,12 @@ export default class FormOngkirView {
                                                 <label for="pilih-alamat" class="form-label fw-bold">Pilih Alamat Penjemputan:</label>
                                                 <select class="form-select" id="pilih-alamat" name="alamat_id" required>
                                                     <option value="">-- Pilih Alamat --</option>
+                                                </select>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="pilih-rekening" class="form-label fw-bold">Pilih rekening Penjemputan:</label>
+                                                <select class="form-select" id="rekening-user-dijemput" name="rekening_id" required>
+                                                    <option value="">-- Pilih rekening --</option>
                                                 </select>
                                             </div>
                                             
@@ -230,6 +254,15 @@ export default class FormOngkirView {
                                                 <small class="text-muted">Harga sampah - ongkos kirim</small>
                                             </div>
                                             
+                                            <div class="mb-3">
+                                              <label class="form-label fw-bold">Estimasi Tanggal Mulai Penjemputan:</label>
+                                              <input type="date" class="form-control" id="estimasi-mulai-dijemput" readonly>
+                                            </div>
+                                            <div class="mb-3">
+                                              <label class="form-label fw-bold">Estimasi Tanggal Selesai Penjemputan:</label>
+                                              <input type="date" class="form-control" id="estimasi-selesai-dijemput" readonly>
+                                            </div>
+
                                             <div class="mt-4 text-end">
                                                 <button type="button" class="btn btn-secondary me-2 cancel-btn">
                                                     Batal
@@ -262,13 +295,11 @@ export default class FormOngkirView {
       }).format(amount);
     };
 
-    // Populate sampah image
     const sampahImage = document.getElementById("sampah-image");
     if (sampahImage && data.gambarSampah) {
       sampahImage.src = data.gambarSampah;
     }
 
-    // Populate detail info
     document.getElementById("nama-lengkap").textContent =
       data.namaLengkap || "-";
     document.getElementById("no-hp").textContent = data.noHp || "-";
@@ -281,14 +312,59 @@ export default class FormOngkirView {
       ? formatCurrency(data.hargaSampah)
       : "-";
 
-    // Update total harga for mengantar sendiri
-    this.updateTotalHarga(data.hargaSampah || 0, 0);
+    // Tambahkan atau update Total Harga
+    let totalHargaEl = document.getElementById("total-harga-sampah");
+    if (!totalHargaEl) {
+      const hargaContainer =
+        document.getElementById("harga-sampah").parentElement.parentElement;
+      const row = document.createElement("div");
+      row.className = "row mb-0";
+      row.innerHTML = `
+        <div class="col-5"><strong>Total Harga:</strong></div>
+        <div class="col-7" id="total-harga-sampah">${formatCurrency(
+          data.totalHarga
+        )}</div>
+      `;
+      hargaContainer.parentElement.appendChild(row);
+    } else {
+      totalHargaEl.textContent = formatCurrency(data.totalHarga);
+    }
+
+    // Kirim total harga dari presenter langsung
+    this.updateTotalHarga(data.totalHarga || 0, 0);
   }
 
-  populateUserAddress(address) {
+  // Gabungan: tampilkan alamat lengkap admin tanpa konflik dengan displayUserAlamatInfo()
+  populateUserAddress(adminAlamat) {
     const alamatUser = document.getElementById("alamat-user");
+    const latInput = document.getElementById("latitude");
+    const lngInput = document.getElementById("longitude");
+
+    const latDisplay = document.getElementById("lat-display");
+    const lngDisplay = document.getElementById("lng-display");
+
+    // Ambil alamat lengkap dari dua kemungkinan field
+    const alamatLengkap =
+      (adminAlamat?.alamat && adminAlamat.alamat.trim()) ||
+      (adminAlamat?.alamat_lengkap && adminAlamat.alamat_lengkap.trim()) ||
+      null;
+
+    console.log("Alamat yang akan ditampilkan:", alamatLengkap);
+
     if (alamatUser) {
-      alamatUser.textContent = address || "Alamat tidak tersedia";
+      alamatUser.textContent = alamatLengkap || "Alamat belum tersedia";
+    }
+
+    if (latInput) latInput.value = adminAlamat?.latitude || "";
+    if (lngInput) lngInput.value = adminAlamat?.longitude || "";
+
+    if (latDisplay) latDisplay.textContent = adminAlamat?.latitude || "-";
+    if (lngDisplay) lngDisplay.textContent = adminAlamat?.longitude || "-";
+
+    // Juga update bagian displayUserAlamatInfo jika diperlukan
+    const alamatInfo = document.getElementById("alamat-user-info");
+    if (alamatInfo) {
+      alamatInfo.textContent = alamatLengkap || "-";
     }
   }
 
@@ -297,7 +373,6 @@ export default class FormOngkirView {
     const selectAlamat = document.getElementById("pilih-alamat");
 
     if (selectAlamat) {
-      // Clear existing options except the first one
       selectAlamat.innerHTML = '<option value="">-- Pilih Alamat --</option>';
 
       alamatList.forEach((alamat) => {
@@ -310,6 +385,32 @@ export default class FormOngkirView {
     }
   }
 
+  displayUserRekening(rekeningList) {
+    const ids = ["rekening-user-mengantar", "rekening-user-dijemput"];
+
+    ids.forEach((id) => {
+      const selectEl = document.getElementById(id);
+      if (!selectEl) return;
+
+      selectEl.innerHTML = '<option value="">-- Pilih rekening --</option>';
+
+      if (!rekeningList || rekeningList.length === 0) {
+        const option = document.createElement("option");
+        option.value = "";
+        option.textContent = "Belum ada rekening.";
+        selectEl.appendChild(option);
+      } else {
+        rekeningList.forEach((rekening) => {
+          const option = document.createElement("option");
+          option.value = rekening.id_rekening;
+          option.textContent = `${rekening.nama_bank} - ${rekening.no_rek} a.n ${rekening.nama_pemilik}`;
+          selectEl.appendChild(option);
+        });
+      }
+    });
+  }
+
+  // Perbarui updateEstimasiJarak agar bagian DIJEMPUT gunakan totalHarga dari presenter
   updateEstimasiJarak(jarak, ongkir) {
     const estimasiJarakInput = document.getElementById("estimasi-jarak");
     const ongkirInput = document.getElementById("ongkir");
@@ -327,28 +428,30 @@ export default class FormOngkirView {
 
     // Update calculations for dijemput method
     if (this.selectedDeliveryMethod === "dijemput") {
-      const hargaSampah = this.applicationData?.hargaSampah || 0;
-      this.updateTotalHarga(hargaSampah, ongkir || 0);
+      const totalHarga = this.applicationData?.totalHarga || 0;
+      this.updateTotalHarga(totalHarga, ongkir || 0);
     }
   }
 
-  updateTotalHarga(hargaSampah, ongkir) {
+  // Perbarui updateTotalHarga agar bagian DIJEMPUT hanya tampil totalHarga dari presenter
+  updateTotalHarga(totalHargaSampah, ongkir) {
     const formatNumber = (amount) => {
       return new Intl.NumberFormat("id-ID").format(amount);
     };
 
     if (this.selectedDeliveryMethod === "mengantar") {
-      // For mengantar sendiri, total harga = harga sampah (no ongkir)
+      // Total harga = totalHargaSampah (tanpa ongkir)
       const totalHargaMengantar = document.getElementById(
         "total-harga-mengantar"
       );
       if (totalHargaMengantar) {
-        totalHargaMengantar.value = formatNumber(hargaSampah);
+        totalHargaMengantar.value = formatNumber(totalHargaSampah);
       }
     } else {
-      // For dijemput, calculate total harga and pendapatan
-      const totalHarga = hargaSampah + (ongkir || 0);
-      const pendapatan = hargaSampah - (ongkir || 0);
+      // Dijemput: total harga TIDAK ditambah ongkir
+      // Pendapatan = totalHargaSampah - ongkir
+      const totalHarga = totalHargaSampah; // ❗ hanya total harga dari presenter
+      const pendapatan = totalHargaSampah - (ongkir || 0);
 
       const totalHargaDijemput = document.getElementById(
         "total-harga-dijemput"
@@ -360,8 +463,13 @@ export default class FormOngkirView {
       }
 
       if (pendapatanInput) {
-        pendapatanInput.value = formatNumber(Math.max(0, pendapatan));
-        // Change color based on pendapatan value
+        const nilaiTampil =
+          pendapatan < 0
+            ? "-" + formatNumber(Math.abs(pendapatan))
+            : formatNumber(pendapatan);
+
+        pendapatanInput.value = nilaiTampil;
+
         if (pendapatan <= 0) {
           pendapatanInput.classList.remove("text-success");
           pendapatanInput.classList.add("text-danger");

@@ -849,6 +849,187 @@ app.get("/api/admin/alamat", (req, res) => {
   });
 });
 
+app.put("/api/pengajuan/mengantar/:id", (req, res) => {
+  const { id } = req.params;
+  const { rekening_id, total, tanggal_awal, tanggal_akhir } =
+    req.body;
+
+  // Validasi input
+  if (!rekening_id || !total || !tanggal_awal || !tanggal_akhir) {
+    return res.status(400).json({
+      success: false,
+      message:
+        "Semua data (rekening, total harga, estimasi tanggal) wajib diisi",
+    });
+  }
+
+  const sql = `
+    UPDATE penjualan_sampah
+    SET 
+      rekening_id = ?, 
+      total = ?, 
+      tanggal_awal = ?, 
+      tanggal_akhir = ?, 
+      opsi_pengiriman = 'antar sendiri',
+      status = 'penawaran diterima',
+      updated_at = NOW()
+    WHERE id= ?
+  `;
+
+  db.query(
+    sql,
+    [rekening_id, total, tanggal_awal, tanggal_akhir, id],
+    (err, result) => {
+      if (err) {
+        console.error("DB Error (mengantar):", err);
+        return res
+          .status(500)
+          .json({
+            success: false,
+            message: "Gagal menyimpan data pengantaran",
+          });
+      }
+
+      res.json({
+        success: true,
+        message: "Data pengantaran berhasil disimpan",
+      });
+    }
+  );
+});
+
+app.put("/api/pengajuan/dijemput/:id", (req, res) => {
+  const { id } = req.params;
+  const {
+    rekening_id,
+    alamat_user_id,
+    total,
+    ongkir,
+    jarak_estimasi_km,
+    tanggal_awal,
+    tanggal_akhir,
+  } = req.body;
+
+  // Validasi input
+  if (
+    !rekening_id ||
+    !alamat_user_id ||
+    !total ||
+    !ongkir ||
+    !jarak_estimasi_km ||
+    !tanggal_awal ||
+    !tanggal_akhir
+  ) {
+    return res.status(400).json({
+      success: false,
+      message: "Semua data wajib diisi untuk pengiriman dijemput",
+    });
+  }
+
+  const sql = `
+    UPDATE penjualan_sampah
+    SET
+      rekening_id = ?,
+      alamat_user_id = ?,
+      total = ?,
+      ongkir = ?,
+      jarak_estimasi_km = ?,
+      tanggal_awal = ?,
+      tanggal_akhir = ?,
+      opsi_pengiriman = 'dijemput',
+      status = 'penawaran diterima',
+      updated_at = NOW()
+    WHERE id = ?
+  `;
+
+  db.query(
+    sql,
+    [
+      rekening_id,
+      alamat_user_id,
+      total,
+      ongkir,
+      jarak_estimasi_km,
+      tanggal_awal,
+      tanggal_akhir,
+      id,
+    ],
+    (err, result) => {
+      if (err) {
+        console.error("DB Error (dijemput):", err);
+        return res.status(500).json({
+          success: false,
+          message: "Gagal menyimpan data penjemputan",
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "Data penjemputan berhasil disimpan",
+      });
+    }
+  );
+});
+
+app.put("/api/penawaran/tolak/:id", (req, res) => {
+  const { id } = req.params;
+
+  const sql = `
+    UPDATE penjualan_sampah
+    SET status = 'penawaran ditolak', updated_at = NOW()
+    WHERE id = ?
+  `;
+
+  db.query(sql, [id], (err, result) => {
+    if (err) {
+      console.error("DB Error (tolak penawaran):", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Gagal menolak penawaran" });
+    }
+
+    res.json({ success: true, message: "Penawaran berhasil ditolak" });
+  });
+});
+
+app.get("/api/pengiriman/:user_id", (req, res) => {
+  const { user_id } = req.params;
+
+  const sql = `
+    SELECT 
+      ps.id,
+      ps.gambar_sampah,
+      ps.jenis_sampah,
+      ps.berat,
+      ps.harga_tawaran,
+      ps.jarak_estimasi_km AS jarak,
+      ps.ongkir,
+      ps.total,
+      ps.tanggal_awal,
+      ps.tanggal_akhir,
+      ps.opsi_pengiriman,
+      ps.status,
+      aa.alamat_lengkap AS alamat_admin
+    FROM penjualan_sampah ps
+    LEFT JOIN alamat aa ON ps.alamat_admin_id = aa.id_alamat
+    WHERE ps.user_id = ? AND ps.status = 'penawaran diterima'
+    ORDER BY ps.updated_at DESC
+  `;
+
+  db.query(sql, [user_id], (err, results) => {
+    if (err) {
+      console.error("❌ Error fetching pengiriman:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Gagal mengambil data pengiriman" });
+    }
+
+    res.json({ success: true, data: results });
+  });
+});
+
+
+
 app.listen(port, () => {
   console.log(`Server backend berjalan di http://localhost:${port}`);
 });
