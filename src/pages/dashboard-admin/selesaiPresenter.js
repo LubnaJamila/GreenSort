@@ -3,6 +3,7 @@ import SelesaiView from "../dashboard-admin/selesaiView.js";
 import SidebarView from "../../views/sidebarView.js";
 // import DashboardModel from "../../models/dashboard-model.js"; // Uncomment ketika model sudah ada
 import { getCurrentUser, logoutUser } from "../../models/authModel.js";
+import { fetchSelesaiData } from "../../models/selesaiModel.js";
 
 export default class SelesaiPresenter {
   constructor() {
@@ -14,31 +15,22 @@ export default class SelesaiPresenter {
     this.handleRefresh = this.handleRefresh.bind(this); // ✅ Tambahkan binding untuk refresh
   }
 
-  init() {
-    console.log("Initializing SelesaiPresenter");
-    this.currentUser = getCurrentUser();
-    
-    if (!this.currentUser) {
-      console.log("User not logged in, redirecting to login");
-      const event = new CustomEvent("navigate", { detail: { page: "login" } });
-      document.dispatchEvent(event);
-      return;
-    }
+  async init() {
+  this.currentUser = getCurrentUser();
 
-    // ✅ Perbaikan: Render view yang benar
-    this.view.render(); // Ini akan render sidebar dan main content sekaligus
-    
-    // Tampilkan info user di dashboard
-    this.view.displayUserInfo(this.currentUser);
-    
-    // ✅ Perbaikan: Gunakan data dummy sementara sampai model ready
-    const applications = this.getDummySelesaiData();
-    
-    // Render data ke tabel
-    this.view.renderSelesaiData(applications);
-    
-    this.setupEventListeners();
+  if (!this.currentUser) {
+    document.dispatchEvent(new CustomEvent("navigate", { detail: { page: "login" } }));
+    return;
   }
+
+  this.view.render();
+  this.view.displayUserInfo(this.currentUser);
+
+  const applications = await fetchSelesaiData();
+  this.view.renderSelesaiData(applications);
+
+  this.setupEventListeners();
+}
 
   // ✅ Tambahkan method untuk data dummy sementara
   // Perbaikan untuk data dummy di SelesaiPresenter
@@ -100,11 +92,10 @@ getDummySelesaiData() {
   }
 
   // ✅ Tambahkan method untuk handle refresh
-  handleRefresh() {
-    console.log("Refreshing selesai data");
-    const applications = this.getDummySelesaiData();
-    this.view.renderSelesaiData(applications);
-  }
+  async handleRefresh() {
+  const applications = await fetchSelesaiData();
+  this.view.renderSelesaiData(applications);
+}
 
   handleLogout() {
     console.log("Logout initiated");

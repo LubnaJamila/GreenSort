@@ -68,7 +68,6 @@ export default class SelesaiView {
                   <th>Harga</th>
                   <th>Total Harga</th>
                   <th>Gambar Sampah</th>
-                  <th>Action</th>
                 </tr>
               </thead>
               <tbody id="applications-table-body">
@@ -237,21 +236,18 @@ renderApplicationRow(app) {
       <td>${app.harga || 'N/A'}</td>
       <td>${app.totalHarga || app.total || 'N/A'}</td>
       <td>
-        ${app.gambarSampah ? 
-          `<img src="${app.gambarSampah}" alt="Sampah" style="width: 50px; height: 50px; object-fit: cover;">` : 
-          '<span class="text-muted">No Image</span>'
-        }
-      </td>
-      <td>
-        <div class="btn-group">
-          <button class="btn btn-sm btn-outline-primary" onclick="viewDetail(${app.id})" title="View Detail">
-            <i class="bi bi-eye"></i>
-          </button>
-          <button class="btn btn-sm btn-outline-success" onclick="downloadReceipt(${app.id})" title="Download Receipt">
-            <i class="bi bi-download"></i>
-          </button>
-        </div>
-      </td>
+      <img 
+        src="${
+          app.gambarSampah
+            ? (app.gambarSampah.startsWith("/uploads/")
+                ? `http://localhost:3000${app.gambarSampah}`
+                : `http://localhost:3000/uploads/${app.gambarSampah}`)
+            : "https://via.placeholder.com/50"
+        }" 
+        alt="Sampah" 
+        style="width: 50px; height: 50px; object-fit: cover;"
+      >
+    </td>
     </tr>
   `;
 }

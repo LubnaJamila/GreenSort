@@ -34,7 +34,7 @@ export default class PengajuanPresenter {
 
   async loadApplications() {
   try {
-    const allStatuses = ['pengajuan', 'pengajuan diterima', 'pengajuan ditolak'];
+    const allStatuses = ['pengajuan', 'pengajuan diterima', 'pengajuan ditolak','penawaran diterima','penawaran ditolak','selesai'];
     let allApplications = [];
 
     for (const status of allStatuses) {
@@ -122,7 +122,9 @@ export default class PengajuanPresenter {
     const status = item.statusOriginal.toLowerCase();
     if (status === 'pengajuan') stats.pending++;
     if (status === 'pengajuan diterima') stats.accepted++;
-    if (status === 'pengajuan ditolak') stats.rejected++;
+    if (status === 'penawaran diterima'|| status === 'penawaran ditolak') stats.rejected++;
+    if (status === 'penawaran diterima') stats.shipped++;
+    if (status === 'selesai') stats.completed++;
   });
 
   this.view.displayStatistics(stats);

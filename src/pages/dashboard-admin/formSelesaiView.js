@@ -107,24 +107,6 @@ export default class FormSelesaiView {
                                             <div class="col-5"><strong>Metode:</strong></div>
                                             <div class="col-7" id="metode-pengiriman">-</div>
                                         </div>
-                                        <div class="row mb-2">
-                                            <div class="col-5"><strong>Alamat:</strong></div>
-                                            <div class="col-7" id="alamat-pengiriman">-</div>
-                                        </div>
-                                        <div class="row mb-2">
-                                            <div class="col-5"><strong>Jarak:</strong></div>
-                                            <div class="col-7" id="jarak-pengiriman">-</div>
-                                        </div>
-                                        <div class="row mb-2">
-                                            <div class="col-5"><strong>Ongkos Kirim:</strong></div>
-                                            <div class="col-7" id="ongkos-kirim">-</div>
-                                        </div>
-                                        <div class="row mb-2">
-                                            <div class="col-5"><strong>Status:</strong></div>
-                                            <div class="col-7">
-                                                <span class="badge bg-warning text-dark" id="status-pengiriman">Proses</span>
-                                            </div>
-                                        </div>
                                         <div class="row mb-0">
                                             <div class="col-5"><strong>Total Bayar:</strong></div>
                                             <div class="col-7">
@@ -186,19 +168,13 @@ export default class FormSelesaiView {
                                             </div>
                                         </div>
                                         
-                                        <div class="mb-3">
-                                            <label for="catatan" class="form-label">Catatan (Opsional)</label>
-                                            <textarea class="form-control" id="catatan" name="catatan" rows="3" 
-                                                      placeholder="Tambahkan catatan jika diperlukan..."></textarea>
-                                        </div>
-                                        
                                         <!-- Action Buttons -->
                                         <div class="d-flex justify-content-between align-items-center">
                                             <button type="button" id="cancel-btn" class="btn btn-secondary">
                                                 <i class="bi bi-arrow-left me-2"></i>Kembali
                                             </button>
                                             <button type="submit" id="submit-btn" class="btn btn-success btn-lg">
-                                                <i class="bi bi-check-circle me-2"></i>Selesaikan Transaksi
+                                                <i class="bi bi-check-circle me-2"></i>Kirim Bukti Transfer
                                             </button>
                                         </div>
                                     </form>
@@ -270,6 +246,8 @@ export default class FormSelesaiView {
     }
     
     populateApplicationData(data) {
+        console.log("🖼 Menampilkan data ke UI:", data);
+
         if (!data) return;
         
         this.applicationData = data;
@@ -285,8 +263,9 @@ export default class FormSelesaiView {
         // Populate sampah image
         const sampahImage = document.getElementById('sampah-image');
         if (sampahImage && data.gambarSampah) {
-            sampahImage.src = data.gambarSampah;
+            sampahImage.src = 'http://localhost:3000' + data.gambarSampah;
         }
+
         
         // Populate detail sampah
         document.getElementById('nama-lengkap').textContent = data.namaLengkap || '-';
@@ -295,15 +274,11 @@ export default class FormSelesaiView {
         document.getElementById('berat-sampah').textContent = `${data.beratSampah || data.kuantitas || '-'} kg`;
         document.getElementById('harga-sampah').textContent = data.hargaSampah ? formatCurrency(data.hargaSampah) : '-';
         
-        // Populate detail pengiriman
-        document.getElementById('metode-pengiriman').textContent = data.metodePengiriman === 'mengantar' ? 'Mengantar Sendiri' : 'Dijemput';
-        document.getElementById('alamat-pengiriman').textContent = data.alamatPengiriman || '-';
-        document.getElementById('jarak-pengiriman').textContent = data.jarakPengiriman ? `${data.jarakPengiriman} km` : '-';
-        document.getElementById('ongkos-kirim').textContent = data.ongkosKirim ? formatCurrency(data.ongkosKirim) : 'Gratis';
-        
-        // Calculate total
-        const totalBayar = (data.hargaSampah || 0) - (data.ongkosKirim || 0);
-        document.getElementById('total-bayar').textContent = formatCurrency(totalBayar);
+        // ✅ Detail Pengiriman (hanya 2 data)
+        document.getElementById('metode-pengiriman').textContent = data.metodePengiriman ?? '-';
+        document.getElementById('total-bayar').textContent = data.ongkosKirim ? formatCurrency(data.ongkosKirim) : '-';
+
+
         
         // Update status
         const statusElement = document.getElementById('status-pengiriman');
@@ -453,7 +428,6 @@ export default class FormSelesaiView {
         }
         
         const formData = new FormData(e.target);
-        formData.append('bukti_transaksi', this.uploadedFile);
         formData.append('application_id', this.applicationData?.id);
         
         // Dispatch event to presenter

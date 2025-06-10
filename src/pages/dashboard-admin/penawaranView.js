@@ -375,16 +375,16 @@ getStatusStyles(status) {
   }
 
   updateStatistics(stats) {
-    // Update stat cards with new data
-    const statCards = document.querySelectorAll('.stat-number');
-    if (statCards.length >= 5 && stats) {
-      statCards[0].textContent = stats.total || '0';
-      statCards[1].textContent = stats.menunggu || '0';
-      statCards[2].textContent = stats.diterima || '0';
-      statCards[3].textContent = stats.ditolak || '0';
-      statCards[4].textContent = stats.kadaluarsa || '0';
-    }
+  const statCards = document.querySelectorAll('.stat-number');
+  if (statCards.length >= 5 && stats) {
+    statCards[0].textContent = stats.total || '0';       // Semua
+    statCards[1].textContent = stats.pengajuan || '0';   // Pengajuan
+    statCards[2].textContent = stats.penawaran || '0';   // Penawaran
+    statCards[3].textContent = stats.pengiriman || '0';  // Pengiriman
+    statCards[4].textContent = stats.selesai || '0';     // Selesai
   }
+}
+
 
   renderPenawaranData(offersData, stats = null) {
     this.renderOffersTable(offersData);

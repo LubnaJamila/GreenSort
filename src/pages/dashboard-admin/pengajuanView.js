@@ -704,9 +704,23 @@ export default class PengajuanView {
   }
 
   showSuccess(message) {
-    console.log(message);
-    alert(message);
-  }
+    const alertHtml = `
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    const cardBody = document.querySelector('.card-body');
+    if (cardBody) {
+        cardBody.insertAdjacentHTML('afterbegin', alertHtml);
+    }
+
+    // Arahkan langsung tanpa delay
+    window.location.href = '#/selesai';
+}
+
 
   renderApplicationsTable(applicationsData) {
     console.log("Rendering applications table with data:", applicationsData);

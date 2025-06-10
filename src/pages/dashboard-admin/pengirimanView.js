@@ -65,34 +65,21 @@ export default class PengirimanView {
                 <h2 class="section-title">Data Pengiriman</h2>
             </div>
 
-            <!-- Filter Tabs -->
-            <div class="filter-tabs">
-                <button class="filter-tab" data-filter="pending">
-                Dijemput <span class="badge bg-light text-dark ms-1" id="badge-pending">0</span>
-                </button>
-                <button class="filter-tab" data-filter="accepted">
-                Diantar <span class="badge bg-light text-dark ms-1" id="badge-accepted">0</span>
-                </button>
-            </div>
-
             <!-- Table Container -->
             <div class="table-container">
                 <div class="table-responsive">
                 <table class="table table-striped" id="datatable" style="width:100%">
                     <thead>
                     <tr>
-                        <th><input type="checkbox" id="select-all" class="form-check-input"></th>
-                        <th>Nama</th>
-                        <th>Kategori Sampah</th>
-                        <th>Berat</th>
-                        <th>Harga</th>
-                        <th>Total Harga</th>
-                        <th>Alamat</th>
-                        <th>Tanggal Penjemputan</th>
-                        <th>Status</th>
-                        <th>Aksi</th>
+                    <th>Nama</th>
+                    <th>Kategori</th>
+                    <th>Tanggal</th>
+                    <th>Pengiriman</th>
+                    <th>Alamat Penjual</th>
+                    <th>Alamat Admin</th>
+                    <th>Action</th>
                     </tr>
-                    </thead>
+                </thead>
                     <tbody id="applications-table-body">
                     <!-- Dynamic content will be inserted here -->
                     </tbody>
@@ -260,37 +247,28 @@ refreshData() {
         return filterMap[filter] || '';
     }
 
-    renderApplicationRow(app) {
-        const { statusClass, statusIcon, statusLabel } = this.getStatusStyles(app.status);
-        
-        return `
-        <tr>
-            <td><input type="checkbox" class="form-check-input row-checkbox" value="${app.id}"></td>
-            <td>${app.nama || app.name || 'N/A'}</td>
-            <td>${app.kategoriSampah || app.category || 'N/A'}</td>
-            <td>${app.berat || app.weight || 0} kg</td>
-            <td>Rp ${(app.harga || 0).toLocaleString('id-ID')}</td>
-            <td>Rp ${(app.totalHarga || 0).toLocaleString('id-ID')}</td>
-            <td class="text-truncate" style="max-width: 150px;" title="${app.alamat || 'N/A'}">${app.alamat || 'N/A'}</td>
-            <td>${app.tanggalPenjemputan || 'N/A'}</td>
-            <td>
-            <span class="badge ${statusClass}">
-                <i class="bi ${statusIcon}"></i> ${statusLabel}
-            </span>
-            </td>
-            <td>
-            <div class="btn-group" role="group">
-                <button type="button" class="btn btn-sm btn-outline-primary detail-btn" data-id="${app.id}" title="Detail">
-                <i class="bi bi-eye"></i>
-                </button>
-                <button type="button" class="btn btn-sm btn-success complete-btn" data-id="${app.id}" title="Selesai">
-                <i class="bi bi-check-circle"></i>
-                </button>
-            </div>
-            </td>
-        </tr>
-        `;
-    }
+renderApplicationRow(app) {
+ const alamatPenjual = app.opsi_pengiriman === 'dijemput' ? app.alamat_user : '-';
+const alamatAdmin = app.opsi_pengiriman === 'antar sendiri' ? app.alamat_admin : '-';
+
+return `
+  <tr>
+    <td>${app.nama}</td>
+    <td>${app.kategori_sampah}</td>
+    <td>${app.tanggal_akhir ? new Date(app.tanggal_akhir).toLocaleDateString('id-ID') : '-'}</td>
+    <td>${app.opsi_pengiriman}</td>
+    <td>${alamatPenjual}</td>
+    <td>${alamatAdmin}</td>
+    <td>
+    <div class="btn-group">
+        <a class="btn btn-sm btn-success" href="#/form-selesai?id=${app.id}" title="Selesaikan Transaksi">
+        <i class="bi bi-check2-circle">Selesai</i>
+        </a>
+    </div>
+    </td>
+  </tr>
+`;
+}
 
     getStatusStyles(status) {
         const statusMap = {
@@ -370,7 +348,7 @@ refreshData() {
             responsive: true,
             pageLength: 10,
             lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
-            order: [[7, 'desc']], // Sort by date column
+            order: [[2, 'desc']], // Sort by date column
             language: {
                 search: "Cari:",
                 lengthMenu: "Tampilkan _MENU_ data per halaman",
@@ -386,26 +364,6 @@ refreshData() {
                     previous: "<",
                 },
             },
-            columnDefs: [
-                {
-                    targets: [0, 9], // Checkbox and Action columns
-                    orderable: false,
-                    searchable: false
-                },
-                {
-                    targets: [6], // Alamat column
-                    render: function(data, type, row) {
-                        if (type === 'display' && data && data.length > 30) {
-                            return '<span title="' + data + '">' + data.substr(0, 30) + '...</span>';
-                        }
-                        return data || '';
-                    }
-                }
-            ],
-            drawCallback: () => {
-                this.setupRowEventListeners();
-                this.updateSelectAllState();
-            }
         });
 
         // Apply current filter after DataTable is initialized
@@ -619,24 +577,26 @@ refreshData() {
     // Clear table body
     tableBody.innerHTML = '';
 
-    // Render data
     if (this.applicationsData.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="10" class="text-center">Tidak ada data tersedia</td></tr>';
-        this.showEmptyState(true);
+    tableBody.innerHTML = '<tr><td colspan="7" class="text-center">Tidak ada data tersedia</td></tr>';
+    this.showEmptyState(true);
     } else {
-        const tableHTML = this.applicationsData
-            .map((app) => this.renderApplicationRow(app))
-            .join("");
-        tableBody.innerHTML = tableHTML;
-        this.showEmptyState(false);
+    const tableHTML = this.applicationsData
+        .map((app) => this.renderApplicationRow(app))
+        .join("");
+    tableBody.innerHTML = tableHTML;
+    this.showEmptyState(false);
     }
-
     // Update badges before initializing DataTable
     this.updateTabBadges();
 
     // Initialize DataTable after a short delay
     setTimeout(() => {
-        this.initDataTable();
+    if (this.applicationsData.length === 0) {
+        console.log('No data to initialize DataTable');
+        return;
+    }
+    this.initDataTable();
     }, 150);
 }
 

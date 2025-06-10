@@ -2,33 +2,36 @@
 import PenawaranView from "./penawaranView.js"; 
 import { getCurrentUser, logoutUser } from "../../models/authModel.js";
 import SidebarView from "../../views/sidebarView.js";
-import { fetchSemuaPenawaran } from "../../models/penawaranModel.js";
+import { fetchSemuaPenawaran,fetchStatistikPenawaran } from "../../models/penawaranModel.js";
 
 export default class PenawaranPresenter {
     constructor() {
         this.penawaranView = new PenawaranView();
         this.sidebarView = new SidebarView();
         this.currentUser = null;
-        this.applications = []; // Store applications data
+        this.applications = []; 
 
         this.handleLogout = this.handleLogout.bind(this);
     }
 
     init() {
-        console.log("Initializing PenawaranPresenter");
+    console.log("Initializing PenawaranPresenter");
 
-        this.currentUser = getCurrentUser();
-        if (!this.currentUser) {
-            console.log("User not logged in, redirecting to login");
-            const event = new CustomEvent("navigate", { detail: { page: "login" } });
-            document.dispatchEvent(event);
-            return;
-        }
-        this.sidebarView.render();
-        this.penawaranView.render();
-        this.loadPenawaranData();
-        this.penawaranView.displayUserInfo(this.currentUser);
-        this.setupEventListeners();
+    this.currentUser = getCurrentUser();
+    if (!this.currentUser) {
+        const event = new CustomEvent("navigate", { detail: { page: "login" } });
+        document.dispatchEvent(event);
+        return;
+    }
+
+    this.sidebarView.render();
+    this.penawaranView.render();
+
+    this.loadStatistikCard();      
+    this.loadPenawaranData();     
+
+    this.penawaranView.displayUserInfo(this.currentUser);
+    this.setupEventListeners();
     }
     async loadPenawaranData() {
     try {
@@ -42,16 +45,36 @@ export default class PenawaranPresenter {
     setupEventListeners() {
         document.addEventListener("user-logout", this.handleLogout);
     }
+    async loadStatistikCard() {
+    try {
+        const data = await fetchStatistikPenawaran();
 
+        const stats = {
+        total: data.length,
+        pengajuan: 0,
+        penawaran: 0,
+        pengiriman: 0,
+        selesai: 0,
+        };
+
+        data.forEach(item => {
+        const status = item.status?.toLowerCase();
+        if (status === "pengajuan") stats.pengajuan++;
+        if (status === "penawaran diterima" || status === "penawaran ditolak") stats.penawaran++;
+        if (status === "penawaran diterima") stats.pengiriman++;
+        if (status === "selesai") stats.selesai++;
+        });
+
+        this.penawaranView.updateStatistics(stats);
+    } catch (error) {
+        console.error("❌ Gagal ambil statistik card:", error);
+    }
+    }
     handleLogout() {
         console.log("Logout initiated");
         logoutUser();
-
-        // Bersihkan tampilan penawaran dan sidebar
         this.penawaranView.destroy();
         this.sidebarView.destroy();
-
-        // Navigasi ke halaman login
         const event = new CustomEvent("navigate", { detail: { page: "login" } });
         document.dispatchEvent(event);
     }

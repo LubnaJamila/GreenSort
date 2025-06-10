@@ -30,28 +30,30 @@ export default class DashboardPresenter {
     this.dashboardView.displayUserInfo(this.currentUser);
 
     getDataPenjualanSampah().then((applications) => {
-  this.dashboardView.renderDashboardData(applications);
+    this.dashboardView.renderDashboardData(applications);
 
-  // ✅ Hitung statistik berdasarkan status
-  const counts = {
-    total: applications.length,
-    pengajuan: 0,
-    penawaran: 0,
-    pengiriman: 0,
-    selesai: 0,
-  };
+    const counts = {
+      total: applications.length,
+      pengajuan: 0,
+      penawaran: 0,
+      pengiriman: 0,
+      selesai: 0,
+    };
 
-  applications.forEach(app => {
-    const status = app.status?.toLowerCase();
+    applications.forEach(app => {
+      const status = app.status?.toLowerCase();
 
-    if (status === 'pengajuan') counts.pengajuan++;
-    else if (status === 'pengajuan diterima') counts.penawaran++;
-    else if (status === 'dikirim') counts.pengiriman++;
-    else if (status === 'selesai') counts.selesai++;
+      if (status === 'pengajuan') counts.pengajuan++;
+      else if (status === 'penawaran diterima' || status === 'penawaran ditolak') counts.penawaran++;
+
+      // pengiriman hanya dihitung dari "penawaran diterima" saja
+      if (status === 'penawaran diterima') counts.pengiriman++;
+
+      if (status === 'selesai') counts.selesai++;
   });
 
-  this.dashboardView.updateStatCards(counts);
-});
+    this.dashboardView.updateStatCards(counts);
+  });
 
     this.setupEventListeners();
   }

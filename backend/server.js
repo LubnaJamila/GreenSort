@@ -672,12 +672,15 @@ app.get("/api/pengajuan/status/:status", (req, res) => {
 app.get("/api/pengajuan/id/:id", (req, res) => {
   const { id } = req.params;
 
-  const sql = `
+    const sql = `
     SELECT 
       ps.id AS id,
       ps.user_id,
       ps.jenis_sampah,
       ps.berat,
+      ps.harga_tawaran,
+      ps.total,
+      ps.opsi_pengiriman,
       ps.status,
       ps.gambar_sampah,
       u.nama_lengkap AS name,
@@ -709,7 +712,10 @@ app.get("/api/pengajuan/id/:id", (req, res) => {
         phone: row.phone,
         category: row.jenis_sampah,
         weight: parseFloat(row.berat),
-       image: row.gambar_sampah || null,
+        price: row.harga_tawaran ? parseFloat(row.harga_tawaran) : 0,
+        image: row.gambar_sampah || null,
+        metode: row.opsi_pengiriman || "dijemput",
+        totalBayar: row.total ? parseFloat(row.total) : 0
       }
     });
   });
@@ -775,7 +781,7 @@ app.get("/api/penawaran/status/semua", (req, res) => {
       u.nama_lengkap AS name
     FROM penjualan_sampah ps
     JOIN users u ON ps.user_id = u.id_user
-    WHERE ps.status IN ('penawaran diterima', 'penawaran ditolak')
+    WHERE ps.status IN ('penawaran ditolak')
     ORDER BY ps.created_at DESC
   `;
 
@@ -1027,8 +1033,117 @@ app.get("/api/pengiriman/:user_id", (req, res) => {
     res.json({ success: true, data: results });
   });
 });
+app.get("/api/penjualan/selesai/tabel", (req, res) => {
+  const sql = `
+    SELECT 
+      ps.id,
+      u.nama_lengkap AS nama,
+      ps.jenis_sampah,
+      ps.berat,
+      ps.harga_tawaran AS harga,
+      ps.total,
+      ps.gambar_sampah
+    FROM penjualan_sampah ps
+    JOIN users u ON ps.user_id = u.id_user
+    WHERE ps.status = 'selesai'
+    ORDER BY ps.updated_at DESC
+  `;
 
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("❌ DB Error (tabel selesai):", err);
+      return res.status(500).json({ success: false, message: "Gagal ambil data selesai" });
+    }
 
+    const data = results.map((item) => ({
+      id: item.id,
+      nama: item.nama,
+      jenisSampah: item.jenis_sampah,
+      berat: `${item.berat} kg`,
+      harga: `Rp ${parseFloat(item.harga).toLocaleString()}`,
+      totalHarga: `Rp ${parseFloat(item.total).toLocaleString()}`,
+      gambarSampah: item.gambar_sampah 
+        ? (item.gambar_sampah.startsWith('/uploads/') 
+            ? item.gambar_sampah 
+            : '/uploads/' + item.gambar_sampah)
+        : null,
+    }));
+
+    res.json({ success: true, data });
+  });
+});
+app.get("/api/pengiriman", (req, res) => {
+  const sql = `
+  SELECT 
+    ps.id,
+    u.nama_lengkap AS nama,
+    ps.jenis_sampah AS kategori_sampah,
+    ps.tanggal_akhir,
+    ps.opsi_pengiriman,
+    CONCAT_WS(', ',
+      au.kabupaten,
+      CONCAT('Kecamatan ', au.kecamatan),
+      CONCAT('Desa ', au.desa),
+      au.alamat_lengkap
+    ) AS alamat_user,
+
+    CONCAT_WS(', ',
+      aa.kabupaten,
+      CONCAT('Kecamatan ', aa.kecamatan),
+      CONCAT('Desa ', aa.desa),
+      aa.alamat_lengkap
+    ) AS alamat_admin
+  FROM penjualan_sampah ps
+  JOIN users u ON ps.user_id = u.id_user
+  LEFT JOIN alamat au ON ps.alamat_user_id = au.id_alamat
+  LEFT JOIN alamat aa ON ps.alamat_admin_id = aa.id_alamat
+  WHERE ps.status = 'penawaran diterima'
+`;
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("❌ DB Error:", err);
+      return res.status(500).json({ success: false, message: "Gagal ambil data pengiriman" });
+    }
+    res.json({ success: true, data: results });
+  });
+});
+app.put('/api/penjualan/selesai/:id', (req, res, next) => {
+    upload.single("bukti_transaksi")(req, res, function (err) {
+        if (err instanceof multer.MulterError) {
+            console.error('❌ Multer Error:', err);
+            return res.status(400).json({ success: false, message: err.message });
+        } else if (err) {
+            console.error('❌ Unknown Upload Error:', err);
+            return res.status(500).json({ success: false, message: 'Unknown error uploading file' });
+        }
+
+        // lanjut proses seperti biasa:
+        const { id } = req.params;
+        const file = req.file;
+
+        if (!file) {
+            return res.status(400).json({ success: false, message: 'File tidak ditemukan' });
+        }
+
+        const buktiTFPath = `/uploads/${file.filename}`;
+        const sql = `
+            UPDATE penjualan_sampah
+            SET status = 'selesai',
+                bukti_tf = ?
+            WHERE id = ?
+        `;
+
+        db.query(sql, [buktiTFPath, id], (err, result) => {
+            if (err) {
+                console.error("❌ DB Error (update selesai):", err);
+                return res.status(500).json({ success: false, message: "Gagal update status selesai" });
+            }
+
+            res.json({ success: true, message: "Berhasil selesai" });
+        });
+    });
+});
 
 app.listen(port, () => {
   console.log(`Server backend berjalan di http://localhost:${port}`);

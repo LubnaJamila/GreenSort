@@ -22,69 +22,47 @@ export default class PengirimanPresenter {
     }
 
     async init() {
-    console.log("Initializing PengirimanPresenter");
+  console.log("Initializing PengirimanPresenter");
 
-    this.currentUser = getCurrentUser();
-    if (!this.currentUser) {
-        console.log("User not logged in, redirecting to login");
-        const event = new CustomEvent("navigate", { detail: { page: "login" } });
-        document.dispatchEvent(event);
-        return;
-    }
+  this.currentUser = getCurrentUser();
+  if (!this.currentUser) {
+    console.log("User not logged in, redirecting to login");
+    const event = new CustomEvent("navigate", { detail: { page: "login" } });
+    document.dispatchEvent(event);
+    return;
+  }
 
-    try {
-        // Render view first
-        this.view.render();
-        this.view.displayUserInfo(this.currentUser);
-        
-        // Setup event listeners
-        this.setupEventListeners();
-        
-        // Load data with proper timing
-        await this.loadApplications();
-        
-        // Bind event handlers
-        this.view.bindAddPengiriman(this.handleAddPengiriman);
-        this.view.bindFilterChange(this.handleFilterChange);
-        this.view.bindStatusUpdate(this.handleStatusUpdate);
-        
-        console.log("PengirimanPresenter initialized successfully");
-        
-    } catch (error) {
-        console.error("Error initializing PengirimanPresenter:", error);
-        this.view.showError("Gagal menginisialisasi halaman");
-    }
+  try {
+    this.view.render();
+    this.view.displayUserInfo(this.currentUser);
+
+    this.setupEventListeners();
+
+    await this.loadApplications();
+
+    this.view.bindAddPengiriman(this.handleAddPengiriman);
+    this.view.bindStatusUpdate(this.handleStatusUpdate);
+
+    console.log("✅ PengirimanPresenter initialized successfully");
+
+  } catch (error) {
+    console.error("❌ Error initializing PengirimanPresenter:", error);
+    this.view.showError("Gagal menginisialisasi halaman");
+  }
 }
-    async loadApplications() {
-    try {
-        console.log("Loading applications data...");
-        
-        // Get data from model dengan error handling
-        this.applications = this.pengirimanModel.getApplicationsWithErrorHandling();
-        
-        console.log(`Loaded ${this.applications.length} applications`);
-        
-        // Debug: Tampilkan contoh data pertama jika ada
-        if (this.applications.length > 0) {
-            console.log("Contoh data pertama:", this.applications[0]);
-            console.log("Status yang tersedia:", [...new Set(this.applications.map(app => app.status))]);
-        }
-        
-        // Wait for DOM to be ready before rendering
-        setTimeout(() => {
-            this.view.renderApplicationsTable(this.applications);
-            this.updateStatistics();
-        }, 100);
-        
-    } catch (error) {
-        console.error("Error loading applications:", error);
-        this.view.showError("Gagal memuat data pengiriman");
-        
-        // Set empty data sebagai fallback
-        this.applications = [];
-        this.view.renderApplicationsTable(this.applications);
-    }
+
+  async loadApplications() {
+  try {
+    this.applications = await this.pengirimanModel.getApplications();
+    this.view.renderApplicationsTable(this.applications);
+  } catch (error) {
+    console.error("Gagal load pengiriman:", error);
+    this.view.showError("Gagal memuat data pengiriman");
+  }
 }
+
+
+
 
     updateStatistics() {
     try {
@@ -305,3 +283,4 @@ debugApplicationData() {
         this.currentUser = null;
     }
 }
+
