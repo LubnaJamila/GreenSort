@@ -46,41 +46,41 @@ export default class DiterimaView {
                     </div>
             
                     <div class="stats-grid">
-                        ${this.renderStatCard(
-                          "80",
-                          "Menunggu Validasi",
-                          "bi-hourglass-split",
-                          "yellow-bg",
-                          "#/dashboardUser"
-                        )}
-                        ${this.renderStatCard(
-                          "16",
-                          "Diterima",
-                          "bi-clipboard-check",
-                          "blue-bg",
-                          "#/diterima"
-                        )}
-                        ${this.renderStatCard(
-                          "8",
-                          "Ditolak",
-                          "bi-x-circle",
-                          "red-bg",
-                          "#/ditolak"
-                        )}
-                        ${this.renderStatCard(
-                          "24",
-                          "Penjemputan",
-                          "bi-truck",
-                          "orange-bg",
-                          "#/penjemputan"
-                        )}
-                        ${this.renderStatCard(
-                          "42",
-                          "Selesai",
-                          "bi-check-circle",
-                          "green-bg",
-                          "#/selesaiUser"
-                        )}
+                      ${this.renderStatCard(
+                        "0",
+                        "Menunggu Validasi",
+                        "bi-hourglass-split",
+                        "yellow-bg",
+                        "#/dashboardUser"
+                      )}
+                      ${this.renderStatCard(
+                        "0",
+                        "Diterima",
+                        "bi-clipboard-check",
+                        "blue-bg",
+                        "#/diterima"
+                      )}
+                      ${this.renderStatCard(
+                        "0",
+                        "Ditolak",
+                        "bi-x-circle",
+                        "red-bg",
+                        "#/ditolak"
+                      )}
+                      ${this.renderStatCard(
+                        "0",
+                        "Penjemputan",
+                        "bi-truck",
+                        "orange-bg",
+                        "#/penjemputan"
+                      )}
+                      ${this.renderStatCard(
+                        "0",
+                        "Selesai",
+                        "bi-check-circle",
+                        "green-bg",
+                        "#/selesaiUser"
+                      )}
                     </div>
                 </header>
         
@@ -116,19 +116,19 @@ export default class DiterimaView {
 
   renderStatCard(number, label, icon, colorClass, link) {
     return `
-            <div class="stat-card">
-                <div class="stat-content">
-                    <div class="stat-number">${number}</div>
-                    <div class="stat-label">${label}</div>
-                </div>
-                <div class="stat-icon ${colorClass}">
-                    <i class="bi ${icon}"></i>
-                </div>
-                <a href="${link}" class="stat-more" aria-label="View more ${label} items">
-                <i class="bi bi-arrow-down"></i>
-                </a>
-            </div>
-        `;
+      <div class="stat-card">
+        <div class="stat-content">
+          <div class="stat-number">${number}</div>
+          <div class="stat-label">${label}</div>
+        </div>
+        <div class="stat-icon ${colorClass}">
+          <i class="bi ${icon}"></i>
+        </div>
+        <a href="${link}" class="stat-more" aria-label="View more ${label} items">
+          <i class="bi bi-arrow-down"></i>
+        </a>
+      </div>
+    `;
   }
 
   renderApplicationsTable(applicationsData) {
@@ -417,6 +417,58 @@ export default class DiterimaView {
     }
   }
 
+  getStatusStyles(status) {
+    const normalizedStatus = status ? status.toLowerCase() : "";
+
+    const statusMap = {
+      pengajuan: {
+        class: "bg-warning bg-opacity-10 text-warning border border-warning",
+        icon: "bi-hourglass-split",
+      },
+      "menunggu validasi": {
+        class: "bg-warning bg-opacity-10 text-warning border border-warning",
+        icon: "bi-hourglass-split",
+      },
+      diterima: {
+        class: "bg-info bg-opacity-10 text-info border border-info",
+        icon: "bi-clipboard-check",
+      },
+      ditolak: {
+        class: "bg-danger bg-opacity-10 text-danger border border-danger",
+        icon: "bi-x-circle",
+      },
+      penjemputan: {
+        class: "bg-primary bg-opacity-10 text-primary border border-primary",
+        icon: "bi-truck",
+      },
+      selesai: {
+        class: "bg-success bg-opacity-10 text-success border border-success",
+        icon: "bi-check-circle",
+      },
+    };
+
+    return (
+      statusMap[normalizedStatus] || {
+        class: "bg-light text-muted border",
+        icon: "bi-question-circle",
+      }
+    );
+  }
+
+  formatStatus(status) {
+    if (!status) return "Tidak Diketahui";
+
+    const statusMap = {
+      pengajuan: "Pengajuan",
+      diterima: "Diterima",
+      ditolak: "Ditolak",
+      penjemputan: "Penjemputan",
+      selesai: "Selesai",
+    };
+
+    return statusMap[status.toLowerCase()] || status;
+  }
+
   initDataTable() {
     // Destroy existing DataTable if it exists
     if (this.dataTable) {
@@ -493,8 +545,23 @@ export default class DiterimaView {
     return Array.from(selectedCheckboxes).map((cb) => cb.value);
   }
 
-  renderDashboardData(applicationsData) {
+  updateStatCards(stats) {
+    // Update stat numbers if stats object is provided
+    if (!stats) return;
+
+    const statCards = document.querySelectorAll(".stat-number");
+    if (statCards.length >= 5) {
+      statCards[0].textContent = stats.menungguValidasi || "0";
+      statCards[1].textContent = stats.diterima || "0";
+      statCards[2].textContent = stats.ditolak || "0";
+      statCards[3].textContent = stats.penjemputan || "0";
+      statCards[4].textContent = stats.selesai || "0";
+    }
+  }
+
+  renderDashboardData(applicationsData, stats = null) {
     this.renderApplicationsTable(applicationsData);
+    this.updateStatCards(stats);
   }
 
   removeEventListeners() {

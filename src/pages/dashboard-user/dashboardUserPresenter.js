@@ -58,7 +58,7 @@ export default class DashboardUserPresenter {
         "pengajuan",
         "pengajuan diterima",
         "pengajuan ditolak",
-        "penjemputan",
+        "penawaran diterima",
         "selesai",
       ];
 
@@ -141,6 +141,7 @@ export default class DashboardUserPresenter {
         case "ditolak":
           stats.ditolak++;
           break;
+        case "penawaran diterima":
         case "penjemputan":
           stats.penjemputan++;
           break;

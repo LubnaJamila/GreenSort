@@ -3,6 +3,7 @@ import "../../assets/styles/sidebar.css";
 import "../../assets/styles/dashboard.css";
 import userPlaceholder from "../../assets/images/unsplash_HaNi1rsZ6Nc.png";
 import SidebarView from "../../views/sidebarView";
+const BASE_URL = "https://greenshort-production.up.railway.app";
 
 export default class SelesaiUserView {
   constructor() {
@@ -11,6 +12,7 @@ export default class SelesaiUserView {
     this.eventListeners = [];
     this.isMobile = window.matchMedia("(max-width: 768px)").matches;
     this.sidebarCollapsed = false;
+    this.baseImageUrl = "https://greenshort-production.up.railway.app/uploads/";
   }
 
   render() {
@@ -44,11 +46,41 @@ export default class SelesaiUserView {
           </div>
 
           <div class="stats-grid">
-            ${this.renderStatCard("80", "Menunggu Validasi", "bi-hourglass-split", "yellow-bg", "#/dashboardUser")}
-            ${this.renderStatCard("16", "Diterima", "bi-clipboard-check", "blue-bg", "#/diterima")}
-            ${this.renderStatCard("8", "Ditolak", "bi-x-circle", "red-bg", "#/ditolak")}
-            ${this.renderStatCard("24", "Penjemputan", "bi-truck", "orange-bg", "#/penjemputan")}
-            ${this.renderStatCard("42", "Selesai", "bi-check-circle", "green-bg", "#/selesaiUser")}
+            ${this.renderStatCard(
+              "80",
+              "Menunggu Validasi",
+              "bi-hourglass-split",
+              "yellow-bg",
+              "#/dashboardUser"
+            )}
+            ${this.renderStatCard(
+              "16",
+              "Diterima",
+              "bi-clipboard-check",
+              "blue-bg",
+              "#/diterima"
+            )}
+            ${this.renderStatCard(
+              "8",
+              "Ditolak",
+              "bi-x-circle",
+              "red-bg",
+              "#/ditolak"
+            )}
+            ${this.renderStatCard(
+              "24",
+              "Penjemputan",
+              "bi-truck",
+              "orange-bg",
+              "#/penjemputan"
+            )}
+            ${this.renderStatCard(
+              "42",
+              "Selesai",
+              "bi-check-circle",
+              "green-bg",
+              "#/selesaiUser"
+            )}
           </div>
         </header>
 
@@ -61,12 +93,12 @@ export default class SelesaiUserView {
             <table id="datatable" class="table table-striped" style="width:100%">
               <thead>
                 <tr>
-                  <th><input type="checkbox" id="select-all"></th>
+                  <th>Gambar</th>
                   <th>Jenis Sampah</th>
-                  <th>Tanggal Pembelian</th>
                   <th>Berat</th>
-                  <th>Harga</th>
-                  <th>Total Harga</th>
+                  <th>Status</th>
+                  <th>Total</th>
+                  <th>Bukti Transfer</th>
                 </tr>
               </thead>
               <tbody id="applications-table-body">
@@ -81,21 +113,20 @@ export default class SelesaiUserView {
 
   renderStatCard(number, label, icon, colorClass, link) {
     return `
-      <div class="stat-card">
-        <div class="stat-content">
-          <div class="stat-number">${number}</div>
-          <div class="stat-label">${label}</div>
-        </div>
-        <div class="stat-icon ${colorClass}">
-          <i class="bi ${icon}"></i>
-        </div>
-        <a href="${link}" class="stat-more" aria-label="View more ${label} items">
-          <i class="bi bi-arrow-down"></i>
-        </a>
-      </div>
-    `;
+          <div class="stat-card">
+            <div class="stat-content">
+              <div class="stat-number">${number}</div>
+              <div class="stat-label">${label}</div>
+            </div>
+            <div class="stat-icon ${colorClass}">
+              <i class="bi ${icon}"></i>
+            </div>
+            <a href="${link}" class="stat-more" aria-label="View more ${label} items">
+              <i class="bi bi-arrow-down"></i>
+            </a>
+          </div>
+        `;
   }
-
   setupEventListeners() {
     this.removeEventListeners();
 
@@ -214,6 +245,19 @@ export default class SelesaiUserView {
     const tableBody = document.getElementById("applications-table-body");
     if (!tableBody) return;
 
+    // Check if data exists and is array
+    if (!applicationsData || !Array.isArray(applicationsData)) {
+      tableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center py-4">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Tidak ada data pengajuan yang diterima
+                    </td>
+                </tr>
+            `;
+      return;
+    }
+
     const tableHTML = applicationsData
       .map((app) => this.renderApplicationRow(app))
       .join("");
@@ -224,14 +268,44 @@ export default class SelesaiUserView {
 
   // ✅ PERBAIKAN: Implementasi method renderApplicationRow yang hilang
   renderApplicationRow(app) {
+    const imageUrl = app.gambar_sampah
+      ? `${this.baseImageUrl}${app.gambar_sampah}`
+      : "";
+
     return `
       <tr>
-        <td><input type="checkbox" class="row-checkbox" value="${app.id}"></td>
+        <td>
+          ${
+            imageUrl
+              ? `
+            <img src="${imageUrl}" 
+                 alt="Gambar Sampah" 
+                 class="img-thumbnail application-image" 
+                 style="width: 60px; height: 60px; object-fit: cover; cursor: pointer;"
+                 onclick="this.parentElement.querySelector('.image-modal').style.display='block'"
+                 onerror="this.src='https://via.placeholder.com/60?text=No+Image'; this.style.objectFit='contain';">
+            <div class="image-modal" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.8); cursor:pointer;" onclick="this.style.display='none'">
+              <img src="${imageUrl}" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); max-width:90%; max-height:90%; object-fit:contain;">
+            </div>
+          `
+              : `
+            <div style="width: 60px; height: 60px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+              <i class="bi bi-image text-muted"></i>
+            </div>
+          `
+          }
+        </td>
         <td>${app.jenisSampah}</td>
-        <td>${app.tanggalPembelian}</td>
         <td>${app.berat}</td>
-        <td>${app.harga}</td>
-        <td>${app.totalHarga}</td>
+        <td>${app.status}</td>
+        <td>${app.total}</td>
+        <td>
+          ${
+            app.buktiTf !== "-"
+              ? `<a href="${BASE_URL}/uploads/${app.buktiTf}" target="_blank">Lihat Bukti</a>`
+              : "-"
+          }
+        </td>
       </tr>
     `;
   }
@@ -270,10 +344,59 @@ export default class SelesaiUserView {
       });
     });
   }
+  updateStatCards(stats) {
+    // Update stat numbers if stats object is provided
+    if (!stats) return;
+
+    const statCards = document.querySelectorAll(".stat-number");
+    if (statCards.length >= 5) {
+      statCards[0].textContent = stats.menungguValidasi || "0";
+      statCards[1].textContent = stats.diterima || "0";
+      statCards[2].textContent = stats.ditolak || "0";
+      statCards[3].textContent = stats.penjemputan || "0";
+      statCards[4].textContent = stats.selesai || "0";
+    }
+  }
 
   // ✅ PERBAIKAN: Ganti nama method sesuai dengan yang dipanggil di presenter
-  renderSelesaiData(applicationsData) {
+  renderDashboardData(applicationsData, stats = null) {
     this.renderApplicationsTable(applicationsData);
+    this.updateStatCards(stats);
+  }
+  showError(message) {
+    // Tampilkan notifikasi error
+    const alertDiv = document.createElement("div");
+    alertDiv.className =
+      "alert alert-danger alert-dismissible fade show position-fixed";
+    alertDiv.style.cssText =
+      "top: 20px; right: 20px; z-index: 9999; min-width: 300px;";
+    alertDiv.innerHTML = `
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+
+    document.body.appendChild(alertDiv);
+
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+      if (alertDiv.parentNode) {
+        alertDiv.remove();
+      }
+    }, 5000);
+  }
+  showLoadingState() {
+    const tableBody = document.getElementById("applications-table-body");
+    if (tableBody) {
+      tableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center py-4">
+                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                        Memuat data pengajuan yang diterima...
+                    </td>
+                </tr>
+            `;
+    }
   }
 
   removeEventListeners() {

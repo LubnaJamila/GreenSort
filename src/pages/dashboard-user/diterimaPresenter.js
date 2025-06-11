@@ -54,7 +54,6 @@ export default class DiterimaPresenter {
     try {
       this.view.showLoadingState();
 
-      // Gunakan model untuk mengambil data pengajuan dengan status 'diterima'
       const userId = this.currentUser.id_user || this.currentUser.id;
 
       if (!userId) {
@@ -64,28 +63,38 @@ export default class DiterimaPresenter {
       }
 
       console.log("Loading dashboard data for user ID:", userId);
+      const allStatuses = [
+        "pengajuan",
+        "pengajuan diterima",
+        "pengajuan ditolak",
+        "penawaran diterima",
+        "selesai",
+      ];
 
-      // Ganti sesuai status yang diinginkan, bisa juga dynamic
-      const status = "pengajuan diterima";
-      const res = await getPengajuanByUserIdAndStatus(userId, status);
+      let allApplications = [];
 
-      if (!res.success) {
-        console.error("API Error:", res.message);
-        this.view.showError(res.message || "Gagal memuat data pengajuan");
-        return;
+      for (const stat of allStatuses) {
+        try {
+          const res = await getPengajuanByUserIdAndStatus(userId, stat);
+          if (res.success && res.data && res.data.length > 0) {
+            allApplications = [...allApplications, ...res.data];
+          }
+        } catch (statusError) {
+          console.warn(
+            `Error fetching data for status '${stat}':`,
+            statusError
+          );
+        }
       }
 
-      // Handle empty data
-      if (!res.data || res.data.length === 0) {
-        console.log("No data found for user with status:", status);
+      if (allApplications.length === 0) {
+        console.log("No applications found for user");
         this.view.renderDashboardData([], this.calculateUserStats([]));
         return;
       }
 
-      console.log("Raw data from API:", res.data);
-
       // Transformasi data
-      const applications = res.data.map((item) => ({
+      const applications = allApplications.map((item) => ({
         id: item.id,
         user_id: item.user_id,
         gambar_sampah: item.gambar_sampah,
@@ -100,7 +109,11 @@ export default class DiterimaPresenter {
       const stats = this.calculateUserStats(applications);
       console.log("Calculated stats:", stats);
 
-      this.view.renderDashboardData(applications, stats);
+      const pengajuanDiterimaOnly = applications.filter(
+        (app) => app.status.toLowerCase().trim() === "pengajuan diterima"
+      );
+
+      this.view.renderDashboardData(pengajuanDiterimaOnly, stats);
     } catch (err) {
       console.error("Error in loadAcceptedApplications:", err);
       this.view.showError("Terjadi kesalahan saat memuat dashboard");
@@ -109,19 +122,50 @@ export default class DiterimaPresenter {
 
   calculateUserStats(applications) {
     const stats = {
-      totalApplications: applications.length,
-      totalWeight: applications.reduce((sum, app) => sum + (app.berat || 0), 0),
-      totalValue: applications.reduce((sum, app) => sum + (app.harga || 0), 0),
-      averageWeight: 0,
+      menungguValidasi: 0,
+      diterima: 0,
+      ditolak: 0,
+      penjemputan: 0,
+      selesai: 0,
     };
 
-    if (stats.totalApplications > 0) {
-      stats.averageWeight = stats.totalWeight / stats.totalApplications;
+    if (!applications || applications.length === 0) {
+      return stats;
     }
+
+    applications.forEach((app) => {
+      const status = app.status ? app.status.toLowerCase().trim() : "";
+
+      switch (status) {
+        case "pengajuan":
+        case "menunggu validasi":
+          stats.menungguValidasi++;
+          break;
+        case "pengajuan diterima":
+        case "diterima":
+          stats.diterima++;
+          break;
+        case "pengajuan ditolak":
+        case "ditolak":
+          stats.ditolak++;
+          break;
+        case "penawaran diterima":
+        case "penjemputan":
+          stats.penjemputan++;
+          break;
+        case "selesai":
+          stats.selesai++;
+          break;
+        default:
+          console.warn("Unknown status:", status);
+          // Default ke menunggu validasi untuk status yang tidak dikenal
+          stats.menungguValidasi++;
+          break;
+      }
+    });
 
     return stats;
   }
-
   async handleApplicationAction(event) {
     const { id, action } = event.detail;
 

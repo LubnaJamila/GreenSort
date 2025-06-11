@@ -574,6 +574,9 @@ app.get("/api/pengajuan/:user_id/status/:status", (req, res) => {
       jenis_sampah, 
       berat, 
       harga_tawaran,
+      alasan_penolakan,
+      total,
+      bukti_tf,
       status
     FROM penjualan_sampah 
     WHERE user_id = ? AND status = ?
@@ -598,6 +601,9 @@ app.get("/api/pengajuan/:user_id/status/:status", (req, res) => {
       berat: parseFloat(item.berat),
       harga_tawaran:
         item.harga_tawaran !== null ? parseFloat(item.harga_tawaran) : null,
+      alasan_penolakan: item.alasan_penolakan,
+      total: item.total !== null ? parseFloat(item.total) : null,
+      bukti_tf: item.bukti_tf ? item.bukti_tf.replace("/uploads/", "") : null,
       status: item.status,
     }));
 

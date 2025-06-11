@@ -1,125 +1,178 @@
 // src/pages/dashboard-admin/selesaiUserPresenter.js
 import SelesaiUserView from "../dashboard-user/selesaiUserView.js";
 import SidebarView from "../../views/sidebarView.js";
-// import DashboardModel from "../../models/dashboard-model.js"; // Uncomment ketika model sudah ada
 import { getCurrentUser, logoutUser } from "../../models/authModel.js";
+import { getPengajuanByUserIdAndStatus } from "../../models/pengajuan_sampah-model.js";
 
 export default class SelesaiUserPresenter {
   constructor() {
     this.view = new SelesaiUserView();
     this.sidebarView = new SidebarView();
-    // this.dashboardModel = new DashboardModel(); // Comment dulu sampai model ada
     this.currentUser = null;
     this.handleLogout = this.handleLogout.bind(this);
     this.handleRefresh = this.handleRefresh.bind(this);
   }
 
-  init() {
+  async init() {
     console.log("Initializing SelesaiUserPresenter");
     this.currentUser = getCurrentUser();
-    
+
     if (!this.currentUser) {
-      console.log("User not logged in, redirecting to login");
       const event = new CustomEvent("navigate", { detail: { page: "login" } });
       document.dispatchEvent(event);
       return;
     }
 
-    // Render view yang benar
-    this.view.render(); // Ini akan render sidebar dan main content sekaligus
-    
-    // Tampilkan info user di dashboard
+    this.view.render();
     this.view.displayUserInfo(this.currentUser);
-    
-    // ✅ PERBAIKAN: Gunakan data dummy dengan struktur yang sesuai
-    const applications = this.getDummySelesaiData();
-    
-    // Render data ke tabel
-    this.view.renderSelesaiData(applications);
-    
+
+    await this.loadData();
     this.setupEventListeners();
   }
 
-  // ✅ PERBAIKAN: Update struktur data sesuai dengan kolom tabel
-  getDummySelesaiData() {
-    return [
-      {
-        id: 1,
-        jenisSampah: "Plastik Botol",
-        tanggalPembelian: "2024-01-15",
-        berat: "5 kg",
-        harga: "Rp 2.000/kg",
-        totalHarga: "Rp 10.000",
-        status: "Selesai"
-      },
-      {
-        id: 2,
-        jenisSampah: "Kertas Bekas",
-        tanggalPembelian: "2024-01-14",
-        berat: "3 kg",
-        harga: "Rp 1.500/kg",
-        totalHarga: "Rp 4.500",
-        status: "Selesai"
-      },
-      {
-        id: 3,
-        jenisSampah: "Kaleng Aluminium",
-        tanggalPembelian: "2024-01-13",
-        berat: "2 kg",
-        harga: "Rp 5.000/kg",
-        totalHarga: "Rp 10.000",
-        status: "Selesai"
-      },
-      {
-        id: 4,
-        jenisSampah: "Kardus Bekas",
-        tanggalPembelian: "2024-01-12",
-        berat: "8 kg",
-        harga: "Rp 800/kg",
-        totalHarga: "Rp 6.400",
-        status: "Selesai"
-      },
-      {
-        id: 5,
-        jenisSampah: "Botol Kaca",
-        tanggalPembelian: "2024-01-11",
-        berat: "4 kg",
-        harga: "Rp 1.200/kg",
-        totalHarga: "Rp 4.800",
-        status: "Selesai"
+  async loadData() {
+    try {
+      this.view.showLoadingState();
+
+      const userId = this.currentUser.id_user || this.currentUser.id;
+
+      if (!userId) {
+        console.error("User ID tidak ditemukan:", this.currentUser);
+        this.view.showError("ID user tidak valid");
+        return;
       }
-    ];
+
+      console.log("Loading dashboard data for user ID:", userId);
+      const allStatuses = [
+        "pengajuan",
+        "pengajuan diterima",
+        "pengajuan ditolak",
+        "penawaran diterima",
+        "penawaran ditolak",
+        "selesai",
+      ];
+
+      let allApplications = [];
+
+      for (const stat of allStatuses) {
+        try {
+          const res = await getPengajuanByUserIdAndStatus(userId, stat);
+          if (res.success && res.data && res.data.length > 0) {
+            allApplications = [...allApplications, ...res.data];
+          }
+        } catch (statusError) {
+          console.warn(
+            `Error fetching data for status '${stat}':`,
+            statusError
+          );
+        }
+      }
+
+      if (allApplications.length === 0) {
+        console.log("No applications found for user");
+        this.view.renderDashboardData([], this.calculateUserStats([]));
+        return;
+      }
+
+      // Transformasi data
+      const applications = allApplications.map((item) => {
+        const status = item.status ? item.status.toLowerCase().trim() : "";
+        const isSelesai = status === "selesai";
+        const isDitolak = status === "penawaran ditolak";
+
+        return {
+          id: item.id,
+          user_id: item.user_id,
+          gambar_sampah: item.gambar_sampah,
+          jenisSampah: item.jenis_sampah,
+          berat: parseFloat(item.berat) || 0,
+          status: item.status || "-",
+          total: isSelesai ? item.total || "-" : "-",
+          bukti_tf: isSelesai ? item.bukti_tf || "-" : "-",
+          alasan: item.alasan_penolakan || "-",
+        };
+      });
+
+      const stats = this.calculateUserStats(applications);
+
+      // Filter hanya data dengan status 'selesai' atau 'penawaran ditolak'
+      const filteredApplications = applications.filter((app) => {
+        const status = app.status.toLowerCase().trim();
+        return status === "selesai" || status === "penawaran ditolak";
+      });
+
+      this.view.renderDashboardData(filteredApplications, stats);
+    } catch (err) {
+      console.error("Error in loadRejectedApplications:", err);
+      this.view.showError("Terjadi kesalahan saat memuat dashboard");
+    }
   }
 
-  setupEventListeners() {
-    // Event listener untuk logout
-    document.addEventListener("user-logout", this.handleLogout);
-    
-    // ✅ PERBAIKAN: Event listener sesuai dengan yang ada di view
-    document.addEventListener("selesaiUser-refresh", this.handleRefresh);
+  calculateUserStats(applications) {
+    const stats = {
+      menungguValidasi: 0,
+      diterima: 0,
+      ditolak: 0,
+      penjemputan: 0,
+      selesai: 0,
+    };
+
+    if (!applications || applications.length === 0) {
+      return stats;
+    }
+
+    applications.forEach((app) => {
+      const status = app.status ? app.status.toLowerCase().trim() : "";
+
+      switch (status) {
+        case "pengajuan":
+        case "menunggu validasi":
+          stats.menungguValidasi++;
+          break;
+        case "pengajuan diterima":
+        case "diterima":
+          stats.diterima++;
+          break;
+        case "pengajuan ditolak":
+        case "ditolak":
+          stats.ditolak++;
+          break;
+        case "penawaran diterima":
+        case "penjemputan":
+          stats.penjemputan++;
+          break;
+        case "selesai":
+          stats.selesai++;
+          break;
+        default:
+          console.warn("Unknown status:", status);
+          // Default ke menunggu validasi untuk status yang tidak dikenal
+          stats.menungguValidasi++;
+          break;
+      }
+    });
+
+    return stats;
   }
 
-  // Method untuk handle refresh
   handleRefresh() {
     console.log("Refreshing selesai data");
-    const applications = this.getDummySelesaiData();
-    this.view.renderSelesaiData(applications);
+    this.loadData();
   }
 
   handleLogout() {
-    console.log("Logout initiated");
     logoutUser();
-    
-    // Bersihkan tampilan dashboard dan sidebar
     this.view.destroy();
-    
-    // Navigasi ke halaman login
     const event = new CustomEvent("navigate", { detail: { page: "login" } });
     document.dispatchEvent(event);
   }
 
+  setupEventListeners() {
+    document.addEventListener("user-logout", this.handleLogout);
+    document.addEventListener("selesaiUser-refresh", this.handleRefresh);
+  }
+
   destroy() {
-    console.log("Destroying SelesaiUserPresenter");
     document.removeEventListener("user-logout", this.handleLogout);
     document.removeEventListener("selesaiUser-refresh", this.handleRefresh);
     this.view.destroy();
