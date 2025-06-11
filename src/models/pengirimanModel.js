@@ -18,3 +18,11 @@ export async function loadPengirimanData(userId) {
     status: item.opsi_pengiriman,
   }));
 }
+export async function getUserDashboardStats(userId) {
+  const res = await fetch(`https://greenshort-production.up.railway.app/api/dashboard-user/stats/${userId}`);
+  const json = await res.json();
+  if (!json.success) throw new Error(json.message || "Gagal fetch stats user");
+  return json.data;
+}
+
+

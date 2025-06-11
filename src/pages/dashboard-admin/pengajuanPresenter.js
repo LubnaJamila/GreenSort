@@ -19,18 +19,21 @@ export default class PengajuanPresenter {
   }
 
   async init() {
-    this.currentUser = getCurrentUser();
-    if (!this.currentUser) {
-      const event = new CustomEvent("navigate", { detail: { page: "login" } });
-      document.dispatchEvent(event);
-      return;
-    }
-
-    this.view.render();
-    this.view.displayUserInfo(this.currentUser);
-    await this.loadApplications();
-    this.setupEventListeners();
+  this.currentUser = getCurrentUser();
+  if (!this.currentUser) {
+    const event = new CustomEvent("navigate", { detail: { page: "login" } });
+    document.dispatchEvent(event);
+    return;
   }
+
+  this.view.render();
+  this.view.displayUserInfo(this.currentUser);
+
+  await this.updateStatistics(); 
+  await this.loadApplications(); 
+
+  this.setupEventListeners();
+}
 
   async loadApplications() {
   try {
@@ -108,26 +111,21 @@ export default class PengajuanPresenter {
   };
   return statusMap[status] || status;
 }
-  updateStatistics() {
-  const stats = {
-    total: this.allApplications.length,
-    pending: 0,
-    accepted: 0,
-    rejected: 0,
-    shipped: 0,     
-    completed: 0    
-  };
-
-  this.allApplications.forEach(item => {
-    const status = item.statusOriginal.toLowerCase();
-    if (status === 'pengajuan') stats.pending++;
-    if (status === 'pengajuan diterima') stats.accepted++;
-    if (status === 'penawaran diterima'|| status === 'penawaran ditolak') stats.rejected++;
-    if (status === 'penawaran diterima') stats.shipped++;
-    if (status === 'selesai') stats.completed++;
-  });
-
-  this.view.displayStatistics(stats);
+  async updateStatistics() {
+  try {
+    const stats = await this.pengajuanModel.getDashboardStats();
+    if (stats) {
+      this.view.displayStatistics({
+        total: stats.total,
+        pending: stats.pengajuan,    
+        rejected: stats.penawaran,   
+        shipped: stats.pengiriman,   
+        completed: stats.selesai     
+      });
+    }
+  } catch (error) {
+    console.error("Error updating statistics:", error);
+  }
 }
   handleFilterChange(filterType, filterValue) {
   if (filterType === 'status') {

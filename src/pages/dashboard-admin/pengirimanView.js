@@ -50,11 +50,11 @@ export default class PengirimanView {
 
                 <!-- Stats Grid -->
                 <div class="stats-grid">
-                    ${this.renderStatCard("80", "Semua", "bi-hourglass-split", "yellow-bg", "#/dashboard")}
-                    ${this.renderStatCard("16", "Pengajuan", "bi-clipboard-check", "blue-bg", "#/pengajuan")}
-                    ${this.renderStatCard("8", "Penawaran", "bi-x-circle", "red-bg", "#/penawaran")}
-                    ${this.renderStatCard("24", "Pengiriman", "bi-truck", "orange-bg", "#/pengiriman")}
-                    ${this.renderStatCard("42", "Selesai", "bi-check-circle", "green-bg", "#/selesai")}
+                    ${this.renderStatCard("0", "Semua", "bi-hourglass-split", "yellow-bg", "#/dashboard")}
+                    ${this.renderStatCard("0", "Pengajuan", "bi-clipboard-check", "blue-bg", "#/pengajuan")}
+                    ${this.renderStatCard("0", "Penawaran", "bi-x-circle", "red-bg", "#/penawaran")}
+                    ${this.renderStatCard("0", "Pengiriman", "bi-truck", "orange-bg", "#/pengiriman")}
+                    ${this.renderStatCard("0", "Selesai", "bi-check-circle", "green-bg", "#/selesai")}
                 </div>
             </div>
             </header>

@@ -58,6 +58,7 @@ export default class DitolakPresenter {
         "pengajuan diterima",
         "pengajuan ditolak",
         "penawaran diterima",
+        "penawaran ditolak",
         "selesai",
       ];
 
@@ -144,6 +145,7 @@ export default class DitolakPresenter {
           stats.penjemputan++;
           break;
         case "selesai":
+        case "penawaran ditolak":
           stats.selesai++;
           break;
         default:

@@ -643,6 +643,16 @@ export default class PenjemputanView {
       userAvatar.src = user.avatar;
     }
   }
+  updateDashboardStats(stats) {
+  const statCards = document.querySelectorAll(".stat-card .stat-number");
+  if (statCards.length >= 5) {
+    statCards[0].textContent = stats.menunggu_validasi || "0"; // Menunggu Validasi
+    statCards[1].textContent = stats.diterima || "0";          // Diterima
+    statCards[2].textContent = stats.ditolak || "0";           // Ditolak
+    statCards[3].textContent = stats.penjemputan || "0";       // Penjemputan
+    statCards[4].textContent = stats.selesai || "0";           // Selesai (selesai + penawaran ditolak)
+  }
+}
 
   renderDashboardData(applicationsData) {
     this.renderApplicationsTable(applicationsData);

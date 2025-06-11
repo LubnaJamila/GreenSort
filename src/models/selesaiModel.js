@@ -39,5 +39,15 @@ export async function updateSelesai(applicationId, formData) {
         return { success: false, message: 'Error updating selesai data.' };
     }
 }
+export async function fetchSelesaiStats() {
+  try {
+    const res = await fetch("https://greenshort-production.up.railway.app/api/dashboard-admin/stats");
+    const result = await res.json();
+    return result.success ? result.data : null;
+  } catch (error) {
+    console.error("❌ Error fetchSelesaiStats:", error);
+    return null;
+  }
+}
 
 

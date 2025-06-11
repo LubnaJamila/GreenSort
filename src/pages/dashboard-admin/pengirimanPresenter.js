@@ -22,34 +22,33 @@ export default class PengirimanPresenter {
     }
 
     async init() {
-  console.log("Initializing PengirimanPresenter");
+    console.log("Initializing PengirimanPresenter");
 
-  this.currentUser = getCurrentUser();
-  if (!this.currentUser) {
-    console.log("User not logged in, redirecting to login");
-    const event = new CustomEvent("navigate", { detail: { page: "login" } });
-    document.dispatchEvent(event);
-    return;
-  }
+    this.currentUser = getCurrentUser();
+    if (!this.currentUser) {
+        console.log("User not logged in, redirecting to login");
+        const event = new CustomEvent("navigate", { detail: { page: "login" } });
+        document.dispatchEvent(event);
+        return;
+    }
 
-  try {
-    this.view.render();
-    this.view.displayUserInfo(this.currentUser);
+    try {
+        this.view.render();
+        this.view.displayUserInfo(this.currentUser);
+        this.setupEventListeners();
 
-    this.setupEventListeners();
+        await this.loadApplications();
+        await this.updateStatistics(); // Ambil data real dari backend
 
-    await this.loadApplications();
+        this.view.bindAddPengiriman(this.handleAddPengiriman);
+        this.view.bindStatusUpdate(this.handleStatusUpdate);
 
-    this.view.bindAddPengiriman(this.handleAddPengiriman);
-    this.view.bindStatusUpdate(this.handleStatusUpdate);
-
-    console.log("✅ PengirimanPresenter initialized successfully");
-
-  } catch (error) {
-    console.error("❌ Error initializing PengirimanPresenter:", error);
-    this.view.showError("Gagal menginisialisasi halaman");
-  }
-}
+        console.log("✅ PengirimanPresenter initialized successfully");
+    } catch (error) {
+        console.error("❌ Error initializing PengirimanPresenter:", error);
+        this.view.showError("Gagal menginisialisasi halaman");
+    }
+    }
 
   async loadApplications() {
   try {
@@ -60,19 +59,22 @@ export default class PengirimanPresenter {
     this.view.showError("Gagal memuat data pengiriman");
   }
 }
-
-
-
-
-    updateStatistics() {
+async updateStatistics() {
     try {
-        const stats = this.calculateStatistics(this.applications);
-        console.log("Calculated statistics:", stats);
-        this.view.displayStatistics(stats);
+        const stats = await this.pengirimanModel.getDashboardStats();
+        if (stats) {
+        this.view.displayStatistics({
+            total: stats.total,
+            pending: stats.pengajuan,      // "Pengajuan"
+            accepted: stats.penawaran,     // "Penawaran Ditolak"
+            shipped: stats.pengiriman,     // "Pengiriman"
+            completed: stats.selesai       // "Selesai"
+        });
+        }
     } catch (error) {
         console.error("Error updating statistics:", error);
     }
-}
+    }
 
     calculateStatistics(applications) {
     if (!applications || !Array.isArray(applications)) {

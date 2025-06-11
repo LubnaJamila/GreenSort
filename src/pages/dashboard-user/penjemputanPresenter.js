@@ -1,7 +1,8 @@
 // src/pages/dashboard-user/penjemputanPresenter.js
 import PenjemputanView from "./penjemputanView.js";
 import { getCurrentUser } from "../../models/authModel.js";
-import { loadPengirimanData } from "../../models/pengirimanModel.js";
+import { loadPengirimanData,getUserDashboardStats } from "../../models/pengirimanModel.js";
+
 
 export default class PenjemputanPresenter {
   constructor() {
@@ -12,29 +13,26 @@ export default class PenjemputanPresenter {
   }
 
   async init() {
-    try {
-      console.log("Initializing penjemputan dashboard...");
+  this.currentUser = getCurrentUser();
+  console.log("Current User:", this.currentUser); // Tambahkan debug ini
 
-      // Render view terlebih dahulu
-      this.view.render();
-
-      // Tunggu render selesai
-      await new Promise((resolve) => setTimeout(resolve, 150));
-
-      // Aktivasi tab default
-      this.view.activateDefaultTab();
-
-      // Load dan display user info
-      const user = getCurrentUser();
-      this.view.displayUserInfo(user);
-
-      // Load data penjemputan
-      await this.loadPenjemputanData(user.id_user);
-    } catch (error) {
-      console.error("Error initializing penjemputan dashboard:", error);
-      this.handleError("Gagal memuat dashboard penjemputan");
-    }
+  if (!this.currentUser) {
+    const event = new CustomEvent("navigate", { detail: { page: "login" } });
+    document.dispatchEvent(event);
+    return;
   }
+
+  this.view.render();
+  this.view.displayUserInfo(this.currentUser);
+
+  // Perbaikan disini
+  await this.loadUserDashboardStats(this.currentUser.id_user); // Pastikan id_user valid
+  
+ await this.loadPenjemputanData(this.currentUser.id_user);
+
+  this.setupEventListeners();
+}
+
 
   async loadPenjemputanData(userId) {
     if (this.isLoading) return;
@@ -55,6 +53,16 @@ export default class PenjemputanPresenter {
       this.view.showTableLoading(false);
     }
   }
+  async loadUserDashboardStats(userId) {
+  try {
+    console.log("Fetching stats for User ID:", userId); // Debug tambahan
+    const stats = await getUserDashboardStats(userId);
+    this.view.updateDashboardStats(stats);
+  } catch (error) {
+    console.error("Error loading user dashboard stats:", error);
+    alert("Error: Gagal memuat dashboard penjemputan");
+  }
+}
 
   normalizeStatus(status) {
     const statusMap = {

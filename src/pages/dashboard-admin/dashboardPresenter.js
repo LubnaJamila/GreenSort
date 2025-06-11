@@ -1,7 +1,7 @@
 // src/presenters/dashboardPresenter.js
 import DashboardView from "../dashboard-admin/dashboardView.js";
 import SidebarView from "../../views/sidebarView.js";
-import { getDataPenjualanSampah } from "../../models/penjualanModel.js";
+import { getDataPenjualanSampah,getDashboardStats } from "../../models/penjualanModel.js";
 import { getCurrentUser, logoutUser } from "../../models/authModel.js";
 
 export default class DashboardPresenter {
@@ -26,37 +26,31 @@ export default class DashboardPresenter {
 
     this.sidebarView.render();
     this.dashboardView.render();
-
     this.dashboardView.displayUserInfo(this.currentUser);
 
+    // Ambil statistik real dari server
+    getDashboardStats().then((stats) => {
+      if (stats) {
+        const counts = {
+          total: stats.total,
+          pengajuan: stats.pengajuan,
+          penawaran: stats.penawaran,
+          pengiriman: stats.pengiriman,
+          selesai: stats.selesai
+        };
+        this.dashboardView.updateStatCards(counts);
+      } else {
+        console.warn("Gagal mengambil data statistik dari server");
+      }
+    });
+
+    // (Opsional) Load data untuk isi tabel dashboard
     getDataPenjualanSampah().then((applications) => {
-    this.dashboardView.renderDashboardData(applications);
-
-    const counts = {
-      total: applications.length,
-      pengajuan: 0,
-      penawaran: 0,
-      pengiriman: 0,
-      selesai: 0,
-    };
-
-    applications.forEach(app => {
-      const status = app.status?.toLowerCase();
-
-      if (status === 'pengajuan') counts.pengajuan++;
-      else if (status === 'penawaran diterima' || status === 'penawaran ditolak') counts.penawaran++;
-
-      // pengiriman hanya dihitung dari "penawaran diterima" saja
-      if (status === 'penawaran diterima') counts.pengiriman++;
-
-      if (status === 'selesai') counts.selesai++;
-  });
-
-    this.dashboardView.updateStatCards(counts);
-  });
+      this.dashboardView.renderDashboardData(applications);
+    });
 
     this.setupEventListeners();
-  }
+}
 
   setupEventListeners() {
     document.addEventListener("user-logout", this.handleLogout);

@@ -13,12 +13,12 @@ export async function fetchSemuaPenawaran() {
 export async function fetchStatistikPenawaran() {
   try {
     const res = await fetch(
-      "https://greenshort-production.up.railway.app/api/penjualan-sampah"
-    ); // endpoint yang ambil SEMUA data
+      "https://greenshort-production.up.railway.app/api/dashboard-admin/stats"
+    ); // endpoint real dashboard admin
     const json = await res.json();
-    return json.success ? json.data : [];
+    return json.success ? json.data : null;
   } catch (err) {
     console.error("❌ Gagal ambil statistik penawaran:", err);
-    return [];
+    return null;
   }
 }

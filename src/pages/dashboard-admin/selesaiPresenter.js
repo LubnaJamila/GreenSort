@@ -1,18 +1,16 @@
 // src/pages/dashboard-admin/selesaiPresenter.js
 import SelesaiView from "../dashboard-admin/selesaiView.js";
 import SidebarView from "../../views/sidebarView.js";
-// import DashboardModel from "../../models/dashboard-model.js"; // Uncomment ketika model sudah ada
 import { getCurrentUser, logoutUser } from "../../models/authModel.js";
-import { fetchSelesaiData } from "../../models/selesaiModel.js";
+import { fetchSelesaiData,fetchSelesaiStats } from "../../models/selesaiModel.js";
 
 export default class SelesaiPresenter {
   constructor() {
-    this.view = new SelesaiView(); // ✅ Perbaikan: gunakan 'view' bukan 'selesaiView'
+    this.view = new SelesaiView(); 
     this.sidebarView = new SidebarView();
-    // this.dashboardModel = new DashboardModel(); // ✅ Comment dulu sampai model ada
     this.currentUser = null;
     this.handleLogout = this.handleLogout.bind(this);
-    this.handleRefresh = this.handleRefresh.bind(this); // ✅ Tambahkan binding untuk refresh
+    this.handleRefresh = this.handleRefresh.bind(this); 
   }
 
   async init() {
@@ -29,11 +27,26 @@ export default class SelesaiPresenter {
   const applications = await fetchSelesaiData();
   this.view.renderSelesaiData(applications);
 
+  await this.updateStatistics(); 
+
   this.setupEventListeners();
 }
-
-  // ✅ Tambahkan method untuk data dummy sementara
-  // Perbaikan untuk data dummy di SelesaiPresenter
+async updateStatistics() {
+  try {
+    const stats = await fetchSelesaiStats();
+    if (stats) {
+      this.view.displayStatistics({
+        total: stats.total,
+        pending: stats.pengajuan,
+        rejected: stats.penawaran,
+        shipped: stats.pengiriman,
+        completed: stats.selesai
+      });
+    }
+  } catch (error) {
+    console.error("❌ Error updateStatistics:", error);
+  }
+}
 getDummySelesaiData() {
   return [
     {
@@ -76,7 +89,7 @@ getDummySelesaiData() {
       berat: "7 kg",
       harga: "Rp 1.000",
       totalHarga: "Rp 7.000", 
-      gambarSampah: null, // Test case untuk gambar kosong
+      gambarSampah: null, 
       status: "Selesai",
       tanggalPembelian: "2024-01-12"
     }
@@ -84,14 +97,9 @@ getDummySelesaiData() {
 }
 
   setupEventListeners() {
-    // ✅ Event listener untuk logout
     document.addEventListener("user-logout", this.handleLogout);
-    
-    // ✅ Event listener untuk refresh yang dipicu dari view
     document.addEventListener("selesai-refresh", this.handleRefresh);
   }
-
-  // ✅ Tambahkan method untuk handle refresh
   async handleRefresh() {
   const applications = await fetchSelesaiData();
   this.view.renderSelesaiData(applications);

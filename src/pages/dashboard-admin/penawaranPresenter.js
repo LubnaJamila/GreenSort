@@ -47,29 +47,21 @@ export default class PenawaranPresenter {
     }
     async loadStatistikCard() {
     try {
-        const data = await fetchStatistikPenawaran();
-
-        const stats = {
-        total: data.length,
-        pengajuan: 0,
-        penawaran: 0,
-        pengiriman: 0,
-        selesai: 0,
-        };
-
-        data.forEach(item => {
-        const status = item.status?.toLowerCase();
-        if (status === "pengajuan") stats.pengajuan++;
-        if (status === "penawaran diterima" || status === "penawaran ditolak") stats.penawaran++;
-        if (status === "penawaran diterima") stats.pengiriman++;
-        if (status === "selesai") stats.selesai++;
+        const stats = await fetchStatistikPenawaran();
+        if (stats) {
+        this.penawaranView.updateStatistics({
+            total: stats.total,
+            pengajuan: stats.pengajuan,      // Pengajuan
+            penawaran: stats.penawaran,      // Penawaran Ditolak
+            pengiriman: stats.pengiriman,    // Pengiriman
+            selesai: stats.selesai           // Selesai
         });
-
-        this.penawaranView.updateStatistics(stats);
+        }
     } catch (error) {
         console.error("❌ Gagal ambil statistik card:", error);
     }
     }
+    
     handleLogout() {
         console.log("Logout initiated");
         logoutUser();

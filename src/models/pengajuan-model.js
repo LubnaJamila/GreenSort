@@ -84,5 +84,15 @@ export default class PengajuanModel {
     return { success: false, message: error.message };
   }
 }
+async getDashboardStats() {
+  try {
+    const response = await fetch(`${this.baseUrl}/dashboard-admin/stats`);
+    const result = await response.json();
+    return result.success ? result.data : null;
+  } catch (error) {
+    console.error("Gagal ambil data dashboard-admin stats:", error);
+    return null;
+  }
+}
 
 }

@@ -11,4 +11,16 @@ export default class PengirimanModel {
       return [];
     }
   }
+  async getDashboardStats() {
+    try {
+      const response = await fetch(
+        "https://greenshort-production.up.railway.app/api/dashboard-admin/stats"
+      );
+      const result = await response.json();
+      return result.success ? result.data : null;
+    } catch (error) {
+      console.error("Gagal mengambil dashboard-admin stats:", error);
+      return null;
+    }
+  }
 }

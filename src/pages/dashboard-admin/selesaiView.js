@@ -44,11 +44,11 @@ export default class SelesaiView {
           </div>
 
           <div class="stats-grid">
-            ${this.renderStatCard("80", "Semua", "bi-hourglass-split", "yellow-bg", "#/dashboard")}
-            ${this.renderStatCard("16", "Pengajuan", "bi-clipboard-check", "blue-bg", "#/pengajuan")}
-            ${this.renderStatCard("8", "Penawaran", "bi-x-circle", "red-bg", "#/penawaran")}
-            ${this.renderStatCard("24", "Pengiriman", "bi-truck", "orange-bg", "#/pengiriman")}
-            ${this.renderStatCard("42", "Selesai", "bi-check-circle", "green-bg", "#/selesai")}
+            ${this.renderStatCard("0", "Semua", "bi-hourglass-split", "yellow-bg", "#/dashboard")}
+            ${this.renderStatCard("0", "Pengajuan", "bi-clipboard-check", "blue-bg", "#/pengajuan")}
+            ${this.renderStatCard("0", "Penawaran", "bi-x-circle", "red-bg", "#/penawaran")}
+            ${this.renderStatCard("0", "Pengiriman", "bi-truck", "orange-bg", "#/pengiriman")}
+            ${this.renderStatCard("0", "Selesai", "bi-check-circle", "green-bg", "#/selesai")}
           </div>
         </header>
 
@@ -286,6 +286,19 @@ renderApplicationRow(app) {
       });
     });
   }
+displayStatistics(stats) {
+  const statAll = document.querySelector('.stat-card:nth-child(1) .stat-number');
+  const statPending = document.querySelector('.stat-card:nth-child(2) .stat-number');
+  const statRejected = document.querySelector('.stat-card:nth-child(3) .stat-number');
+  const statShipped = document.querySelector('.stat-card:nth-child(4) .stat-number');
+  const statCompleted = document.querySelector('.stat-card:nth-child(5) .stat-number');
+
+  if (statAll) statAll.textContent = stats.total || '0';
+  if (statPending) statPending.textContent = stats.pending || '0';
+  if (statRejected) statRejected.textContent = stats.rejected || '0';
+  if (statShipped) statShipped.textContent = stats.shipped || '0';
+  if (statCompleted) statCompleted.textContent = stats.completed || '0';
+}
 
   renderSelesaiData(applicationsData) {
     this.renderApplicationsTable(applicationsData);
