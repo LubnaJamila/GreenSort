@@ -20,6 +20,9 @@ export default class KlasifikasiSampahView {
     this.model.loadModel(); // Load model on initialization
     this.rekomendasiModel = new RekomendasiModel(); // Tambahan
 
+    this.render(); // Render dulu, biar ada #model-status
+    this.initModelLoading(); // Async load model + status
+
     // Color mapping for each waste type
     this.wasteTypeColors = {
       Cardboard: "#fd7e14",
@@ -71,7 +74,8 @@ export default class KlasifikasiSampahView {
                         </div>
                         <div class="d-flex justify-content-end">
                             <button class="btn btn-classify" type="button" id="classify-btn" disabled>Klasifikasi</button>
-                        </div>
+                            </div>
+                            <div id="model-status" style="margin-top: 1rem; font-size: 0.9rem; color: #6c757d;">Memuat model...</div>
                     </div>
                 </section>
 
@@ -234,6 +238,24 @@ export default class KlasifikasiSampahView {
         event: "click",
         handler: handleSell,
       });
+    }
+  }
+  setModelStatus(status, color = "#6c757d") {
+    const el = document.getElementById("model-status");
+    if (el) {
+      el.textContent = status;
+      el.style.color = color;
+    }
+  }
+  async initModelLoading() {
+    this.setModelStatus("Memuat model...", "#6c757d");
+
+    try {
+      await this.model.loadModel();
+      this.setModelStatus("Model berhasil dimuat", "#28a745");
+    } catch (err) {
+      console.error("Gagal memuat model:", err);
+      this.setModelStatus("Gagal memuat model", "#dc3545");
     }
   }
 

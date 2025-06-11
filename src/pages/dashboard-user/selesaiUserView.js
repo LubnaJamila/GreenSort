@@ -301,8 +301,8 @@ export default class SelesaiUserView {
         <td>${app.total}</td>
         <td>
           ${
-            app.buktiTf !== "-"
-              ? `<a href="${BASE_URL}/uploads/${app.buktiTf}" target="_blank">Lihat Bukti</a>`
+            app.status.toLowerCase().trim() === "selesai" && app.buktiTf !== "-"
+              ? `<a href="${BASE_URL}/uploads/${app.bukti_tf}" target="_blank">Lihat Bukti</a>`
               : "-"
           }
         </td>

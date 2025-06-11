@@ -49,7 +49,6 @@ export default class SelesaiUserPresenter {
         "pengajuan ditolak",
         "penawaran diterima",
         "penawaran ditolak",
-        "penawaran ditolak",
         "selesai",
       ];
 

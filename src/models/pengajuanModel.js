@@ -13,7 +13,7 @@ export async function getPengajuanById(id) {
 }
 export async function updatePengantaran(idPengajuan, payload) {
   const response = await fetch(
-    `${BASE_URL}/pengajuan/mengantar/${idPengajuan}`,
+    `${BASE_URL}/api/pengajuan/mengantar/${idPengajuan}`,
     {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
