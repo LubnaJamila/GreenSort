@@ -112,10 +112,10 @@ export async function deleteRekeningById(id_rekening) {
 }
 export async function updateRekeningById(id_rekening, data) {
   try {
-    const res = await fetch(`http://localhost:3000/api/rekening/${id_rekening}`, {
+    const res = await fetch(`${BASE_URL}/api/rekening/${id_rekening}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
     });
     return await res.json();
   } catch (error) {
