@@ -3,7 +3,6 @@ export default class DashboardModel {
   constructor() {}
 
   getApplications() {
-    // Simulasi data (bisa diganti dengan fetch API ke backend)
     return [
       {
         id: 1,

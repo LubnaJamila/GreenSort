@@ -1,6 +1,6 @@
 import * as tf from "@tensorflow/tfjs";
 
-// Regularizer dummy untuk menggantikan 'L2' yang tidak dikenal
+
 function L2Regularizer(config) {
   this.l2 = config.l2 || 0.01;
 }
@@ -13,10 +13,10 @@ L2Regularizer.prototype.getConfig = function () {
   return { l2: this.l2 };
 };
 
-// Tambahkan className agar tf.serialization mengenalinya
+
 L2Regularizer.className = "L2";
 
-// Register ke tf.serialization
+
 tf.serialization.registerClass(L2Regularizer);
 
 class KlasifikasiModel {

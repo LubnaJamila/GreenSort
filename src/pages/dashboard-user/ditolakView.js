@@ -129,7 +129,7 @@ export default class DitolakView {
   setupEventListeners() {
     this.removeEventListeners();
 
-    // Mobile menu toggle
+    
     const mobileMenuBtn = document.getElementById("mobile-menu-toggle");
     if (mobileMenuBtn) {
       const handler = () => this.toggleSidebar();
@@ -141,7 +141,7 @@ export default class DitolakView {
       });
     }
 
-    // Sidebar overlay click
+    
     const overlay = document.querySelector(".sidebar-overlay");
     if (overlay) {
       const handler = () => this.toggleSidebar(false);
@@ -149,7 +149,7 @@ export default class DitolakView {
       this.eventListeners.push({ element: overlay, type: "click", handler });
     }
 
-    // Window resize
+    
     const resizeHandler = () => this.handleResize();
     window.addEventListener("resize", resizeHandler);
     this.eventListeners.push({
@@ -158,7 +158,7 @@ export default class DitolakView {
       handler: resizeHandler,
     });
 
-    // Refresh button
+    
     const refreshBtn = document.getElementById("refresh-btn");
     if (refreshBtn) {
       const handler = () => this.handleRefresh();
@@ -166,7 +166,7 @@ export default class DitolakView {
       this.eventListeners.push({ element: refreshBtn, type: "click", handler });
     }
 
-    // Select all checkbox
+    
     const selectAll = document.getElementById("select-all");
     if (selectAll) {
       const handler = (e) => this.toggleSelectAll(e.target.checked);
@@ -244,7 +244,7 @@ export default class DitolakView {
     const tableBody = document.getElementById("applications-table-body");
     if (!tableBody) return;
 
-    // Check if data exists and is array
+    
     if (!applicationsData || !Array.isArray(applicationsData)) {
       tableBody.innerHTML = `
                 <tr>
@@ -339,20 +339,20 @@ export default class DitolakView {
           [10, 25, 50, 100],
           [10, 25, 50, 100],
         ],
-        order: [[1, "desc"]], // Urutkan berdasarkan Jenis Sampah (index 1) atau yang sesuai
+        order: [[1, "desc"]], 
         columnDefs: [
           {
-            targets: 0, // Gambar Sampah
+            targets: 0, 
             orderable: false,
             searchable: false,
             className: "text-center",
           },
           {
-            targets: 3, // Status
+            targets: 3, 
             className: "text-center",
           },
           {
-            targets: 4, // Alasan Penolakan
+            targets: 4, 
             className: "text-wrap",
             width: "200px",
           },
@@ -377,7 +377,7 @@ export default class DitolakView {
   }
 
   updateStatCards(stats) {
-    // Update stat numbers if stats object is provided
+    
     if (!stats) return;
 
     const statCards = document.querySelectorAll(".stat-number");
@@ -395,12 +395,12 @@ export default class DitolakView {
     this.updateStatCards(stats);
   }
 
-  // Method khusus untuk update data ditolak
+  
   updateRejectedData(applicationsData) {
     this.renderApplicationsTable(applicationsData);
   }
 
-  // Method untuk mendapatkan data yang dipilih
+  
   getSelectedRows() {
     const selectedCheckboxes = document.querySelectorAll(
       '#applications-table-body input[type="checkbox"]:checked'
@@ -408,7 +408,7 @@ export default class DitolakView {
     return Array.from(selectedCheckboxes).map((checkbox) => checkbox.value);
   }
 
-  // Method untuk clear selection
+  
   clearSelection() {
     const selectAll = document.getElementById("select-all");
     const checkboxes = document.querySelectorAll(
@@ -419,7 +419,7 @@ export default class DitolakView {
     checkboxes.forEach((checkbox) => (checkbox.checked = false));
   }
   showError(message) {
-    // Tampilkan notifikasi error
+    
     const alertDiv = document.createElement("div");
     alertDiv.className =
       "alert alert-danger alert-dismissible fade show position-fixed";
@@ -433,7 +433,7 @@ export default class DitolakView {
 
     document.body.appendChild(alertDiv);
 
-    // Auto remove after 5 seconds
+    
     setTimeout(() => {
       if (alertDiv.parentNode) {
         alertDiv.remove();
@@ -441,7 +441,7 @@ export default class DitolakView {
     }, 5000);
   }
 
-  // Method untuk show/hide loading state
+  
   showLoading(show = true) {
     const tableBody = document.getElementById("applications-table-body");
     if (!tableBody) return;

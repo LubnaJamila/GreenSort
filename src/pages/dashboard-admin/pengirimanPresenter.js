@@ -10,9 +10,9 @@ export default class PengirimanPresenter {
         this.currentUser = null;
         this.pengirimanModel = new PengirimanModel();
         this.sidebarView = new SidebarView();
-        this.applications = []; // Store applications data
+        this.applications = []; 
 
-        // Bind methods
+        
         this.handleLogout = this.handleLogout.bind(this);
         this.handleAddPengiriman = this.handleAddPengiriman.bind(this);
         this.handleFilterChange = this.handleFilterChange.bind(this);
@@ -38,7 +38,7 @@ export default class PengirimanPresenter {
         this.setupEventListeners();
 
         await this.loadApplications();
-        await this.updateStatistics(); // Ambil data real dari backend
+        await this.updateStatistics(); 
 
         this.view.bindAddPengiriman(this.handleAddPengiriman);
         this.view.bindStatusUpdate(this.handleStatusUpdate);
@@ -65,10 +65,10 @@ async updateStatistics() {
         if (stats) {
         this.view.displayStatistics({
             total: stats.total,
-            pending: stats.pengajuan,      // "Pengajuan"
-            accepted: stats.penawaran,     // "Penawaran Ditolak"
-            shipped: stats.pengiriman,     // "Pengiriman"
-            completed: stats.selesai       // "Selesai"
+            pending: stats.pengajuan,      
+            accepted: stats.penawaran,     
+            shipped: stats.pengiriman,     
+            completed: stats.selesai       
         });
         }
     } catch (error) {
@@ -103,12 +103,12 @@ async updateStatistics() {
         app.status === "completed" || app.status === "Selesai"
     ).length;
     
-    // Calculate total value
+    
     const totalValue = applications.reduce((sum, app) => {
         return sum + (app.totalHarga || 0);
     }, 0);
 
-    // Calculate waste type distribution
+    
     const wasteTypes = {};
     applications.forEach(app => {
         const wasteType = app.kategoriSampah || app.jenisSampah || 'Unknown';
@@ -164,15 +164,15 @@ debugApplicationData() {
     handleStatusUpdate(applicationId, newStatus) {
         console.log(`Updating status for application ${applicationId} to ${newStatus}`);
         
-        // Find and update application
+        
         const applicationIndex = this.applications.findIndex(app => app.id === applicationId);
         if (applicationIndex !== -1) {
         this.applications[applicationIndex].status = newStatus;
         
-        // Update in model
+        
         this.pengirimanModel.updateStatusPengiriman(applicationId, newStatus);
         
-        // Refresh display
+        
         this.view.displayApplications(this.applications);
         this.updateStatistics();
         
@@ -186,7 +186,7 @@ debugApplicationData() {
         const applicationId = e.detail.id;
         console.log(`Completing shipment for application ${applicationId}`);
         
-        // Update status to completed
+        
         this.handleStatusUpdate(applicationId, 'completed');
     }
 
@@ -198,22 +198,22 @@ debugApplicationData() {
     setupEventListeners() {
         document.addEventListener("user-logout", this.handleLogout);
         
-        // Listen untuk dashboard refresh event
+        
         document.addEventListener("dashboard-refresh", async () => {
         await this.refresh();
         });
         
-        // Listen untuk application detail event
+        
         document.addEventListener("show-application-detail", this.handleShowDetail);
         
-        // Listen untuk complete shipment event
+        
         document.addEventListener("complete-shipment", this.handleCompleteShipment);
     }
 
     showApplicationDetail(applicationId) {
         const application = this.getApplicationById(applicationId);
         if (application) {
-        // Dispatch event untuk navigasi ke detail page
+       
         const event = new CustomEvent("navigate", { 
             detail: { 
             page: "pengiriman-detail", 
@@ -241,7 +241,7 @@ debugApplicationData() {
         document.dispatchEvent(event);
     }
 
-    // Method to refresh data
+    
     async refresh() {
     console.log("Refreshing pengiriman data...");
     try {
@@ -253,34 +253,34 @@ debugApplicationData() {
     }
 }
 
-    // Method to get application by ID
+    
     getApplicationById(id) {
         return this.applications.find(app => app.id === id);
     }
 
-    // Method to export data (if needed)
+    
     exportApplications(format = 'json') {
         if (format === 'json') {
         return JSON.stringify(this.applications, null, 2);
         }
-        // Add other export formats as needed
+        
     }
 
     destroy() {
         console.log("Destroying PengirimanPresenter");
         
-        // Remove event listeners
+        
         document.removeEventListener("user-logout", this.handleLogout);
         document.removeEventListener("dashboard-refresh", this.refresh);
         document.removeEventListener("show-application-detail", this.handleShowDetail);
         document.removeEventListener("complete-shipment", this.handleCompleteShipment);
         
-        // Destroy view
+        
         if (this.view && this.view.destroy) {
         this.view.destroy();
         }
         
-        // Clear data
+        
         this.applications = [];
         this.currentUser = null;
     }

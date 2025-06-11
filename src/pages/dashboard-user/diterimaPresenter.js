@@ -11,7 +11,7 @@ export default class DiterimaPresenter {
     this.view = new DiterimaView();
     this.currentUser = null;
 
-    // Bind event handlers
+    
     this.handleRefresh = this.handleRefresh.bind(this);
     this.handleDiterimaRefresh = this.handleDiterimaRefresh.bind(this);
     this.handleApplicationAction = this.handleApplicationAction.bind(this);
@@ -20,7 +20,7 @@ export default class DiterimaPresenter {
   async init() {
     console.log("Initializing DiterimaPresenter");
 
-    // Get current user
+    
     this.currentUser = getCurrentUser();
     if (!this.currentUser) {
       console.log("User not logged in, redirecting to login");
@@ -29,19 +29,19 @@ export default class DiterimaPresenter {
       return;
     }
 
-    // Render the view
+    
     this.view.render();
     this.view.displayUserInfo(this.currentUser);
 
-    // Load initial data
+    
     await this.loadAcceptedApplications();
 
-    // Setup event listeners
+   
     this.setupEventListeners();
   }
 
   setupEventListeners() {
-    // Listen for refresh events
+    
     document.addEventListener("dashboard-refresh", this.handleRefresh);
     document.addEventListener("diterima-refresh", this.handleDiterimaRefresh);
     document.addEventListener(
@@ -94,7 +94,7 @@ export default class DiterimaPresenter {
         return;
       }
 
-      // Transformasi data
+      
       const applications = allApplications.map((item) => ({
         id: item.id,
         user_id: item.user_id,
@@ -160,7 +160,7 @@ export default class DiterimaPresenter {
           break;
         default:
           console.warn("Unknown status:", status);
-          // Default ke menunggu validasi untuk status yang tidak dikenal
+          
           stats.menungguValidasi++;
           break;
       }
@@ -186,22 +186,16 @@ export default class DiterimaPresenter {
   }
 
   async acceptApplication(applicationId) {
-    // Konfirmasi sebelum melakukan aksi
+    
     if (!confirm("Apakah Anda yakin ingin menerima pengajuan ini?")) {
       return;
     }
 
     try {
-      // TODO: Implementasi API call untuk menerima pengajuan
-      // const response = await fetch(`${BASE_URL}/api/pengajuan/${applicationId}/accept`, {
-      //     method: 'PUT',
-      //     headers: { 'Content-Type': 'application/json' }
-      // });
-
-      // Sementara simulasi berhasil
+     
       this.view.showSuccess("Pengajuan berhasil diterima");
 
-      // Refresh data
+      
       await this.loadAcceptedApplications();
     } catch (error) {
       console.error("Error accepting application:", error);
@@ -235,12 +229,12 @@ export default class DiterimaPresenter {
     await this.loadAcceptedApplications();
   }
 
-  // Method to get selected applications
+  
   getSelectedApplications() {
     return this.view.getSelectedRows();
   }
 
-  // Method to export data (if needed)
+  
   exportData() {
     const selectedRows = this.getSelectedApplications();
     if (selectedRows.length === 0) {
@@ -248,12 +242,12 @@ export default class DiterimaPresenter {
       return;
     }
 
-    // Implement export logic here
+    
     console.log("Exporting selected applications:", selectedRows);
-    // You can implement CSV/Excel export here
+    
   }
 
-  // Method to handle bulk actions (if needed)
+  
   handleBulkAction(action) {
     const selectedRows = this.getSelectedApplications();
     if (selectedRows.length === 0) {
@@ -280,7 +274,7 @@ export default class DiterimaPresenter {
       return;
     }
 
-    // Implement print logic here
+    
     console.log("Printing selected applications:", selectedRows);
     window.print();
   }

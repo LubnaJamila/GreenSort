@@ -57,17 +57,16 @@ export default class DiterimaModel {
         ];
     }
 
-    // Method untuk mendapatkan semua data yang diterima
+    
     getAllAcceptedApplications() {
         return new Promise((resolve) => {
-            // Simulasikan async operation dengan timeout kecil
+            
             setTimeout(() => {
                 resolve(this.dummyData);
             }, 300);
         });
     }
 
-    // Method untuk mendapatkan data by ID
     getApplicationById(id) {
         return new Promise((resolve, reject) => {
             setTimeout(() => {
@@ -81,7 +80,6 @@ export default class DiterimaModel {
         });
     }
 
-    // Method untuk filter data
     getFilteredApplications(filter) {
         return new Promise((resolve) => {
             setTimeout(() => {

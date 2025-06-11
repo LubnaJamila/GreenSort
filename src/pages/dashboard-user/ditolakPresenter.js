@@ -3,16 +3,14 @@ import DitolakView from "./ditolakView.js";
 import { getCurrentUser } from "../../models/authModel.js";
 import { getPengajuanByUserIdAndStatus } from "../../models/pengajuan_sampah-model.js";
 
-// Import model untuk data aplikasi (sesuaikan dengan struktur project Anda)
-// import ApplicationModel from "../../models/applicationModel.js";
 
 export default class DitolakPresenter {
   constructor() {
     this.view = new DitolakView();
-    // this.applicationModel = new ApplicationModel();
+    
     this.currentUser = null;
 
-    // Bind methods
+    
     this.handleRefresh = this.handleRefresh.bind(this);
     this.handleDataUpdate = this.handleDataUpdate.bind(this);
   }
@@ -20,7 +18,7 @@ export default class DitolakPresenter {
   init() {
     console.log("Initializing DitolakPresenter");
 
-    // Get current user
+    
     this.currentUser = getCurrentUser();
     if (!this.currentUser) {
       console.log("User not logged in, redirecting to login");
@@ -29,14 +27,14 @@ export default class DitolakPresenter {
       return;
     }
 
-    // Render view
+    
     this.view.render();
     this.view.displayUserInfo(this.currentUser);
 
-    // Load initial data
+    
     this.loadRejectedApplications();
 
-    // Setup event listeners
+    
     this.setupEventListeners();
   }
 
@@ -84,7 +82,7 @@ export default class DitolakPresenter {
         return;
       }
 
-      // Transformasi data
+      
       const applications = allApplications.map((item) => ({
         id: item.id,
         user_id: item.user_id,
@@ -159,7 +157,7 @@ export default class DitolakPresenter {
     return stats;
   }
 
-  // Sample data untuk testing (hapus ketika sudah terintegrasi dengan backend)
+  
   getSampleRejectedData() {
     return [
       {
@@ -196,10 +194,10 @@ export default class DitolakPresenter {
   }
 
   setupEventListeners() {
-    // Listen for refresh events
+    
     document.addEventListener("dashboard-refresh", this.handleRefresh);
 
-    // Listen for data updates
+   
     document.addEventListener("rejected-data-update", this.handleDataUpdate);
   }
 
@@ -216,10 +214,10 @@ export default class DitolakPresenter {
   }
 
   showError(message) {
-    // Implementasi notifikasi error
+    
     console.error(message);
 
-    // Contoh menggunakan toast notification (sesuaikan dengan library yang digunakan)
+    
     if (window.showToast) {
       window.showToast(message, "error");
     } else {
@@ -228,7 +226,7 @@ export default class DitolakPresenter {
   }
 
   showSuccess(message) {
-    // Implementasi notifikasi sukses
+   
     console.log(message);
 
     if (window.showToast) {
@@ -238,7 +236,7 @@ export default class DitolakPresenter {
     }
   }
 
-  // Method untuk handle bulk actions (jika diperlukan)
+  
   async handleBulkAction(action) {
     const selectedIds = this.view.getSelectedRows();
 
@@ -266,8 +264,7 @@ export default class DitolakPresenter {
 
   async handleBulkDelete(ids) {
     if (confirm(`Apakah Anda yakin ingin menghapus ${ids.length} item?`)) {
-      // Implementasi delete
-      // await this.applicationModel.deleteApplications(ids);
+      
       this.showSuccess(`Berhasil menghapus ${ids.length} item`);
       this.loadRejectedApplications();
       this.view.clearSelection();
@@ -278,8 +275,7 @@ export default class DitolakPresenter {
     if (
       confirm(`Apakah Anda yakin ingin mengajukan ulang ${ids.length} item?`)
     ) {
-      // Implementasi resubmit
-      // await this.applicationModel.resubmitApplications(ids);
+      
       this.showSuccess(`Berhasil mengajukan ulang ${ids.length} item`);
       this.loadRejectedApplications();
       this.view.clearSelection();

@@ -193,7 +193,7 @@ export default class FormSelesaiView {
         const uploadArea = document.getElementById('upload-area');
         const fileInput = document.getElementById('bukti-transaksi');
         
-        // Style the upload area
+       
         uploadArea.style.cssText = `
             border: 2px dashed #dee2e6;
             border-radius: 8px;
@@ -204,7 +204,7 @@ export default class FormSelesaiView {
             background-color: #f8f9fa;
         `;
         
-        // Hover effects
+        
         uploadArea.addEventListener('mouseenter', () => {
             uploadArea.style.borderColor = '#007bff';
             uploadArea.style.backgroundColor = '#e3f2fd';
@@ -215,12 +215,12 @@ export default class FormSelesaiView {
             uploadArea.style.backgroundColor = '#f8f9fa';
         });
         
-        // Click to open file picker
+        
         uploadArea.addEventListener('click', () => {
             fileInput.click();
         });
         
-        // Drag and drop events
+        
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
             uploadArea.style.borderColor = '#007bff';
@@ -252,7 +252,7 @@ export default class FormSelesaiView {
         
         this.applicationData = data;
         
-        // Format currency
+        
         const formatCurrency = (amount) => {
             return new Intl.NumberFormat('id-ID', {
                 style: 'currency',
@@ -260,7 +260,7 @@ export default class FormSelesaiView {
             }).format(amount);
         };
         
-        // Populate sampah image
+        
         const sampahImage = document.getElementById('sampah-image');
         if (sampahImage && data.gambarSampah) {
             sampahImage.src =
@@ -268,20 +268,20 @@ export default class FormSelesaiView {
         }
 
         
-        // Populate detail sampah
+        
         document.getElementById('nama-lengkap').textContent = data.namaLengkap || '-';
         document.getElementById('no-hp').textContent = data.noHp || '-';
         document.getElementById('kategori-sampah').textContent = data.kategoriSampah || data.jenisSampah || '-';
         document.getElementById('berat-sampah').textContent = `${data.beratSampah || data.kuantitas || '-'} kg`;
         document.getElementById('harga-sampah').textContent = data.hargaSampah ? formatCurrency(data.hargaSampah) : '-';
         
-        // ✅ Detail Pengiriman (hanya 2 data)
+       
         document.getElementById('metode-pengiriman').textContent = data.metodePengiriman ?? '-';
         document.getElementById('total-bayar').textContent = data.ongkosKirim ? formatCurrency(data.ongkosKirim) : '-';
 
 
         
-        // Update status
+        
         const statusElement = document.getElementById('status-pengiriman');
         if (data.status) {
             statusElement.textContent = data.status;
@@ -305,8 +305,8 @@ export default class FormSelesaiView {
     }
     
     handleFileSelect(file) {
-        // Validate file
-        const maxSize = 5 * 1024 * 1024; // 5MB
+        
+        const maxSize = 5 * 1024 * 1024; 
         const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
         
         if (!allowedTypes.includes(file.type)) {
@@ -332,7 +332,7 @@ export default class FormSelesaiView {
         fileName.textContent = `${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
         previewArea.style.display = 'block';
         
-        // Show image preview for image files
+        
         if (file.type.startsWith('image/')) {
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -354,7 +354,7 @@ export default class FormSelesaiView {
     setupEventListeners() {
         this.removeEventListeners();
     
-        // Mobile menu toggle
+        
         const mobileMenuBtn = document.getElementById("mobile-menu-toggle");
         if (mobileMenuBtn) {
             const handler = () => this.toggleSidebar();
@@ -366,7 +366,7 @@ export default class FormSelesaiView {
             });
         }
     
-        // Sidebar overlay click
+        
         const overlay = document.querySelector(".sidebar-overlay");
         if (overlay) {
             const handler = () => this.toggleSidebar(false);
@@ -374,7 +374,7 @@ export default class FormSelesaiView {
             this.eventListeners.push({ element: overlay, type: "click", handler });
         }
     
-        // Window resize
+        
         const resizeHandler = () => this.handleResize();
         window.addEventListener("resize", resizeHandler);
         this.eventListeners.push({
@@ -383,7 +383,7 @@ export default class FormSelesaiView {
             handler: resizeHandler,
         });
         
-        // File input change
+       
         const fileInput = document.getElementById('bukti-transaksi');
         if (fileInput) {
             const handler = (e) => {
@@ -395,7 +395,7 @@ export default class FormSelesaiView {
             this.eventListeners.push({ element: fileInput, type: 'change', handler });
         }
         
-        // Remove file button
+       
         const removeFileBtn = document.getElementById('remove-file');
         if (removeFileBtn) {
             const handler = () => this.removeFile();
@@ -403,7 +403,7 @@ export default class FormSelesaiView {
             this.eventListeners.push({ element: removeFileBtn, type: 'click', handler });
         }
         
-        // Cancel button
+       
         const cancelBtn = document.getElementById("cancel-btn");
         if (cancelBtn) {
             const handler = () => this.handleCancel();
@@ -411,7 +411,7 @@ export default class FormSelesaiView {
             this.eventListeners.push({ element: cancelBtn, type: "click", handler });
         }
         
-        // Form submit
+        
         const form = document.getElementById('selesai-form');
         if (form) {
             const handler = (e) => this.handleFormSubmit(e);
@@ -431,7 +431,7 @@ export default class FormSelesaiView {
         const formData = new FormData(e.target);
         formData.append('application_id', this.applicationData?.id);
         
-        // Dispatch event to presenter
+        
         const event = new CustomEvent('form-submit', {
             detail: {
                 formData: formData,
@@ -453,7 +453,7 @@ export default class FormSelesaiView {
     }
     
     handleBack() {
-        // Navigate back to previous page
+        
         window.location.hash = '#/diterima';
     }
     
@@ -483,7 +483,7 @@ export default class FormSelesaiView {
         if (cardBody) {
             cardBody.insertAdjacentHTML('afterbegin', alertHtml);
             
-            // Auto remove after 5 seconds
+            
             setTimeout(() => {
                 const alert = cardBody.querySelector('.alert-danger');
                 if (alert) {
@@ -506,7 +506,7 @@ export default class FormSelesaiView {
         if (cardBody) {
             cardBody.insertAdjacentHTML('afterbegin', alertHtml);
             
-            // Auto redirect after 3 seconds
+            
             setTimeout(() => {
                 window.location.href = '#/selesai';
             }, 3000);

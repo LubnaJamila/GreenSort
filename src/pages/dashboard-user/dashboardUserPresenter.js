@@ -10,7 +10,7 @@ export default class DashboardUserPresenter {
     this.dashboardModel = new DashboardModel();
     this.currentUser = null;
 
-    // Bind methods
+    
     this.handleLogout = this.handleLogout.bind(this);
     this.handleRefresh = this.handleRefresh.bind(this);
     this.handleViewApplication = this.handleViewApplication.bind(this);
@@ -29,16 +29,16 @@ export default class DashboardUserPresenter {
 
     console.log("Current user:", this.currentUser);
 
-    // Render dashboard
+    
     this.view.render();
 
-    // Display user info
+    
     this.view.displayUserInfo(this.currentUser);
 
-    // Load and display dashboard data
+    
     this.loadDashboardData();
 
-    // Setup event listeners
+    
     this.setupEventListeners();
   }
 
@@ -85,7 +85,7 @@ export default class DashboardUserPresenter {
         return;
       }
 
-      // Transformasi data
+      
       const applications = allApplications.map((item) => ({
         id: item.id,
         user_id: item.user_id,
@@ -97,15 +97,15 @@ export default class DashboardUserPresenter {
         updated_at: item.updated_at,
       }));
 
-      // Hitung statistik dari SEMUA aplikasi
+      
       const stats = this.calculateUserStats(applications);
 
-      // Filter hanya yang statusnya "pengajuan" untuk ditampilkan di tabel
+     
       const pengajuanOnly = applications.filter(
         (app) => app.status.toLowerCase().trim() === "pengajuan"
       );
 
-      // Render hanya data status "pengajuan", tapi statistik semua status
+      
       this.view.renderDashboardData(pengajuanOnly, stats);
     } catch (err) {
       console.error("Error in loadDashboardData:", err);
@@ -152,7 +152,7 @@ export default class DashboardUserPresenter {
           break;
         default:
           console.warn("Unknown status:", status);
-          // Default ke menunggu validasi untuk status yang tidak dikenal
+          
           stats.menungguValidasi++;
           break;
       }
@@ -162,13 +162,13 @@ export default class DashboardUserPresenter {
   }
 
   setupEventListeners() {
-    // User logout event
+    
     document.addEventListener("user-logout", this.handleLogout);
 
-    // Dashboard refresh event
+    
     document.addEventListener("dashboard-refresh", this.handleRefresh);
 
-    // Application view event
+    
     document.addEventListener("view-application", this.handleViewApplication);
   }
 
@@ -176,10 +176,10 @@ export default class DashboardUserPresenter {
     console.log("User logout initiated");
     logoutUser();
 
-    // Clean up view
+    
     this.view.destroy();
 
-    // Navigate to login
+    
     const event = new CustomEvent("navigate", { detail: { page: "login" } });
     document.dispatchEvent(event);
   }

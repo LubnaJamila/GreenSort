@@ -12,7 +12,6 @@ export default class PengajuanPresenter {
     this.sidebarView = new SidebarView();
     this.applications = [];
 
-    // Bind methods
     this.handleLogout = this.handleLogout.bind(this);
     this.handleStatusUpdate = this.handleStatusUpdate.bind(this);
     this.handleFilterChange = this.handleFilterChange.bind(this);

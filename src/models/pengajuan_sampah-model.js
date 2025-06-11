@@ -19,7 +19,6 @@ export async function kirimPengajuan(formData) {
 
 export async function getPengajuanByUserId(userId) {
   try {
-    // Validasi userId
     if (!userId) {
       return { success: false, message: "User ID diperlukan" };
     }
@@ -42,7 +41,7 @@ export async function getPengajuanByUserId(userId) {
   }
 }
 
-// Tambahan: Fungsi untuk mengambil pengajuan berdasarkan status tertentu
+
 export async function getPengajuanByUserIdAndStatus(userId, status) {
   try {
     if (!userId || !status) {

@@ -14,7 +14,7 @@ export default class PenjemputanPresenter {
 
   async init() {
   this.currentUser = getCurrentUser();
-  console.log("Current User:", this.currentUser); // Tambahkan debug ini
+  console.log("Current User:", this.currentUser); 
 
   if (!this.currentUser) {
     const event = new CustomEvent("navigate", { detail: { page: "login" } });
@@ -25,8 +25,8 @@ export default class PenjemputanPresenter {
   this.view.render();
   this.view.displayUserInfo(this.currentUser);
 
-  // Perbaikan disini
-  await this.loadUserDashboardStats(this.currentUser.id_user); // Pastikan id_user valid
+ 
+  await this.loadUserDashboardStats(this.currentUser.id_user); 
   
  await this.loadPenjemputanData(this.currentUser.id_user);
 
@@ -55,7 +55,7 @@ export default class PenjemputanPresenter {
   }
   async loadUserDashboardStats(userId) {
   try {
-    console.log("Fetching stats for User ID:", userId); // Debug tambahan
+    console.log("Fetching stats for User ID:", userId); 
     const stats = await getUserDashboardStats(userId);
     this.view.updateDashboardStats(stats);
   } catch (error) {
@@ -75,7 +75,7 @@ export default class PenjemputanPresenter {
   }
 
   setupEventListeners() {
-    // Tambahkan event listener jika dibutuhkan
+  
   }
 
   handleError(message) {

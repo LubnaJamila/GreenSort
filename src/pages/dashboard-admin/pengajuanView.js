@@ -151,7 +151,7 @@ export default class PengajuanView {
 
   setupEventListeners() {
     this.removeEventListeners();
-    // Mobile menu toggle
+   
     const mobileMenuBtn = document.getElementById("mobile-menu-toggle");
     if (mobileMenuBtn) {
       const handler = () => this.toggleSidebar();
@@ -162,14 +162,14 @@ export default class PengajuanView {
         handler,
       });
     }
-    // Sidebar overlay click
+    
     const overlay = document.querySelector(".sidebar-overlay");
     if (overlay) {
       const handler = () => this.toggleSidebar(false);
       overlay.addEventListener("click", handler);
       this.eventListeners.push({ element: overlay, type: "click", handler });
     }
-    // Window resize
+    
     const resizeHandler = () => this.handleResize();
     window.addEventListener("resize", resizeHandler);
     this.eventListeners.push({
@@ -443,7 +443,7 @@ export default class PengajuanView {
   }
 
   setupRowEventListeners() {
-  // Tombol detail (jika ada)
+ 
   const detailBtns = document.querySelectorAll('.detail-btn');
   detailBtns.forEach(btn => {
     const handler = (e) => this.handleDetailClick(e);
@@ -451,7 +451,7 @@ export default class PengajuanView {
     this.eventListeners.push({ element: btn, type: 'click', handler });
   });
 
-  // Checkbox baris
+  
   const rowCheckboxes = document.querySelectorAll('.row-checkbox');
   rowCheckboxes.forEach(checkbox => {
     const handler = () => this.updateSelectAllState();
@@ -717,7 +717,7 @@ export default class PengajuanView {
         cardBody.insertAdjacentHTML('afterbegin', alertHtml);
     }
 
-    // Arahkan langsung tanpa delay
+    
     window.location.href = '#/selesai';
 }
 

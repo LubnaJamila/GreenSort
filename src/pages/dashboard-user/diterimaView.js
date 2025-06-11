@@ -11,7 +11,7 @@ export default class DiterimaView {
     this.eventListeners = [];
     this.isMobile = window.matchMedia("(max-width: 768px)").matches;
     this.sidebarCollapsed = false;
-    this.dataTable = null; // Store DataTable instance
+    this.dataTable = null; 
     this.baseImageUrl = "https://greenshort-production.up.railway.app/uploads/";
   }
 
@@ -135,7 +135,7 @@ export default class DiterimaView {
     const tableBody = document.getElementById("applications-table-body");
     if (!tableBody) return;
 
-    // Check if data exists and is array
+    
     if (!applicationsData || !Array.isArray(applicationsData)) {
       tableBody.innerHTML = `
                 <tr>
@@ -225,7 +225,7 @@ export default class DiterimaView {
   setupEventListeners() {
     this.removeEventListeners();
 
-    // Mobile menu toggle
+    
     const mobileMenuBtn = document.getElementById("mobile-menu-toggle");
     if (mobileMenuBtn) {
       const handler = () => this.toggleSidebar();
@@ -237,7 +237,7 @@ export default class DiterimaView {
       });
     }
 
-    // Sidebar overlay click
+   
     const overlay = document.querySelector(".sidebar-overlay");
     if (overlay) {
       const handler = () => this.toggleSidebar(false);
@@ -245,7 +245,7 @@ export default class DiterimaView {
       this.eventListeners.push({ element: overlay, type: "click", handler });
     }
 
-    // Window resize
+    
     const resizeHandler = () => this.handleResize();
     window.addEventListener("resize", resizeHandler);
     this.eventListeners.push({
@@ -254,7 +254,7 @@ export default class DiterimaView {
       handler: resizeHandler,
     });
 
-    // Refresh button
+    
     const refreshBtn = document.getElementById("refresh-btn");
     if (refreshBtn) {
       const handler = () => this.handleRefresh();
@@ -267,7 +267,7 @@ export default class DiterimaView {
     const tableBody = document.getElementById("applications-table-body");
     if (!tableBody) return;
 
-    // Gunakan bound handler supaya bisa dihapus dengan tepat
+    
     if (!this.boundActionHandler) {
       this.boundActionHandler = (e) => {
         e.preventDefault();
@@ -289,13 +289,13 @@ export default class DiterimaView {
   }
 
   handleRefresh() {
-    // Dispatch refresh event
+    
     const refreshEvent = new CustomEvent("diterima-refresh");
     document.dispatchEvent(refreshEvent);
   }
 
   showSuccess(message) {
-    // Tampilkan notifikasi sukses dengan toast-like behavior
+    
     const alertDiv = document.createElement("div");
     alertDiv.className =
       "alert alert-success alert-dismissible fade show position-fixed";
@@ -309,7 +309,7 @@ export default class DiterimaView {
 
     document.body.appendChild(alertDiv);
 
-    // Auto remove after 3 seconds
+    
     setTimeout(() => {
       if (alertDiv.parentNode) {
         alertDiv.remove();
@@ -318,7 +318,7 @@ export default class DiterimaView {
   }
 
   showError(message) {
-    // Tampilkan notifikasi error
+    
     const alertDiv = document.createElement("div");
     alertDiv.className =
       "alert alert-danger alert-dismissible fade show position-fixed";
@@ -470,13 +470,13 @@ export default class DiterimaView {
   }
 
   initDataTable() {
-    // Destroy existing DataTable if it exists
+    
     if (this.dataTable) {
       this.dataTable.destroy();
       this.dataTable = null;
     }
 
-    // Wait for DOM to be ready and jQuery DataTables to be available
+    
     if (typeof $ !== "undefined" && $.fn.DataTable) {
       try {
         this.dataTable = $("#datatable").DataTable({
@@ -486,24 +486,24 @@ export default class DiterimaView {
             [10, 25, 50, -1],
             [10, 25, 50, "Semua"],
           ],
-          order: [[1, "asc"]], // Sort by jenis sampah column
+          order: [[1, "asc"]], 
           columnDefs: [
             {
-              targets: [0], // Gambar column
+              targets: [0], 
               orderable: false,
               searchable: false,
               responsivePriority: 1,
             },
             {
-              targets: [2, 3], // Berat dan Harga columns
+              targets: [2, 3], 
               className: "text-end",
             },
             {
-              targets: [4], // Status column
+              targets: [4], 
               className: "text-center",
             },
             {
-              targets: [5], // Action column
+              targets: [5], 
               orderable: false,
               searchable: false,
               responsivePriority: 2,
@@ -526,7 +526,7 @@ export default class DiterimaView {
             },
           },
           drawCallback: () => {
-            // Re-setup action listeners after table redraw
+            
             this.setupActionListeners();
           },
         });
@@ -546,7 +546,7 @@ export default class DiterimaView {
   }
 
   updateStatCards(stats) {
-    // Update stat numbers if stats object is provided
+    
     if (!stats) return;
 
     const statCards = document.querySelectorAll(".stat-number");
@@ -574,13 +574,13 @@ export default class DiterimaView {
   destroy() {
     this.removeEventListeners();
 
-    // Properly destroy DataTable
+    
     if (this.dataTable) {
       this.dataTable.destroy();
       this.dataTable = null;
     }
 
-    // Clean up sidebar
+    
     if (this.sidebar) {
       this.sidebar.destroy();
     }

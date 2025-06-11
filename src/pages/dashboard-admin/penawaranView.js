@@ -100,7 +100,7 @@ export default class PenawaranView {
   setupEventListeners() {
     this.removeEventListeners();
 
-    // Mobile menu toggle
+    
     const mobileMenuBtn = document.getElementById("mobile-menu-toggle");
     if (mobileMenuBtn) {
       const handler = () => this.toggleSidebar();
@@ -112,7 +112,7 @@ export default class PenawaranView {
       });
     }
 
-    // Sidebar overlay click
+    
     const overlay = document.querySelector(".sidebar-overlay");
     if (overlay) {
       const handler = () => this.toggleSidebar(false);
@@ -120,7 +120,7 @@ export default class PenawaranView {
       this.eventListeners.push({ element: overlay, type: "click", handler });
     }
 
-    // Window resize
+    
     const resizeHandler = () => this.handleResize();
     window.addEventListener("resize", resizeHandler);
     this.eventListeners.push({
@@ -129,7 +129,7 @@ export default class PenawaranView {
       handler: resizeHandler,
     });
 
-    // Add offer button
+   
     const addOfferBtn = document.getElementById("add-offer-btn");
     if (addOfferBtn) {
       const handler = () => this.handleAddOffer();
@@ -137,7 +137,7 @@ export default class PenawaranView {
       this.eventListeners.push({ element: addOfferBtn, type: "click", handler });
     }
 
-    // Refresh button
+    
     const refreshBtn = document.getElementById("refresh-btn");
     if (refreshBtn) {
       const handler = () => this.handleRefresh();
@@ -145,7 +145,7 @@ export default class PenawaranView {
       this.eventListeners.push({ element: refreshBtn, type: "click", handler });
     }
 
-    // Select all checkbox
+    
     const selectAll = document.getElementById("select-all");
     if (selectAll) {
       const handler = (e) => this.toggleSelectAll(e.target.checked);
@@ -208,40 +208,40 @@ export default class PenawaranView {
   }
 
   handleAddOffer() {
-    // Dispatch custom event for adding new offer
+    
     const event = new CustomEvent("add-offer");
     document.dispatchEvent(event);
   }
 
   handleRefresh() {
-    // Dispatch custom event for refreshing offers data
+    
     const event = new CustomEvent("penawaran-refresh");
     document.dispatchEvent(event);
   }
 
   handleEditOffer(offerId) {
-    // Dispatch custom event for editing offer
+    
     const event = new CustomEvent("edit-offer", { detail: { offerId } });
     document.dispatchEvent(event);
   }
 
   handleDeleteOffer(offerId) {
     if (confirm("Apakah Anda yakin ingin menghapus penawaran ini?")) {
-      // Dispatch custom event for deleting offer
+      
       const event = new CustomEvent("delete-offer", { detail: { offerId } });
       document.dispatchEvent(event);
     }
   }
 
   handleApproveOffer(offerId) {
-    // Dispatch custom event for approving offer
+    
     const event = new CustomEvent("approve-offer", { detail: { offerId } });
     document.dispatchEvent(event);
   }
 
   handleRejectOffer(offerId) {
     if (confirm("Apakah Anda yakin ingin menolak penawaran ini?")) {
-      // Dispatch custom event for rejecting offer
+      
       const event = new CustomEvent("reject-offer", { detail: { offerId } });
       document.dispatchEvent(event);
     }
@@ -268,7 +268,7 @@ export default class PenawaranView {
   }
 
   renderOfferRow(offer) {
-    console.log("🕵️ Offer row:", offer);
+  console.log("🕵️ Offer row:", offer);
   const { statusClass, statusText } = this.getStatusStyles(offer.status);
 
   return `
@@ -278,16 +278,14 @@ export default class PenawaranView {
       <td>${offer.jenisSampah}</td>
       <td>${offer.berat} kg</td>
       <td>Rp ${offer.harga.toLocaleString("id-ID")}</td>
-      <td>Rp ${offer.total.toLocaleString("id-ID")}</td>
+      <td>Rp ${(offer.total !== null ? offer.total.toLocaleString("id-ID") : '0')}</td> <!-- Fix disini -->
       <td><span class="badge ${statusClass}">${statusText}</span></td>
     </tr>
   `;
 }
 
-
-
   setupTableActions() {
-    // Edit buttons
+   
     document.querySelectorAll('.btn-edit').forEach(btn => {
       const handler = (e) => {
         const offerId = e.currentTarget.getAttribute('data-offer-id');
@@ -297,7 +295,7 @@ export default class PenawaranView {
       this.eventListeners.push({ element: btn, type: 'click', handler });
     });
 
-    // Approve buttons
+    
     document.querySelectorAll('.btn-approve').forEach(btn => {
       const handler = (e) => {
         const offerId = e.currentTarget.getAttribute('data-offer-id');
@@ -307,7 +305,7 @@ export default class PenawaranView {
       this.eventListeners.push({ element: btn, type: 'click', handler });
     });
 
-    // Reject buttons
+    
     document.querySelectorAll('.btn-reject').forEach(btn => {
       const handler = (e) => {
         const offerId = e.currentTarget.getAttribute('data-offer-id');
@@ -317,7 +315,7 @@ export default class PenawaranView {
       this.eventListeners.push({ element: btn, type: 'click', handler });
     });
 
-    // Delete buttons
+    
     document.querySelectorAll('.btn-delete').forEach(btn => {
       const handler = (e) => {
         const offerId = e.currentTarget.getAttribute('data-offer-id');
@@ -355,7 +353,7 @@ getStatusStyles(status) {
     $(document).ready(() => {
       $("#datatable").DataTable({
         responsive: true,
-        order: [[1, 'desc']], // Sort by ID descending
+        order: [[1, 'desc']], 
         language: {
           search: "Cari:",
           lengthMenu: "Tampilkan _MENU_ penawaran per halaman",
@@ -377,11 +375,11 @@ getStatusStyles(status) {
   updateStatistics(stats) {
   const statCards = document.querySelectorAll('.stat-number');
   if (statCards.length >= 5 && stats) {
-    statCards[0].textContent = stats.total || '0';       // Semua
-    statCards[1].textContent = stats.pengajuan || '0';   // Pengajuan
-    statCards[2].textContent = stats.penawaran || '0';   // Penawaran
-    statCards[3].textContent = stats.pengiriman || '0';  // Pengiriman
-    statCards[4].textContent = stats.selesai || '0';     // Selesai
+    statCards[0].textContent = stats.total || '0';       
+    statCards[1].textContent = stats.pengajuan || '0';   
+    statCards[2].textContent = stats.penawaran || '0';   
+    statCards[3].textContent = stats.pengiriman || '0';  
+    statCards[4].textContent = stats.selesai || '0';     
   }
 }
 

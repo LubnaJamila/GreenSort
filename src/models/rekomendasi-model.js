@@ -1,5 +1,5 @@
 const CATEGORY_MAPPING = {
-  // Lowercase mappings for normalized input
+  
   cardboard: "Kardus",
   organic: "Organik",
   glass: "Kaca",
@@ -10,7 +10,7 @@ const CATEGORY_MAPPING = {
   textile: "Kain",
   vegetation: "Vegetasi",
 
-  // Direct mappings from classification results
+  
   Cardboard: "Kardus",
   Food_Organics: "Bahan Organik Makanan",
   Glass: "Kaca",
@@ -57,31 +57,31 @@ export default class RekomendasiModel {
   }
 
   normalizeWasteType(wasteType) {
-    // First check direct mapping
+    
     if (CATEGORY_MAPPING[wasteType]) {
       return CATEGORY_MAPPING[wasteType];
     }
 
-    // Then check lowercase mapping
+    
     const lowerType = wasteType.toLowerCase();
     if (CATEGORY_MAPPING[lowerType]) {
       return CATEGORY_MAPPING[lowerType];
     }
 
-    // Fallback to original
+    
     return wasteType;
   }
 
   async getRecommendation(inputKategori, inputBeratKg) {
     try {
-      // Ensure dataset is loaded
+      
       await this.loadDataset();
 
       if (!this.dataset || !Array.isArray(this.dataset)) {
         throw new Error("Dataset not available or invalid format");
       }
 
-      // Normalize the category
+      
       const mappedCategory = this.normalizeWasteType(inputKategori);
       const weightKg = parseFloat(inputBeratKg);
 
@@ -96,7 +96,7 @@ export default class RekomendasiModel {
         ...new Set(this.dataset.map((item) => item.kategori)),
       ]);
 
-      // Find exact match within weight range
+      
       const exactMatch = this.dataset.find((item) => {
         return (
           item.kategori === mappedCategory &&
@@ -116,7 +116,7 @@ export default class RekomendasiModel {
         };
       }
 
-      // Find any entry for this category (fallback)
+      
       const fallbackEntry = this.dataset.find(
         (item) => item.kategori === mappedCategory
       );
@@ -132,7 +132,7 @@ export default class RekomendasiModel {
         };
       }
 
-      // No match found - provide generic recommendation
+      
       const availableCategories = [
         ...new Set(this.dataset.map((item) => item.kategori)),
       ];

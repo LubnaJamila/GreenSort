@@ -27,7 +27,7 @@ export default class PenjemputanView {
     this.checkMobileView();
   }
 
-  // Ganti method renderMainContent() dengan yang ini
+ 
   renderMainContent() {
     this.app.innerHTML = `
       <button id="mobile-menu-toggle" class="mobile-menu-btn">
@@ -189,13 +189,13 @@ export default class PenjemputanView {
       </div>
     `;
 
-    // Aktivasi tab dengan metode yang lebih reliable
+   
     this.activateDefaultTab();
   }
 
-  // Method untuk aktivasi tab default yang lebih kuat
+  
   activateDefaultTab() {
-    // Implementasi dengan multiple attempts untuk memastikan aktivasi
+    
     const attemptActivation = (attempt = 1) => {
       const allTab = document.getElementById("all-tab");
       const allPane = document.getElementById("all");
@@ -214,7 +214,7 @@ export default class PenjemputanView {
 
       console.log(`Attempt ${attempt}: Activating default tab...`);
 
-      // Force remove active from all tabs first
+      
       const allTabs = document.querySelectorAll(".nav-link");
       const allPanes = document.querySelectorAll(".tab-pane");
 
@@ -227,14 +227,14 @@ export default class PenjemputanView {
         pane.classList.remove("active", "show");
       });
 
-      // Force activate the "Semua" tab
+      
       allTab.classList.add("active");
       allTab.setAttribute("aria-selected", "true");
 
-      // Force activate the "Semua" pane
+      
       allPane.classList.add("active", "show");
 
-      // Verify activation
+      
       setTimeout(() => {
         const isTabActive = allTab.classList.contains("active");
         const isPaneActive =
@@ -244,7 +244,7 @@ export default class PenjemputanView {
         if (isTabActive && isPaneActive) {
           console.log('✅ Tab "Semua" berhasil diaktifkan!');
 
-          // Trigger any Bootstrap tab events if needed
+          
           if (window.bootstrap && bootstrap.Tab) {
             try {
               const tabInstance = bootstrap.Tab.getOrCreateInstance(allTab);
@@ -261,11 +261,11 @@ export default class PenjemputanView {
       }, 50);
     };
 
-    // Start activation attempts
+    
     setTimeout(() => attemptActivation(), 100);
   }
 
-  // Tambahkan method showTableLoading yang dibutuhkan oleh presenter
+  
   showTableLoading(show = true) {
     if (show) {
       this.showLoading(true);
@@ -274,7 +274,7 @@ export default class PenjemputanView {
     }
   }
 
-  // Tambahkan juga CSS untuk memastikan warna hijau
+  
   addTabStyles() {
     const style = document.createElement("style");
     style.id = "penjemputan-tab-styles";
@@ -320,7 +320,7 @@ export default class PenjemputanView {
       }
     `;
 
-    // Remove existing style if exists
+    
     const existingStyle = document.getElementById("penjemputan-tab-styles");
     if (existingStyle) {
       existingStyle.remove();
@@ -329,11 +329,11 @@ export default class PenjemputanView {
     document.head.appendChild(style);
   }
 
-  // Modifikasi method render() untuk memanggil addTabStyles
+  
   render() {
     this.sidebar.render();
     this.renderMainContent();
-    this.addTabStyles(); // Tambahkan ini
+    this.addTabStyles(); 
     this.setupEventListeners();
     this.checkMobileView();
   }
@@ -358,7 +358,7 @@ export default class PenjemputanView {
   setupEventListeners() {
     this.removeEventListeners();
 
-    // Mobile menu toggle
+   
     const mobileMenuBtn = document.getElementById("mobile-menu-toggle");
     if (mobileMenuBtn) {
       const handler = () => this.toggleSidebar();
@@ -370,7 +370,7 @@ export default class PenjemputanView {
       });
     }
 
-    // Sidebar overlay click
+    
     const overlay = document.querySelector(".sidebar-overlay");
     if (overlay) {
       const handler = () => this.toggleSidebar(false);
@@ -378,7 +378,7 @@ export default class PenjemputanView {
       this.eventListeners.push({ element: overlay, type: "click", handler });
     }
 
-    // Window resize
+    
     const resizeHandler = () => this.handleResize();
     window.addEventListener("resize", resizeHandler);
     this.eventListeners.push({
@@ -391,7 +391,7 @@ export default class PenjemputanView {
   showLoading(show = true) {
     let loadingState = document.getElementById("loading-state");
 
-    // Jika belum ada di DOM, buat elemen loading secara dinamis
+    
     if (!loadingState) {
       loadingState = document.createElement("div");
       loadingState.id = "loading-state";
@@ -408,7 +408,7 @@ export default class PenjemputanView {
 
     loadingState.style.display = show ? "block" : "none";
 
-    // Sembunyikan semua tab sementara loading
+   
     const tabContent = document.getElementById("penjemputanTabsContent");
     if (tabContent) {
       tabContent.style.display = show ? "none" : "block";
@@ -425,17 +425,17 @@ export default class PenjemputanView {
       diantar: document.getElementById("body-diantar"),
     };
 
-    // Kosongkan semua tabel
+    
     Object.values(tables).forEach((tbody) => (tbody.innerHTML = ""));
 
     this.applicationsData.forEach((app) => {
       const opsi = this.normalizeStatus(app.status || "");
       const rowHTML = this.renderApplicationRow(app);
 
-      // Semua
+      
       tables.all.innerHTML += rowHTML;
 
-      // Filter ke tab yang sesuai
+      
       if (opsi === "dijemput") {
         tables.dijemput.innerHTML += rowHTML;
       } else if (opsi === "antar sendiri") {
@@ -558,7 +558,7 @@ export default class PenjemputanView {
       ).length,
     };
 
-    // Update stat cards
+    
     const totalStat = document.getElementById("stat-total-penjemputan");
     const dijemputStat = document.getElementById("stat-dijemput");
     const diantarStat = document.getElementById("stat-diantar");
@@ -581,7 +581,7 @@ export default class PenjemputanView {
       ).length,
     };
 
-    // Update tab badges
+    
     Object.keys(counts).forEach((status) => {
       const badge = document.getElementById(`badge-${status}`);
       if (badge) badge.textContent = counts[status];
@@ -646,11 +646,11 @@ export default class PenjemputanView {
   updateDashboardStats(stats) {
   const statCards = document.querySelectorAll(".stat-card .stat-number");
   if (statCards.length >= 5) {
-    statCards[0].textContent = stats.menunggu_validasi || "0"; // Menunggu Validasi
-    statCards[1].textContent = stats.diterima || "0";          // Diterima
-    statCards[2].textContent = stats.ditolak || "0";           // Ditolak
-    statCards[3].textContent = stats.penjemputan || "0";       // Penjemputan
-    statCards[4].textContent = stats.selesai || "0";           // Selesai (selesai + penawaran ditolak)
+    statCards[0].textContent = stats.menunggu_validasi || "0"; 
+    statCards[1].textContent = stats.diterima || "0";          
+    statCards[2].textContent = stats.ditolak || "0";          
+    statCards[3].textContent = stats.penjemputan || "0";      
+    statCards[4].textContent = stats.selesai || "0";           
   }
 }
 
@@ -659,7 +659,7 @@ export default class PenjemputanView {
   }
 
   clearSelection() {
-    // Method ini bisa dikosongkan karena tidak ada selection yang perlu di-clear
+   
   }
 
   removeEventListeners() {

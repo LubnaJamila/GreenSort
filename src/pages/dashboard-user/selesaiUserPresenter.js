@@ -74,7 +74,7 @@ export default class SelesaiUserPresenter {
         return;
       }
 
-      // Transformasi data
+     
       const applications = allApplications.map((item) => {
         const status = item.status ? item.status.toLowerCase().trim() : "";
         const isSelesai = status === "selesai";
@@ -95,7 +95,7 @@ export default class SelesaiUserPresenter {
 
       const stats = this.calculateUserStats(applications);
 
-      // Filter hanya data dengan status 'selesai' atau 'penawaran ditolak'
+      
       const filteredApplications = applications.filter((app) => {
         const status = app.status.toLowerCase().trim();
         return status === "selesai" || status === "penawaran ditolak";
@@ -147,7 +147,7 @@ export default class SelesaiUserPresenter {
           break;
         default:
           console.warn("Unknown status:", status);
-          // Default ke menunggu validasi untuk status yang tidak dikenal
+         
           stats.menungguValidasi++;
           break;
       }

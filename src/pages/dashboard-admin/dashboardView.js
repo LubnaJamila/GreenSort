@@ -262,7 +262,7 @@ export default class DashboardView {
   }
 
   renderApplicationRow(app) {
-  const showHargaStatuses = ["pengajuan diterima", "penawaran diterima", "penawaran ditolak"];
+  const showHargaStatuses = ["pengajuan diterima", "penawaran diterima", "penawaran ditolak","selesai"];
   const harga = showHargaStatuses.includes(app.status)
     ? `Rp. ${this.formatRupiah(app.harga_tawaran)}`
     : "-";

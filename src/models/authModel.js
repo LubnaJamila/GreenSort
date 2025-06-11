@@ -1,7 +1,7 @@
-const BASE_URL = 'https://greenshort-production.up.railway.app'; // Backend kamu jalan di sini
+const BASE_URL = 'https://greenshort-production.up.railway.app'; 
 
 export async function registerUser(userData) {
-  // Kirim data ke backend
+  
   const res = await fetch(`${BASE_URL}/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -21,7 +21,6 @@ export async function loginUser(credentials) {
 
   const result = await res.json();
 
-  // Jika login berhasil, simpan user ke localStorage
   if (result.success) {
     localStorage.setItem('currentUser', JSON.stringify(result.user));
   }

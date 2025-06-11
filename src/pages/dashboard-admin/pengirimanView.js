@@ -379,19 +379,19 @@ return `
 
 
     initializeDefaultFilter() {
-    // Set default tab aktif ke 'pending' (Dijemput)
+    
     setTimeout(() => {
         const pendingTab = document.querySelector('[data-filter="pending"]');
         if (pendingTab) {
-            // Remove active class from all tabs
+            
             document.querySelectorAll('.filter-tab').forEach(tab => {
                 tab.classList.remove('active');
             });
             
-            // Add active class to pending tab
+           
             pendingTab.classList.add('active');
             
-            // Set current filter
+            
             this.currentFilter = 'pending';
             
             console.log('Default filter set to pending');
@@ -568,13 +568,13 @@ return `
         return;
     }
 
-    // Destroy existing DataTable first
+    
     if ($.fn.DataTable.isDataTable("#datatable")) {
         $("#datatable").DataTable().destroy();
         this.dataTable = null;
     }
 
-    // Clear table body
+   
     tableBody.innerHTML = '';
 
     if (this.applicationsData.length === 0) {
@@ -587,10 +587,10 @@ return `
     tableBody.innerHTML = tableHTML;
     this.showEmptyState(false);
     }
-    // Update badges before initializing DataTable
+    
     this.updateTabBadges();
 
-    // Initialize DataTable after a short delay
+   
     setTimeout(() => {
     if (this.applicationsData.length === 0) {
         console.log('No data to initialize DataTable');
@@ -710,7 +710,7 @@ return `
 }
 
     ensureProperInitialization() {
-        // Check if required elements exist
+        
         const requiredElements = [
         'applications-table-body',
         'badge-pending', 

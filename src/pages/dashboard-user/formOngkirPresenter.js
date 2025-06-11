@@ -22,9 +22,9 @@ export default class FormOngkirPresenter {
     this.masterAlamat = [];
     this.selectedAlamat = null;
 
-    // Constants for calculation
-    this.ONGKIR_PER_KM = 2000; // Rp 2.000 per km
-    this.MINIMUM_ONGKIR = 5000; // Minimum Rp 5.000
+   
+    this.ONGKIR_PER_KM = 2000; 
+    this.MINIMUM_ONGKIR = 5000; 
 
     this.setupEventListeners();
     this.alamatModel = new AlamatModel();
@@ -32,27 +32,27 @@ export default class FormOngkirPresenter {
 
   async init(applicationId = null) {
     try {
-      // Show loading state
+      
       this.showLoadingState();
 
-      // Load application data if ID provided
+      
       if (applicationId) {
         await this.loadApplicationData(applicationId);
       }
 
-      // Load user data
+     
       await this.loadUserData();
 
-      // Load master alamat (alamat-alamat admin)
+      
       await this.loadMasterAlamat();
 
-      // Render view (card kosong + form)
+      
       this.view.render(this.applicationData);
 
-      // Set alamat admin default di card mengantar
-      this.setDefaultAlamatTujuan(); // ✅ Tambahkan baris ini
+      
+      this.setDefaultAlamatTujuan(); 
 
-      // Populate view: user info, alamat, dll
+      
       this.populateViewData();
       this.handleDeliveryMethodChange("mengantar");
     } catch (error) {
@@ -71,8 +71,8 @@ export default class FormOngkirPresenter {
         namaLengkap: data.nama_lengkap,
         noHp: data.no_hp,
         kategoriSampah: data.jenis_sampah,
-        beratSampah: berat, // ✅ berat dari DB
-        hargaSampah: hargaPerKg, // ✅ harga per kg dari DB
+        beratSampah: berat, 
+        hargaSampah: hargaPerKg, 
         totalHarga: berat * hargaPerKg,
         gambarSampah: data.gambar_sampah
           ? `https://greenshort-production.up.railway.app${data.gambar_sampah}`
@@ -98,7 +98,7 @@ export default class FormOngkirPresenter {
         id: item.id_alamat,
         nama: `${item.desa}, ${item.kecamatan}`,
         alamat: item.alamat_lengkap,
-        latitude: item.latitude, // ← Ini penting!
+        latitude: item.latitude, 
         longitude: item.longitude,
         jarak: 0,
       }));
@@ -149,7 +149,7 @@ export default class FormOngkirPresenter {
         this.masterAlamat.find((al) => al.nama === "Kantor Pusat") ||
         this.masterAlamat[0];
 
-      // Kirim langsung seluruh objek agar konsisten
+      
       this.view.populateUserAddress(alamatAdminUtama);
 
       if (this.userData.alamatList.length > 0) {
@@ -157,7 +157,7 @@ export default class FormOngkirPresenter {
       }
     }
 
-    // Alamat tujuan default (mengantar sendiri)
+    
     this.setDefaultAlamatTujuan();
   }
 
@@ -166,7 +166,7 @@ export default class FormOngkirPresenter {
       this.masterAlamat.find((alamat) => alamat.nama === "Kantor Pusat") ||
       this.masterAlamat[0];
 
-    console.log("Default Alamat Admin:", defaultAlamat); // ✅ debug log
+    console.log("Default Alamat Admin:", defaultAlamat); 
 
     if (defaultAlamat) {
       const alamatTujuanElement = document.getElementById("alamat-tujuan");
@@ -184,17 +184,17 @@ export default class FormOngkirPresenter {
   }
 
   setupEventListeners() {
-    // Listen for delivery method change
+    
     document.addEventListener("delivery-method-changed", (event) => {
       this.handleDeliveryMethodChange(event.detail.method);
     });
 
-    // Listen for alamat change
+    
     document.addEventListener("alamat-changed", (event) => {
       this.handleAlamatChange(event.detail.alamatId);
     });
 
-    // Listen for form submit
+    
     document.addEventListener("form-submit", (event) => {
       this.handleFormSubmit(event.detail);
     });
@@ -211,10 +211,10 @@ export default class FormOngkirPresenter {
       this.setDefaultAlamatTujuan();
     }
 
-    // ⏱ Ambil estimasi tanggal dari fungsi helper (format YYYY-MM-DD)
+    
     const estimasi = this.getEstimasiTanggalRange(method);
 
-    // 🗓 Tampilkan ke input <input type="date">
+    
     if (method === "mengantar") {
       const startEl = document.getElementById("estimasi-mulai-mengantar");
       const endEl = document.getElementById("estimasi-selesai-mengantar");
@@ -241,7 +241,7 @@ export default class FormOngkirPresenter {
       end.setDate(today.getDate() + 4);
     }
 
-    const toDateStr = (date) => date.toISOString().split("T")[0]; // hasil: "2025-06-09"
+    const toDateStr = (date) => date.toISOString().split("T")[0]; 
     return {
       start: toDateStr(start),
       end: toDateStr(end),
@@ -251,7 +251,7 @@ export default class FormOngkirPresenter {
   hitungJarakKm(lat1, lon1, lat2, lon2) {
     const toRad = (value) => (value * Math.PI) / 180;
 
-    const R = 6371; // Radius bumi dalam km
+    const R = 6371; 
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
 
@@ -264,15 +264,15 @@ export default class FormOngkirPresenter {
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-    return R * c; // dalam kilometer
+    return R * c; 
   }
 
-  // Tambahkan ke dalam FormOngkirPresenter class
+  
 
   hitungOngkir(jarakKm, beratGram) {
-    const jarakMinimal = 60; // km
-    const tarifPer15Km = 3000; // Rp per 15 km
-    const tarifPer100Gram = 100; // Rp per 100 gram
+    const jarakMinimal = 60; 
+    const tarifPer15Km = 3000; 
+    const tarifPer100Gram = 100; 
 
     const jarakDihitung = Math.max(jarakKm, jarakMinimal);
     const kelipatanJarak = Math.ceil(jarakDihitung / jarakMinimal);
@@ -323,23 +323,23 @@ export default class FormOngkirPresenter {
   }
   async handleFormSubmit(formData) {
     try {
-      // Validate form data
+      
       const validation = this.validateFormData(formData);
       if (!validation.isValid) {
         this.view.showError(validation.message);
         return;
       }
 
-      // Show loading state
+      
       this.view.showLoading(true);
 
-      // Prepare submission data
+     
       const submissionData = this.prepareSubmissionData(formData);
 
-      // Submit form
+      
       await this.submitForm(submissionData);
 
-      // Show success message
+      
       this.view.showSuccess(
         "Form berhasil disimpan! Anda akan diarahkan kembali ke halaman sebelumnya."
       );
@@ -352,7 +352,7 @@ export default class FormOngkirPresenter {
   }
 
   validateFormData(formData) {
-    // Basic validation
+    
     if (!formData.applicationId) {
       return { isValid: false, message: "Data pengajuan tidak ditemukan." };
     }
@@ -401,12 +401,12 @@ export default class FormOngkirPresenter {
         submissionData.idRekening = idRekening;
         submissionData.alamatUserId = alamat?.id;
         submissionData.estimasiJarak = jarak;
-        submissionData.ongkir = ongkirView; // ✅ dari tampilan
+        submissionData.ongkir = ongkirView; 
         submissionData.estimasiMulai = estimasiMulai;
         submissionData.estimasiSelesai = estimasiSelesai;
-        submissionData.totalHarga = pendapatanView; // ✅ dari tampilan       // ✅ Ambil dari input pendapatan
+        submissionData.totalHarga = pendapatanView; 
     } else {
-      // Untuk metode "mengantar"
+      
       const defaultAlamat =
         this.masterAlamat.find((alamat) => alamat.nama === "Kantor Pusat") ||
         this.masterAlamat[0];
@@ -472,11 +472,11 @@ export default class FormOngkirPresenter {
   }
 
   showLoadingState() {
-    // Could show a loading spinner or skeleton UI
+    
     console.log("Loading form data...");
   }
 
-  // Method to handle external navigation to this form
+  
   static async navigateToForm(applicationId) {
     try {
       const presenter = new FormOngkirPresenter();
@@ -484,12 +484,12 @@ export default class FormOngkirPresenter {
       return presenter;
     } catch (error) {
       console.error("Error navigating to form:", error);
-      // Could redirect to error page or show error message
+      
       throw error;
     }
   }
 
-  // Utility method to format currency
+  
   formatCurrency(amount) {
     return new Intl.NumberFormat("id-ID", {
       style: "currency",
@@ -497,7 +497,7 @@ export default class FormOngkirPresenter {
     }).format(amount);
   }
 
-  // Utility method to format distance
+  
   formatDistance(distance) {
     if (distance < 1) {
       return `${(distance * 1000).toFixed(0)} m`;
@@ -505,9 +505,9 @@ export default class FormOngkirPresenter {
     return `${distance.toFixed(1)} km`;
   }
 
-  // Cleanup method
+ 
   destroy() {
-    // Remove event listeners
+   
     document.removeEventListener(
       "delivery-method-changed",
       this.handleDeliveryMethodChange
@@ -515,12 +515,12 @@ export default class FormOngkirPresenter {
     document.removeEventListener("alamat-changed", this.handleAlamatChange);
     document.removeEventListener("form-submit", this.handleFormSubmit);
 
-    // Destroy view
+    
     if (this.view) {
       this.view.destroy();
     }
 
-    // Clear data
+    
     this.applicationData = null;
     this.userData = null;
     this.masterAlamat = [];

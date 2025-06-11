@@ -140,7 +140,7 @@ export default class DashboardUserView {
   setupEventListeners() {
     this.removeEventListeners();
 
-    // Mobile menu toggle
+    
     const mobileMenuBtn = document.getElementById("mobile-menu-toggle");
     if (mobileMenuBtn) {
       const handler = () => this.toggleSidebar();
@@ -152,7 +152,7 @@ export default class DashboardUserView {
       });
     }
 
-    // Sidebar overlay click
+    
     const overlay = document.querySelector(".sidebar-overlay");
     if (overlay) {
       const handler = () => this.toggleSidebar(false);
@@ -160,7 +160,7 @@ export default class DashboardUserView {
       this.eventListeners.push({ element: overlay, type: "click", handler });
     }
 
-    // Window resize
+    
     const resizeHandler = () => this.handleResize();
     window.addEventListener("resize", resizeHandler);
     this.eventListeners.push({
@@ -169,7 +169,7 @@ export default class DashboardUserView {
       handler: resizeHandler,
     });
 
-    // Refresh button
+    
     const refreshBtn = document.getElementById("refresh-btn");
     if (refreshBtn) {
       const handler = () => this.handleRefresh();
@@ -177,7 +177,7 @@ export default class DashboardUserView {
       this.eventListeners.push({ element: refreshBtn, type: "click", handler });
     }
 
-    // Select all checkbox
+    
     const selectAll = document.getElementById("select-all");
     if (selectAll) {
       const handler = (e) => this.toggleSelectAll(e.target.checked);
@@ -336,7 +336,7 @@ export default class DashboardUserView {
     const tableBody = document.getElementById("applications-table-body");
     if (!tableBody) return;
 
-    // View buttons
+    
     const viewButtons = tableBody.querySelectorAll(".view-btn");
     viewButtons.forEach((btn) => {
       const handler = (e) => {
@@ -408,20 +408,20 @@ export default class DashboardUserView {
   }
 
   initDataTable() {
-    // Destroy existing DataTable if it exists
+    
     if ($.fn.DataTable && $.fn.DataTable.isDataTable("#datatable")) {
       $("#datatable").DataTable().destroy();
     }
 
-    // Check if jQuery and DataTables are available
+    
     if (typeof $ !== "undefined" && $.fn.DataTable) {
       $(document).ready(() => {
         $("#datatable").DataTable({
           responsive: true,
-          order: [[2, "asc"]], // Sort by jenis sampah column
+          order: [[2, "asc"]], 
           columnDefs: [
-            { orderable: false, targets: [0, 1, 5] }, // Disable sorting for checkbox, image, and actions columns
-            { searchable: false, targets: [0, 1, 5] }, // Disable search for checkbox, image, and actions columns
+            { orderable: false, targets: [0, 1, 5] }, 
+            { searchable: false, targets: [0, 1, 5] }, 
           ],
           language: {
             search: "Cari:",
@@ -451,7 +451,7 @@ export default class DashboardUserView {
   }
 
   updateStatCards(stats) {
-    // Update stat numbers if stats object is provided
+    
     if (!stats) return;
 
     const statCards = document.querySelectorAll(".stat-number");

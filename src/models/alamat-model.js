@@ -2,9 +2,8 @@
 export default class AlamatModel {
   constructor() {
     this.apiBaseUrl = "https://www.emsifa.com/api-wilayah-indonesia/api";
-    this.backendUrl = "https://greenshort-production.up.railway.app/api"; // Backend server URL
+    this.backendUrl = "https://greenshort-production.up.railway.app/api"; 
 
-    // Cache untuk menyimpan data yang sudah dimuat
     this.cache = {
       provinces: null,
       regencies: {},
@@ -26,7 +25,6 @@ export default class AlamatModel {
     }
   }
 
-  // Methods untuk wilayah Indonesia (tetap sama)
   async getProvinces() {
     try {
       if (this.cache.provinces) {
@@ -91,7 +89,6 @@ export default class AlamatModel {
     }
   }
 
-  // Validate alamat data
   validateAlamatData(data) {
     const requiredFields = [
       "provinsi",
@@ -113,7 +110,6 @@ export default class AlamatModel {
       }
     });
 
-    // Validate coordinates
     if (
       data.latitude &&
       (isNaN(data.latitude) || data.latitude < -90 || data.latitude > 90)
@@ -134,7 +130,6 @@ export default class AlamatModel {
     };
   }
 
-  // Save alamat ke backend database
   async saveAlamat(alamatData) {
     const validation = this.validateAlamatData(alamatData);
 
@@ -143,13 +138,10 @@ export default class AlamatModel {
     }
 
     try {
-      // Get current user from localStorage atau auth system
       const currentUser = JSON.parse(localStorage.getItem("currentUser"));
       if (!currentUser || !currentUser.id_user) {
         throw new Error("User not authenticated");
       }
-
-      // Prepare data untuk backend
       const dataToSend = {
         provinsi: alamatData.provinsi,
         kabupaten: alamatData.kabupaten,
@@ -188,7 +180,7 @@ export default class AlamatModel {
     }
   }
 
-  // Get alamat user dari backend
+  
   async getUserAlamat(userId) {
     try {
       const response = await fetch(`${this.backendUrl}/alamat/${userId}`, {
@@ -214,7 +206,7 @@ export default class AlamatModel {
     }
   }
 
-  // Delete alamat dari backend
+  
   async deleteAlamat(alamatId) {
     try {
       const response = await fetch(`${this.backendUrl}/alamat/${alamatId}`, {

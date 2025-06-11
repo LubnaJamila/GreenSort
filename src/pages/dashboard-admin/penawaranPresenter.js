@@ -36,7 +36,7 @@ export default class PenawaranPresenter {
     async loadPenawaranData() {
     try {
         const data = await fetchSemuaPenawaran();
-        console.log("📦 Semua Penawaran:", data); // Debug log
+        console.log("📦 Semua Penawaran:", data); 
         this.penawaranView.renderPenawaranData(data);
     } catch (error) {
         console.error("❌ Gagal load semua penawaran:", error);
@@ -51,10 +51,10 @@ export default class PenawaranPresenter {
         if (stats) {
         this.penawaranView.updateStatistics({
             total: stats.total,
-            pengajuan: stats.pengajuan,      // Pengajuan
-            penawaran: stats.penawaran,      // Penawaran Ditolak
-            pengiriman: stats.pengiriman,    // Pengiriman
-            selesai: stats.selesai           // Selesai
+            pengajuan: stats.pengajuan,      
+            penawaran: stats.penawaran,     
+            pengiriman: stats.pengiriman,    
+            selesai: stats.selesai           
         });
         }
     } catch (error) {

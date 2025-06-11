@@ -109,10 +109,10 @@ getDummySelesaiData() {
     console.log("Logout initiated");
     logoutUser();
     
-    // Bersihkan tampilan dashboard dan sidebar
+    
     this.view.destroy();
     
-    // Navigasi ke halaman login
+    
     const event = new CustomEvent("navigate", { detail: { page: "login" } });
     document.dispatchEvent(event);
   }

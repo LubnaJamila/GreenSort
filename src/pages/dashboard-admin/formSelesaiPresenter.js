@@ -44,7 +44,7 @@ export default class FormSelesaiPresenter {
 
     getApplicationIdFromUrl() {
         const hash = window.location.hash;
-        // Expected format: #/selesai/:id or #/selesai?id=123
+        
         const match = hash.match(/\/selesai\/(\d+)/) || hash.match(/[?&]id=(\d+)/);
         return match ? match[1] : null;
     }
@@ -54,17 +54,17 @@ export default class FormSelesaiPresenter {
         document.addEventListener('form-submit', (event) => { 
         this.handleFormSubmit(event.detail);
         });
-        // Listen for load application detail event
+        
         document.addEventListener('load-application-detail', (event) => {
             this.handleLoadApplicationDetail(event.detail);
         });
 
-        // Listen for submit completion event
+       
         document.addEventListener('submit-completion', (event) => {
             this.handleSubmitCompletion(event.detail);
         });
 
-        // Listen for user info request
+        
         document.addEventListener('request-user-info', () => {
             this.loadUserInfo();
         });
@@ -109,7 +109,7 @@ export default class FormSelesaiPresenter {
             throw new Error('Data pengajuan tidak ditemukan.');
         }
 
-        // FORMAT datanya sesuai yang diharapkan View
+        
         const formattedData = {
             id: applicationData.id,
             namaLengkap: applicationData.name,
@@ -133,7 +133,7 @@ export default class FormSelesaiPresenter {
 
 
     canCompleteApplication(application) {
-        // Check if application status allows completion
+        
         const allowedStatuses = ['Diterima', 'accepted', 'in_process', 'ready_pickup'];
         const currentStatus = application.status || application.statusOriginal;
         
@@ -144,35 +144,35 @@ export default class FormSelesaiPresenter {
         try {
             console.log('Submitting completion:', completionData);
 
-            // Add current application ID if not present
+            
             if (!completionData.applicationId && this.currentApplicationId) {
                 completionData.applicationId = this.currentApplicationId;
             }
 
-            // Validate completion data
+            
             if (!this.validateCompletionData(completionData)) {
                 return;
             }
 
-            // Add additional data
+            
             completionData.completedBy = this.user?.id || this.user?.username || 'admin';
             completionData.completedAt = new Date().toISOString();
 
-            // Call model to submit completion
+            
             const result = await this.pengajuanModel.completeApplication(completionData);
             
             if (result && result.success) {
                 this.view.showSuccess('Pengajuan berhasil diselesaikan.');
                 
-                // If notification is enabled, send notification
+                
                 if (completionData.notifyUser) {
                     await this.sendCompletionNotification(completionData);
                 }
                 
-                // Log the completion activity
+                
                 await this.logCompletionActivity(completionData);
                 
-                // Redirect after success
+                
                 setTimeout(() => {
                     window.location.hash = '#/pengajuan';
                 }, 2000);
@@ -188,7 +188,7 @@ export default class FormSelesaiPresenter {
     }
 
     validateCompletionData(data) {
-        // Validate required fields
+        
         if (!data.applicationId) {
             this.view.showError('ID pengajuan tidak valid.');
             return false;
@@ -199,7 +199,7 @@ export default class FormSelesaiPresenter {
             return false;
         }
 
-        // Validate file if present
+        
         if (data.buktiTransaksiFile) {
             const validation = this.validateFileUpload(data.buktiTransaksiFile);
             if (!validation.valid) {
@@ -217,7 +217,7 @@ export default class FormSelesaiPresenter {
     }
 
     validateFileUpload(file) {
-        const maxSize = 5 * 1024 * 1024; // 5MB
+        const maxSize = 5 * 1024 * 1024; 
         const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
         
         if (!file) {
@@ -254,7 +254,7 @@ export default class FormSelesaiPresenter {
                 timestamp: new Date().toISOString()
             };
 
-            // Check if model has sendNotification method
+            
             if (typeof this.model.sendNotification === 'function') {
                 await this.model.sendNotification(notificationData);
                 console.log('Completion notification sent successfully');
@@ -264,7 +264,7 @@ export default class FormSelesaiPresenter {
             
         } catch (error) {
             console.error('Error sending completion notification:', error);
-            // Don't show error to user as this is not critical
+            
         }
     }
 
@@ -285,7 +285,7 @@ export default class FormSelesaiPresenter {
                 timestamp: new Date().toISOString()
             };
 
-            // Check if model has logActivity method
+            
             if (typeof this.model.logActivity === 'function') {
                 await this.model.logActivity(activityData);
                 console.log('Completion activity logged successfully');
@@ -295,19 +295,19 @@ export default class FormSelesaiPresenter {
             
         } catch (error) {
             console.error('Error logging completion activity:', error);
-            // Don't show error to user as this is not critical
+            
         }
     }
 
     async loadUserInfo() {
         try {
-            // Try to get user info from model first
+            
             let userInfo = null;
             
             if (typeof this.model.getCurrentUser === 'function') {
                 userInfo = await this.model.getCurrentUser();
             } else {
-                // Fallback to auth model
+                
                 userInfo = getCurrentUser();
             }
             
@@ -317,7 +317,7 @@ export default class FormSelesaiPresenter {
             }
         } catch (error) {
             console.error('Error loading user info:', error);
-            // Don't show error for user info as it's not critical
+            
         }
     }
 
@@ -338,7 +338,7 @@ export default class FormSelesaiPresenter {
         }
     }
 
-    // Utility methods for formatting and validation
+    
     formatCurrency(amount) {
         if (!amount) return 'Rp 0';
         
@@ -354,8 +354,7 @@ export default class FormSelesaiPresenter {
         const harga = parseFloat(hargaSampah) || 0;
         const ongkir = parseFloat(ongkosKirim) || 0;
         
-        // For pickup service, subtract shipping cost from waste price
-        // For self-delivery, no shipping cost
+        
         return Math.max(0, harga - ongkir);
     }
 
@@ -363,7 +362,7 @@ export default class FormSelesaiPresenter {
         return input.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
     }
 
-    // Method to get completion statistics (if needed for dashboard)
+    
     async getCompletionStats() {
         try {
             if (typeof this.model.getCompletionStatistics === 'function') {
@@ -376,7 +375,7 @@ export default class FormSelesaiPresenter {
         }
     }
 
-    // Method to get completion history for an application
+    
     async getCompletionHistory(applicationId) {
         try {
             if (typeof this.model.getApplicationCompletionHistory === 'function') {
@@ -389,21 +388,21 @@ export default class FormSelesaiPresenter {
         }
     }
 
-    // Method to refresh application data
+    
     async refreshApplicationData() {
         if (this.currentApplicationId) {
             await this.loadApplicationDetail(this.currentApplicationId);
         }
     }
 
-    // Cleanup method
+    
     destroy() {
-        // Remove event listeners
+        
         document.removeEventListener('load-application-detail', this.handleLoadApplicationDetail);
         document.removeEventListener('submit-completion', this.handleSubmitCompletion);
         document.removeEventListener('request-user-info', this.loadUserInfo);
         
-        // Destroy view
+        
         if (this.view && typeof this.view.destroy === 'function') {
             this.view.destroy();
         }

@@ -215,7 +215,7 @@ export default class FormPenolakanView {
         submitBtn.disabled = false;
     }
 
-    // ✅ Fix penting — simpan data ke state
+    
     this.applicationData = application;
 }
 
@@ -282,7 +282,7 @@ export default class FormPenolakanView {
     setupEventListeners() {
         this.removeEventListeners();
 
-        // Mobile menu toggle
+        
         const mobileMenuBtn = document.getElementById("mobile-menu-toggle");
         if (mobileMenuBtn) {
         const handler = () => this.toggleSidebar();
@@ -294,7 +294,7 @@ export default class FormPenolakanView {
         });
         }
 
-        // Sidebar overlay click
+        
         const overlay = document.querySelector(".sidebar-overlay");
         if (overlay) {
         const handler = () => this.toggleSidebar(false);
@@ -302,7 +302,7 @@ export default class FormPenolakanView {
         this.eventListeners.push({ element: overlay, type: "click", handler });
         }
 
-        // Window resize
+        
         const resizeHandler = () => this.handleResize();
         window.addEventListener("resize", resizeHandler);
         this.eventListeners.push({
@@ -311,7 +311,7 @@ export default class FormPenolakanView {
         handler: resizeHandler,
         });
 
-        // Form submission
+        
         const rejectionForm = document.getElementById('rejection-form');
         if (rejectionForm) {
         const handler = (e) => this.handleFormSubmit(e);
@@ -319,7 +319,7 @@ export default class FormPenolakanView {
         this.eventListeners.push({ element: rejectionForm, type: 'submit', handler });
         }
 
-        // Cancel button
+        
         const cancelBtn = document.getElementById('cancel-rejection');
         if (cancelBtn) {
         const handler = () => this.handleCancel();
@@ -327,7 +327,7 @@ export default class FormPenolakanView {
         this.eventListeners.push({ element: cancelBtn, type: 'click', handler });
         }
 
-        // Form validation
+        
         const reasonTextarea = document.getElementById('rejection-reason');
         if (reasonTextarea) {
         const handler = () => this.validateForm();
@@ -349,7 +349,7 @@ export default class FormPenolakanView {
         category: formData.get('rejectionCategory'),
         notifyUser: formData.has('notifyUser'),
         rejectedAt: new Date().toISOString(),
-        rejectedBy: 'admin' // Should come from auth
+        rejectedBy: 'admin' 
         };
 
         if (!this.validateFormData(rejectionData)) {
@@ -394,7 +394,7 @@ export default class FormPenolakanView {
         this.isSubmitting = true;
         this.updateSubmitButton(true);
         
-        // Dispatch event for presenter to handle
+        
         const event = new CustomEvent('submit-rejection', { 
         detail: rejectionData 
         });
@@ -425,7 +425,7 @@ export default class FormPenolakanView {
     }
 
     loadApplicationData(applicationId) {
-        // Dispatch event for presenter to load data
+        
         const event = new CustomEvent('load-application-detail', { 
         detail: { id: applicationId } 
         });
@@ -465,7 +465,7 @@ export default class FormPenolakanView {
         </div>
         `;
 
-        // Auto hide after 5 seconds
+        
         setTimeout(() => {
         const alert = container.querySelector('.alert');
         if (alert) {
@@ -486,7 +486,7 @@ export default class FormPenolakanView {
     }
 
 
-    // Mobile and responsive methods
+    
     toggleSidebar(show = null) {
         const sidebar = document.querySelector(".sidebar");
         const overlay = document.querySelector(".sidebar-overlay");

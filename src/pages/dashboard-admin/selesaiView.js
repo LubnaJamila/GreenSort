@@ -100,7 +100,7 @@ export default class SelesaiView {
   setupEventListeners() {
     this.removeEventListeners();
 
-    // Mobile menu toggle
+    
     const mobileMenuBtn = document.getElementById("mobile-menu-toggle");
     if (mobileMenuBtn) {
       const handler = () => this.toggleSidebar();
@@ -112,7 +112,7 @@ export default class SelesaiView {
       });
     }
 
-    // Sidebar overlay click
+    
     const overlay = document.querySelector(".sidebar-overlay");
     if (overlay) {
       const handler = () => this.toggleSidebar(false);
@@ -120,7 +120,7 @@ export default class SelesaiView {
       this.eventListeners.push({ element: overlay, type: "click", handler });
     }
 
-    // Window resize
+    
     const resizeHandler = () => this.handleResize();
     window.addEventListener("resize", resizeHandler);
     this.eventListeners.push({
@@ -129,7 +129,7 @@ export default class SelesaiView {
       handler: resizeHandler,
     });
 
-    // Refresh button
+    
     const refreshBtn = document.getElementById("refresh-btn");
     if (refreshBtn) {
       const handler = () => this.handleRefresh();
@@ -137,7 +137,7 @@ export default class SelesaiView {
       this.eventListeners.push({ element: refreshBtn, type: "click", handler });
     }
 
-    // Select all checkbox
+    
     const selectAll = document.getElementById("select-all");
     if (selectAll) {
       const handler = (e) => this.toggleSelectAll(e.target.checked);
@@ -223,7 +223,7 @@ export default class SelesaiView {
     this.initDataTable();
   }
 
-  // Perbaikan untuk method renderApplicationRow di SelesaiView
+  
 renderApplicationRow(app) {
   const { statusClass, statusIcon } = this.getStatusStyles(app.status);
 

@@ -13,7 +13,7 @@ export default class FormOngkirView {
     this.sidebarCollapsed = false;
     this.applicationData = null;
     this.masterAlamat = [];
-    this.selectedDeliveryMethod = "mengantar"; // default
+    this.selectedDeliveryMethod = "mengantar"; 
   }
 
   render(applicationData = null) {
@@ -287,7 +287,7 @@ export default class FormOngkirView {
 
     this.applicationData = data;
 
-    // Format currency
+    
     const formatCurrency = (amount) => {
       return new Intl.NumberFormat("id-ID", {
         style: "currency",
@@ -312,7 +312,7 @@ export default class FormOngkirView {
       ? formatCurrency(data.hargaSampah)
       : "-";
 
-    // Tambahkan atau update Total Harga
+    
     let totalHargaEl = document.getElementById("total-harga-sampah");
     if (!totalHargaEl) {
       const hargaContainer =
@@ -330,11 +330,11 @@ export default class FormOngkirView {
       totalHargaEl.textContent = formatCurrency(data.totalHarga);
     }
 
-    // Kirim total harga dari presenter langsung
+    
     this.updateTotalHarga(data.totalHarga || 0, 0);
   }
 
-  // Gabungan: tampilkan alamat lengkap admin tanpa konflik dengan displayUserAlamatInfo()
+  
   populateUserAddress(adminAlamat) {
     const alamatUser = document.getElementById("alamat-user");
     const latInput = document.getElementById("latitude");
@@ -343,7 +343,7 @@ export default class FormOngkirView {
     const latDisplay = document.getElementById("lat-display");
     const lngDisplay = document.getElementById("lng-display");
 
-    // Ambil alamat lengkap dari dua kemungkinan field
+    
     const alamatLengkap =
       (adminAlamat?.alamat && adminAlamat.alamat.trim()) ||
       (adminAlamat?.alamat_lengkap && adminAlamat.alamat_lengkap.trim()) ||
@@ -361,7 +361,7 @@ export default class FormOngkirView {
     if (latDisplay) latDisplay.textContent = adminAlamat?.latitude || "-";
     if (lngDisplay) lngDisplay.textContent = adminAlamat?.longitude || "-";
 
-    // Juga update bagian displayUserAlamatInfo jika diperlukan
+    
     const alamatInfo = document.getElementById("alamat-user-info");
     if (alamatInfo) {
       alamatInfo.textContent = alamatLengkap || "-";
@@ -410,7 +410,7 @@ export default class FormOngkirView {
     });
   }
 
-  // Perbarui updateEstimasiJarak agar bagian DIJEMPUT gunakan totalHarga dari presenter
+  
   updateEstimasiJarak(jarak, ongkir) {
     const estimasiJarakInput = document.getElementById("estimasi-jarak");
     const ongkirInput = document.getElementById("ongkir");
@@ -426,21 +426,21 @@ export default class FormOngkirView {
       ongkirInput.value = ongkir ? formatNumber(ongkir) : "0";
     }
 
-    // Update calculations for dijemput method
+    
     if (this.selectedDeliveryMethod === "dijemput") {
       const totalHarga = this.applicationData?.totalHarga || 0;
       this.updateTotalHarga(totalHarga, ongkir || 0);
     }
   }
 
-  // Perbarui updateTotalHarga agar bagian DIJEMPUT hanya tampil totalHarga dari presenter
+  
   updateTotalHarga(totalHargaSampah, ongkir) {
     const formatNumber = (amount) => {
       return new Intl.NumberFormat("id-ID").format(amount);
     };
 
     if (this.selectedDeliveryMethod === "mengantar") {
-      // Total harga = totalHargaSampah (tanpa ongkir)
+      
       const totalHargaMengantar = document.getElementById(
         "total-harga-mengantar"
       );
@@ -448,9 +448,8 @@ export default class FormOngkirView {
         totalHargaMengantar.value = formatNumber(totalHargaSampah);
       }
     } else {
-      // Dijemput: total harga TIDAK ditambah ongkir
-      // Pendapatan = totalHargaSampah - ongkir
-      const totalHarga = totalHargaSampah; // ❗ hanya total harga dari presenter
+      
+      const totalHarga = totalHargaSampah; 
       const pendapatan = totalHargaSampah - (ongkir || 0);
 
       const totalHargaDijemput = document.getElementById(
@@ -484,7 +483,7 @@ export default class FormOngkirView {
   setupEventListeners() {
     this.removeEventListeners();
 
-    // Mobile menu toggle
+    
     const mobileMenuBtn = document.getElementById("mobile-menu-toggle");
     if (mobileMenuBtn) {
       const handler = () => this.toggleSidebar();
@@ -496,7 +495,7 @@ export default class FormOngkirView {
       });
     }
 
-    // Sidebar overlay click
+    
     const overlay = document.querySelector(".sidebar-overlay");
     if (overlay) {
       const handler = () => this.toggleSidebar(false);
@@ -504,7 +503,7 @@ export default class FormOngkirView {
       this.eventListeners.push({ element: overlay, type: "click", handler });
     }
 
-    // Window resize
+    
     const resizeHandler = () => this.handleResize();
     window.addEventListener("resize", resizeHandler);
     this.eventListeners.push({
@@ -513,7 +512,7 @@ export default class FormOngkirView {
       handler: resizeHandler,
     });
 
-    // Cancel buttons
+    
     const cancelBtns = document.querySelectorAll(".cancel-btn");
     cancelBtns.forEach((btn) => {
       const handler = () => this.handleCancel();
@@ -521,7 +520,7 @@ export default class FormOngkirView {
       this.eventListeners.push({ element: btn, type: "click", handler });
     });
 
-    // Radio button changes
+    
     const deliveryRadios = document.querySelectorAll(
       'input[name="delivery-method"]'
     );
@@ -531,7 +530,7 @@ export default class FormOngkirView {
       this.eventListeners.push({ element: radio, type: "change", handler });
     });
 
-    // Alamat dropdown change
+    
     const pilihAlamat = document.getElementById("pilih-alamat");
     if (pilihAlamat) {
       const handler = (e) => this.handleAlamatChange(e.target.value);
@@ -543,7 +542,7 @@ export default class FormOngkirView {
       });
     }
 
-    // Form submit for both forms
+    
     const mengantarForm = document.getElementById("mengantar-form");
     const dijemputForm = document.getElementById("dijemput-form");
 
@@ -577,13 +576,13 @@ export default class FormOngkirView {
     if (method === "mengantar") {
       mengantarForm.style.display = "block";
       dijemputForm.style.display = "none";
-      // Update total harga for mengantar
+      
       const hargaSampah = this.applicationData?.hargaSampah || 0;
       this.updateTotalHarga(hargaSampah, 0);
     } else {
       mengantarForm.style.display = "none";
       dijemputForm.style.display = "block";
-      // Reset alamat selection and calculations
+      
       const pilihAlamat = document.getElementById("pilih-alamat");
       if (pilihAlamat) {
         pilihAlamat.value = "";
@@ -591,7 +590,7 @@ export default class FormOngkirView {
       this.updateEstimasiJarak(null, null);
     }
 
-    // Dispatch event to presenter
+    
     const event = new CustomEvent("delivery-method-changed", {
       detail: { method: method },
     });
@@ -604,7 +603,7 @@ export default class FormOngkirView {
       return;
     }
 
-    // Dispatch event to presenter
+    
     const event = new CustomEvent("alamat-changed", {
       detail: { alamatId: alamatId },
     });
@@ -622,7 +621,7 @@ export default class FormOngkirView {
       ongkir: method === "dijemput" ? formData.get("ongkir") : "0",
     };
 
-    // Dispatch event to presenter
+    
     const event = new CustomEvent("form-submit", {
       detail: data,
     });
@@ -635,7 +634,7 @@ export default class FormOngkirView {
         "Apakah Anda yakin ingin membatalkan? Data yang telah diisi akan hilang."
       )
     ) {
-      // Navigate back to previous page
+      
       window.location.hash = "#/diterima";
     }
   }
@@ -655,7 +654,7 @@ export default class FormOngkirView {
   }
 
   showError(message) {
-    // Create error alert
+    
     const alertHtml = `
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <i class="bi bi-exclamation-triangle me-2"></i>
@@ -670,7 +669,7 @@ export default class FormOngkirView {
     if (deliveryFormSection) {
       deliveryFormSection.insertAdjacentHTML("afterbegin", alertHtml);
 
-      // Auto remove after 5 seconds
+      
       setTimeout(() => {
         const alert = deliveryFormSection.querySelector(".alert-danger");
         if (alert) {
@@ -681,7 +680,7 @@ export default class FormOngkirView {
   }
 
   showSuccess(message) {
-    // Create success alert
+    
     const alertHtml = `
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <i class="bi bi-check-circle me-2"></i>
@@ -696,7 +695,7 @@ export default class FormOngkirView {
     if (deliveryFormSection) {
       deliveryFormSection.insertAdjacentHTML("afterbegin", alertHtml);
 
-      // Auto remove after 3 seconds then redirect
+      
       setTimeout(() => {
         window.location.hash = "#/diterima";
       }, 3000);

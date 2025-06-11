@@ -43,23 +43,23 @@ export default class FormPenolakanPresenter {
 
     getApplicationIdFromUrl() {
         const hash = window.location.hash;
-        // Expected format: #/penolakan/:id or #/penolakan?id=123
+        
         const match = hash.match(/\/penolakan\/(\d+)/) || hash.match(/[?&]id=(\d+)/);
         return match ? match[1] : null;
     }
 
     setupEventListeners() {
-        // Listen for load application detail event
+        
         document.addEventListener('load-application-detail', (event) => {
             this.handleLoadApplicationDetail(event.detail);
         });
 
-        // Listen for submit rejection event
+       
         document.addEventListener('submit-rejection', (event) => {
             this.handleSubmitRejection(event.detail);
         });
 
-        // Listen for user info request
+        
         document.addEventListener('request-user-info', () => {
             this.loadUserInfo();
         });
@@ -84,9 +84,9 @@ export default class FormPenolakanPresenter {
             throw new Error('Data pengajuan tidak ditemukan.');
         }
 
-        // Simpan & tampilkan
+        
         this.currentApplicationId = applicationId;
-        this.view.renderApplicationDetail(applicationData); // Panggil method dari View
+        this.view.renderApplicationDetail(applicationData); 
     } catch (error) {
         console.error('Error loading application detail:', error);
         this.view.showError(error.message || 'Terjadi kesalahan saat memuat data pengajuan.');
@@ -95,7 +95,7 @@ export default class FormPenolakanPresenter {
 
 
     canRejectApplication(application) {
-        // Check if application status allows rejection
+        
         const allowedStatuses = ['pending', 'Menunggu Validasi'];
         const currentStatus = application.status || application.statusOriginal;
         
@@ -106,35 +106,35 @@ export default class FormPenolakanPresenter {
         try {
             console.log('Submitting rejection:', rejectionData);
 
-            // Add current application ID if not present
+            
             if (!rejectionData.applicationId && this.currentApplicationId) {
                 rejectionData.applicationId = this.currentApplicationId;
             }
 
-            // Validate rejection data
+            
             if (!this.validateRejectionData(rejectionData)) {
                 return;
             }
 
-            // Add additional data
+           
             rejectionData.rejectedBy = this.user?.id || this.user?.username || 'admin';
             rejectionData.rejectedAt = new Date().toISOString();
 
-            // Call model to submit rejection
+            
             const result = await this.pengajuanModel.rejectApplication(rejectionData);
             
             if (result && result.success) {
                 this.view.showSuccess('Pengajuan berhasil ditolak.');
                 
-                // If notification is enabled, send notification
+                
                 if (rejectionData.notifyUser) {
                     await this.sendRejectionNotification(rejectionData);
                 }
                 
-                // Log the rejection activity
+                
                 await this.logRejectionActivity(rejectionData);
                 
-                // Redirect after success
+                
                 setTimeout(() => {
                     window.location.hash = '#/pengajuan';
                 }, 2000);
@@ -150,7 +150,7 @@ export default class FormPenolakanPresenter {
     }
 
     validateRejectionData(data) {
-        // Validate required fields
+        
         if (!data.applicationId) {
             this.view.showError('ID pengajuan tidak valid.');
             return false;
@@ -182,7 +182,7 @@ export default class FormPenolakanPresenter {
                 timestamp: new Date().toISOString()
             };
 
-            // Check if model has sendNotification method
+           
             if (typeof this.model.sendNotification === 'function') {
                 await this.model.sendNotification(notificationData);
                 console.log('Rejection notification sent successfully');
@@ -192,7 +192,7 @@ export default class FormPenolakanPresenter {
             
         } catch (error) {
             console.error('Error sending rejection notification:', error);
-            // Don't show error to user as this is not critical
+            
         }
     }
 
@@ -212,7 +212,7 @@ export default class FormPenolakanPresenter {
                 timestamp: new Date().toISOString()
             };
 
-            // Check if model has logActivity method
+            
             if (typeof this.model.logActivity === 'function') {
                 await this.model.logActivity(activityData);
                 console.log('Rejection activity logged successfully');
@@ -222,19 +222,19 @@ export default class FormPenolakanPresenter {
             
         } catch (error) {
             console.error('Error logging rejection activity:', error);
-            // Don't show error to user as this is not critical
+            
         }
     }
 
     async loadUserInfo() {
         try {
-            // Try to get user info from model first
+            
             let userInfo = null;
             
             if (typeof this.model.getCurrentUser === 'function') {
                 userInfo = await this.model.getCurrentUser();
             } else {
-                // Fallback to auth model
+                
                 userInfo = getCurrentUser();
             }
             
@@ -244,7 +244,7 @@ export default class FormPenolakanPresenter {
             }
         } catch (error) {
             console.error('Error loading user info:', error);
-            // Don't show error for user info as it's not critical
+            
         }
     }
 
@@ -265,7 +265,7 @@ export default class FormPenolakanPresenter {
         }
     }
 
-    // Utility methods for formatting and validation
+    
     formatRejectionReason(reason) {
         return reason.trim().charAt(0).toUpperCase() + reason.trim().slice(1);
     }
@@ -274,7 +274,7 @@ export default class FormPenolakanPresenter {
         return input.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
     }
 
-    // Method to get rejection statistics (if needed for dashboard)
+    
     async getRejectionStats() {
         try {
             if (typeof this.model.getRejectionStatistics === 'function') {
@@ -287,7 +287,7 @@ export default class FormPenolakanPresenter {
         }
     }
 
-    // Method to get rejection history for an application
+    
     async getRejectionHistory(applicationId) {
         try {
             if (typeof this.model.getApplicationRejectionHistory === 'function') {
@@ -300,21 +300,18 @@ export default class FormPenolakanPresenter {
         }
     }
 
-    // Method to refresh application data
+    
     async refreshApplicationData() {
         if (this.currentApplicationId) {
             await this.loadApplicationDetail(this.currentApplicationId);
         }
     }
 
-    // Cleanup method
     destroy() {
-        // Remove event listeners
         document.removeEventListener('load-application-detail', this.handleLoadApplicationDetail);
         document.removeEventListener('submit-rejection', this.handleSubmitRejection);
         document.removeEventListener('request-user-info', this.loadUserInfo);
         
-        // Destroy view
         if (this.view && typeof this.view.destroy === 'function') {
             this.view.destroy();
         }

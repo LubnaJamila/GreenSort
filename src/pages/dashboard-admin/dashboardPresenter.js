@@ -28,7 +28,7 @@ export default class DashboardPresenter {
     this.dashboardView.render();
     this.dashboardView.displayUserInfo(this.currentUser);
 
-    // Ambil statistik real dari server
+    
     getDashboardStats().then((stats) => {
       if (stats) {
         const counts = {
@@ -44,7 +44,7 @@ export default class DashboardPresenter {
       }
     });
 
-    // (Opsional) Load data untuk isi tabel dashboard
+    
     getDataPenjualanSampah().then((applications) => {
       this.dashboardView.renderDashboardData(applications);
     });

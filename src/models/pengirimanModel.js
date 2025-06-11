@@ -6,7 +6,6 @@ export async function loadPengirimanData(userId) {
 
   if (!json.success) throw new Error(json.message || "Gagal fetch data");
 
-  // Beri bentuk konsisten untuk presenter
   return json.data.map((item) => ({
     ...item,
     category: item.jenis_sampah,
