@@ -3,7 +3,7 @@ import "../../assets/styles/sampah.css";
 import userPlaceholder from "../../assets/images/unsplash_HaNi1rsZ6Nc.png";
 import SidebarView from "../../views/sidebarView";
 import KlasifikasiModel from "../../models/klasifikasi-model";
-import RekomendasiModel from "../../models/rekomendasi-model"; // Tambahan
+import RekomendasiModel from "../../models/rekomendasi-model"; 
 
 export default class KlasifikasiSampahView {
   constructor() {
@@ -13,17 +13,16 @@ export default class KlasifikasiSampahView {
     this.isMobile = window.matchMedia("(max-width: 768px)").matches;
     this.sidebarCollapsed = false;
     this.uploadedImage = null;
-    this.uploadedFile = null; // Store the actual file for model prediction
+    this.uploadedFile = null;
     this.classificationResult = null;
     this.showRecommendation = false;
     this.model = new KlasifikasiModel();
-    this.model.loadModel(); // Load model on initialization
-    this.rekomendasiModel = new RekomendasiModel(); // Tambahan
+    this.model.loadModel();
+    this.rekomendasiModel = new RekomendasiModel();
 
-    this.render(); // Render dulu, biar ada #model-status
-    this.initModelLoading(); // Async load model + status
+    this.render();
+    this.initModelLoading();
 
-    // Color mapping for each waste type
     this.wasteTypeColors = {
       Cardboard: "#fd7e14",
       Food_Organics: "#198754",
@@ -142,13 +141,11 @@ export default class KlasifikasiSampahView {
   }
 
   bindEvents() {
-    // Clear existing event listeners
     this.eventListeners.forEach(({ element, event, handler }) => {
       element.removeEventListener(event, handler);
     });
     this.eventListeners = [];
 
-    // Upload box click
     const uploadBox = document.getElementById("upload-box");
     const imageUpload = document.getElementById("image-upload");
     const classifyBtn = document.getElementById("classify-btn");
@@ -161,7 +158,6 @@ export default class KlasifikasiSampahView {
       handler: uploadBoxClick,
     });
 
-    // File input change
     const handleFileChange = (e) => this.handleFileUpload(e);
     imageUpload.addEventListener("change", handleFileChange);
     this.eventListeners.push({
@@ -170,7 +166,6 @@ export default class KlasifikasiSampahView {
       handler: handleFileChange,
     });
 
-    // Drag and drop
     const handleDragOver = (e) => {
       e.preventDefault();
       uploadBox.classList.add("dragover");
@@ -206,7 +201,6 @@ export default class KlasifikasiSampahView {
       handler: handleDrop,
     });
 
-    // Classify button
     const handleClassify = () => this.classifyWaste();
     classifyBtn.addEventListener("click", handleClassify);
     this.eventListeners.push({
@@ -215,7 +209,6 @@ export default class KlasifikasiSampahView {
       handler: handleClassify,
     });
 
-    // Result buttons
     const recycleBtn = document.getElementById("recycle-btn");
     const sellBtn = document.getElementById("sell-btn");
 
@@ -240,13 +233,14 @@ export default class KlasifikasiSampahView {
       });
     }
   }
-  setModelStatus(status, color = "#6c757d") {
+  setModelStatus(status, type = "loading") {
     const el = document.getElementById("model-status");
     if (el) {
       el.textContent = status;
-      el.style.color = color;
+      el.className = `model-status ${type}`;
     }
   }
+
   async initModelLoading() {
     this.setModelStatus("Memuat model...", "#6c757d");
 
@@ -373,14 +367,12 @@ export default class KlasifikasiSampahView {
       }
     } else if (action === "sell") {
       if (confirm("Apakah Anda yakin ingin menjual sampah ini?")) {
-        // Save classification data to localStorage before navigating
         this.saveClassificationDataForSell(quantity);
         window.location.href = "#/penjualan-sampah";
       }
     }
   }
 
-  // NEW METHOD: Save classification data for sell action
   saveClassificationDataForSell(quantity) {
     const classificationData = {
       image: this.uploadedImage,
@@ -470,12 +462,10 @@ export default class KlasifikasiSampahView {
         `;
       }
 
-      // Scroll to recommendation section
       section.scrollIntoView({ behavior: "smooth" });
     } catch (error) {
       console.error("Error getting recommendation:", error);
 
-      // Show user-friendly error message
       content.innerHTML = `
         <div class="recommendation-content">
           <p class="text-danger">Gagal memuat rekomendasi.</p>

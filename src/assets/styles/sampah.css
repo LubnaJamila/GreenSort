@@ -339,6 +339,23 @@ position: relative;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(155, 230, 76, 0.3);
 }
+.model-status {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-top: 0.5rem;
+}
+
+.model-status.loading {
+  color: #6c757d; /* abu-abu */
+}
+
+.model-status.success {
+  color: #198754; /* hijau Bootstrap */
+}
+
+.model-status.error {
+  color: #dc3545; /* merah Bootstrap */
+}
 
 /* Loading Animation */
 .loading {
