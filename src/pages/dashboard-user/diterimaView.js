@@ -12,7 +12,7 @@ export default class DiterimaView {
     this.isMobile = window.matchMedia("(max-width: 768px)").matches;
     this.sidebarCollapsed = false;
     this.dataTable = null; // Store DataTable instance
-    this.baseImageUrl = "http://localhost:3000/uploads/";
+    this.baseImageUrl = "https://greenshort-production.up.railway.app/uploads/";
   }
 
   render() {

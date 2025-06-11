@@ -263,7 +263,8 @@ export default class FormSelesaiView {
         // Populate sampah image
         const sampahImage = document.getElementById('sampah-image');
         if (sampahImage && data.gambarSampah) {
-            sampahImage.src = 'http://localhost:3000' + data.gambarSampah;
+            sampahImage.src =
+              "https://greenshort-production.up.railway.app" + data.gambarSampah;
         }
 
         

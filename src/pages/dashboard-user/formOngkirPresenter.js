@@ -75,7 +75,7 @@ export default class FormOngkirPresenter {
         hargaSampah: hargaPerKg, // ✅ harga per kg dari DB
         totalHarga: berat * hargaPerKg,
         gambarSampah: data.gambar_sampah
-          ? `http://localhost:3000${data.gambar_sampah}`
+          ? `https://greenshort-production.up.railway.app${data.gambar_sampah}`
           : null,
         status: data.status,
       };

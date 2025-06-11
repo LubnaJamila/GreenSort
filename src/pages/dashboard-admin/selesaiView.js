@@ -230,18 +230,18 @@ renderApplicationRow(app) {
   return `
     <tr>
       <td><input type="checkbox" class="row-checkbox" value="${app.id}"></td>
-      <td>${app.nama || 'N/A'}</td>
-      <td>${app.jenisSampah || 'N/A'}</td>
-      <td>${app.berat || app.kuantitas || 'N/A'}</td>
-      <td>${app.harga || 'N/A'}</td>
-      <td>${app.totalHarga || app.total || 'N/A'}</td>
+      <td>${app.nama || "N/A"}</td>
+      <td>${app.jenisSampah || "N/A"}</td>
+      <td>${app.berat || app.kuantitas || "N/A"}</td>
+      <td>${app.harga || "N/A"}</td>
+      <td>${app.totalHarga || app.total || "N/A"}</td>
       <td>
       <img 
         src="${
           app.gambarSampah
-            ? (app.gambarSampah.startsWith("/uploads/")
-                ? `http://localhost:3000${app.gambarSampah}`
-                : `http://localhost:3000/uploads/${app.gambarSampah}`)
+            ? app.gambarSampah.startsWith("/uploads/")
+              ? `https://greenshort-production.up.railway.app${app.gambarSampah}`
+              : `https://greenshort-production.up.railway.app/uploads/${app.gambarSampah}`
             : "https://via.placeholder.com/50"
         }" 
         alt="Sampah" 

@@ -1,6 +1,6 @@
 export default class PengajuanModel {
   constructor() {
-    this.baseUrl = 'http://localhost:3000/api';
+    this.baseUrl = "https://greenshort-production.up.railway.app/api";
   }
 
   async getApplicationsByStatus(status) {

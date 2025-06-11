@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = "https://greenshort-production.up.railway.app";
 
 export async function getPengajuanById(id) {
   try {

@@ -1,6 +1,6 @@
 // src/models/pengajuan_sampah-model.js
 
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = "https://greenshort-production.up.railway.app";
 
 export async function kirimPengajuan(formData) {
   try {
@@ -70,7 +70,7 @@ export async function getPengajuanByUserIdAndStatus(userId, status) {
 }
 export async function rejectPenawaranTanpaAlasan(idPengajuan) {
   const response = await fetch(
-    `http://localhost:3000/api/penawaran/tolak/${idPengajuan}`,
+    `https://greenshort-production.up.railway.app/api/penawaran/tolak/${idPengajuan}`,
     {
       method: "PUT",
     }

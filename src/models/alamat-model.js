@@ -2,7 +2,7 @@
 export default class AlamatModel {
   constructor() {
     this.apiBaseUrl = "https://www.emsifa.com/api-wilayah-indonesia/api";
-    this.backendUrl = "http://localhost:3000/api"; // Backend server URL
+    this.backendUrl = "https://greenshort-production.up.railway.app/api"; // Backend server URL
 
     // Cache untuk menyimpan data yang sudah dimuat
     this.cache = {

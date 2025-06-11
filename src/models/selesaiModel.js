@@ -1,7 +1,9 @@
 // src/models/selesaiModel.js
 export async function fetchSelesaiData() {
   try {
-    const res = await fetch("http://localhost:3000/api/penjualan/selesai/tabel");
+    const res = await fetch(
+      "https://greenshort-production.up.railway.app/api/penjualan/selesai/tabel"
+    );
     const result = await res.json();
     return result.success ? result.data : [];
   } catch (error) {
@@ -11,7 +13,9 @@ export async function fetchSelesaiData() {
 }
 export async function fetchSelesaiById(id) {
   try {
-    const res = await fetch(`http://localhost:3000/api/pengajuan/id/${id}`);
+    const res = await fetch(
+      `https://greenshort-production.up.railway.app/api/pengajuan/id/${id}`
+    );
     const result = await res.json();
     return result.success ? result.data : null;
   } catch (err) {
@@ -21,10 +25,13 @@ export async function fetchSelesaiById(id) {
 }
 export async function updateSelesai(applicationId, formData) {
     try {
-        const response = await fetch(`http://localhost:3000/api/penjualan/selesai/${applicationId}`, {
-            method: 'PUT',
-            body: formData
-        });
+        const response = await fetch(
+          `https://greenshort-production.up.railway.app/api/penjualan/selesai/${applicationId}`,
+          {
+            method: "PUT",
+            body: formData,
+          }
+        );
         const result = await response.json();
         return result;
     } catch (error) {

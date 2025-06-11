@@ -1,5 +1,7 @@
 export async function loadPengirimanData(userId) {
-  const res = await fetch(`http://localhost:3000/api/pengiriman/${userId}`);
+  const res = await fetch(
+    `https://greenshort-production.up.railway.app/api/pengiriman/${userId}`
+  );
   const json = await res.json();
 
   if (!json.success) throw new Error(json.message || "Gagal fetch data");

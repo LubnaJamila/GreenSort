@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:3000'; // Backend kamu jalan di sini
+const BASE_URL = 'https://greenshort-production.up.railway.app'; // Backend kamu jalan di sini
 
 export async function registerUser(userData) {
   // Kirim data ke backend
