@@ -9,6 +9,7 @@ module.exports = merge(common, {
   output: {
     filename: "bundle.[contenthash].js",
     assetModuleFilename: "assets/[hash][ext][query]",
+    publicPath: '/GreenSort/',
   },
   module: {
     rules: [
